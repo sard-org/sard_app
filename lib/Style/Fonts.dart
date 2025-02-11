@@ -167,9 +167,5 @@ class AppTexts {
     fontSize: 10,
     fontWeight: FontWeight.w400,
   );
-  static final footnoteRegular111 = GoogleFonts.poppins(
-    fontSize: 10,
-    fontWeight: FontWeight.w400,
-  );
 }
 
