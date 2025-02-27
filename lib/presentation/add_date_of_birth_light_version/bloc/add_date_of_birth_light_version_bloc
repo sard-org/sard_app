@@ -1,0 +1,17 @@
+import 'package:flutter/material.dart';
+import 'package:calendar_date_picker2/calendar_date_picker2.dart';
+import 'package:equatable/equatable.dart';
+import '../../../core/app_export.dart';
+import '../models/add_date_of_birth_light_version_model.dart';
+
+part 'add_date_of_birth_light_version_event.dart';
+part 'add_date_of_birth_light_version_state.dart';
+
+/// A bloc that manages the state of a AddDateOfBirthLightVersion according to the event that is dispatched to it.
+class AddDateOfBirthLightVersionBloc extends Bloc {
+  AddDateOfBirthLightVersionBloc(AddDateOfBirthLightVersionState initialState) : super(initialState) {
+    on(_onInitialize);
+  }
+
+  _onInitialize(AddDateOfBirthLightVersionInitialEvent event, Emitter emit) async {}
+}
