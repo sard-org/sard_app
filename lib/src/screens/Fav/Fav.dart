@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:sard/style/Colors.dart';
 import 'package:sard/style/Fonts.dart';
@@ -67,7 +68,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
             ),
             child: Center(
               child: Text(
-                "المفضلة",
+                "المفضلات",
                 style: AppTexts.heading2Bold.copyWith(
                   color: AppColors.neutral100,
                 ),
@@ -76,7 +77,9 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
           ),
           SizedBox(height: 18),
           Expanded(
-            child: ListView.builder(
+            child: books.isEmpty
+                ? _buildEmptyFavorites() // عرض رسالة فارغة إذا لم يكن هناك كتب
+                : ListView.builder(
               itemCount: books.length,
               itemBuilder: (context, index) {
                 final book = books[index];
@@ -91,6 +94,35 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                 );
               },
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyFavorites() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          kIsWeb?Image.network(
+            "assets/img/fav_embty.png",
+            width: 300,
+            height: 300,
+          ):
+          Image.asset("assets/img/fav_embty.png",
+            width: 300,
+            height: 300,),
+          SizedBox(height: 12),
+          Text(
+            "القائمة فارغة",
+            style: AppTexts.heading3Bold.copyWith(color: AppColors.neutral800),
+          ),
+          SizedBox(height: 8),
+          Text(
+            "أضف بعض الكتب إلى المفضلة لتظهر هنا",
+            style: AppTexts.contentRegular.copyWith(color: AppColors.neutral500),
+            textAlign: TextAlign.center,
           ),
         ],
       ),
@@ -205,7 +237,7 @@ class _BookItemState extends State<BookItem> {
                         widget.price,
                         style: AppTexts.highlightAccent.copyWith(color: AppColors.primary1000),
                       ),
-                      SizedBox(width: 4),
+                      SizedBox(width: 2),
                       Text(
                         widget.currency,
                         style: AppTexts.footnoteRegular11.copyWith(color: AppColors.primary1000),

@@ -62,7 +62,7 @@ class BookListScreen extends StatelessWidget {
           SizedBox(height: 18),
           Expanded(
             child: ListView.builder(
-              itemCount: books.length * 10, // مضاعفة القائمة مرتين
+              itemCount: books.length * 1, // مضاعفة القائمة مرتين
               itemBuilder: (context, index) {
                 final book = books[index % books.length];
                 return BookItem(
@@ -133,7 +133,7 @@ class BookItem extends StatelessWidget {
                   Text(author, textAlign: TextAlign.start, style: AppTexts.footnoteRegular11.copyWith(
                     color: AppColors.neutral400
                   )),
-                  SizedBox(height: 4),
+                  SizedBox(height: 2),
                   Text(title, textAlign: TextAlign.start, style: AppTexts.highlightStandard.copyWith(
                     color: AppColors.neutral1000
                   )),

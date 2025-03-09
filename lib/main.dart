@@ -32,7 +32,7 @@ class _MainScreenState extends State<MainScreen> {
     HomeScreen(), // الرئيسية
     BookListScreen(), // كتبي
     FavoritesScreen(), // المفضلات
-    NotificationsScreen(), // الإشعارات
+    SettingsScreen(), // الإشعارات
   ];
 
   List<String> iconPaths = [
@@ -72,7 +72,7 @@ class _MainScreenState extends State<MainScreen> {
                 width: 28,
                 height: 28,
               ),
-              label: ["الرئيسية", "كتبي", "المفضلات", "الإشعارات"][index],
+              label: ["الرئيسية", "كتبي", "المفضلات", "الاعدادات"][index],
             );
           }),
         ),
