@@ -3,7 +3,7 @@ import 'package:sard/style/Colors.dart';
 import 'package:sard/style/Fonts.dart';
 import 'package:sard/style/BaseScreen.dart';
 import 'change_password_screen.dart';
-import 'edit_profile_screen.dart'; // استيراد شاشة تغيير كلمة المرور
+import 'edit_profile_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   @override
@@ -11,9 +11,8 @@ class SettingsScreen extends StatelessWidget {
     return BaseScreen(
       child: Column(
         children: [
-          // ✅ الهيدر "الإعدادات"
           Container(
-            padding: EdgeInsets.symmetric(vertical: 16),
+            padding: EdgeInsets.symmetric(vertical: 16, horizontal: 16),
             decoration: BoxDecoration(
               color: AppColors.primary500,
               borderRadius: BorderRadius.only(
@@ -21,45 +20,65 @@ class SettingsScreen extends StatelessWidget {
                 bottomRight: Radius.circular(12),
               ),
             ),
-            child: Center(
-              child: Text(
-                "الإعدادات",
-                style: AppTexts.heading2Bold.copyWith(
-                  color: AppColors.neutral100,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                CircleAvatar(
+                  radius: 24,
+                  backgroundImage: AssetImage("assets/img/profile.jpg"),
                 ),
-              ),
+                SizedBox(width: 8), // مسافة بين النص والصورة
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "يومك سعيد!",
+                      style: AppTexts.contentRegular.copyWith(
+                        color: AppColors.neutral400,
+                      ),
+                    ),
+                    Text(
+                      "أحمد حسام",
+                      style: AppTexts.heading2Bold.copyWith(
+                        color: AppColors.neutral100,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
           SizedBox(height: 18),
 
-          // ✅ عناصر الإعدادات مع التنقل بين الصفحات
+          // ✅ باقي عناصر الإعدادات
           Expanded(
             child: Column(
               children: [
                 _buildSettingsItem(
                   context,
                   "تعديل البيانات",
-                  Icons.edit,
+                  "assets/img/Edit.png",
                       () => Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => EditProfileScreen()),
                   ),
                 ),
+                _buildDivider(),
                 _buildSettingsItem(
                   context,
                   "تعديل كلمة المرور",
-                  Icons.lock,
+                  "assets/img/password.png",
                       () => Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => ChangePasswordScreen()),
                   ),
                 ),
+                _buildDivider(),
                 _buildSettingsItem(
                   context,
                   "تسجيل الخروج",
-                  Icons.logout,
+                  "assets/img/Logout.png",
                       () {
-                    // هنا تضيف كود تسجيل الخروج الفعلي
                     print("تم تسجيل الخروج");
                   },
                   isLogout: true,
@@ -72,31 +91,39 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  // ✅ تحسين شكل الزرار وخليه متناسق مع التصميم
-  Widget _buildSettingsItem(BuildContext context, String title, IconData icon, VoidCallback onTap, {bool isLogout = false}) {
+  // ✅ تصميم عنصر الإعدادات
+  Widget _buildSettingsItem(BuildContext context, String title, String iconPath, VoidCallback onTap, {bool isLogout = false}) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8), // مسافات داخلية
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: GestureDetector(
         onTap: onTap,
         child: Container(
           padding: EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: isLogout ? Colors.red.shade100 : AppColors.neutral100, // لون الخلفية
+            color: isLogout ? Colors.red.shade100 : AppColors.neutral100,
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: isLogout ? Colors.red : AppColors.neutral300, // حدود العنصر
+              color: isLogout ? Colors.red : AppColors.neutral300,
               width: 1.2,
             ),
           ),
           child: Row(
             children: [
-              Icon(icon, color: isLogout ? Colors.red : AppColors.primary500, size: 22),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Image.asset(
+                  iconPath,
+                  width: 50,
+                  height: 50,
+                  fit: BoxFit.cover,
+                ),
+              ),
               SizedBox(width: 12),
               Expanded(
                 child: Text(
                   title,
                   style: AppTexts.highlightEmphasis.copyWith(
-                    color: isLogout ? Colors.red : AppColors.neutral1000, // لون النص
+                    color: isLogout ? Colors.red : AppColors.neutral1000,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -105,6 +132,17 @@ class SettingsScreen extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  // ✅ خط فاصل بين العناصر
+  Widget _buildDivider() {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 16),
+      child: Divider(
+        color: AppColors.neutral300,
+        thickness: 1,
       ),
     );
   }

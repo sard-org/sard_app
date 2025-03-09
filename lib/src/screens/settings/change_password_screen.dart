@@ -3,51 +3,181 @@ import '../../../style/BaseScreen.dart';
 import '../../../style/Colors.dart';
 import '../../../style/Fonts.dart';
 
-class ChangePasswordScreen extends StatelessWidget {
+class ChangePasswordScreen extends StatefulWidget {
+  @override
+  _ChangePasswordScreenState createState() => _ChangePasswordScreenState();
+}
+
+class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
+  final TextEditingController _oldPasswordController = TextEditingController();
+  final TextEditingController _newPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
+  bool _obscureOldPassword = true;
+  bool _obscureNewPassword = true;
+  bool _obscureConfirmPassword = true;
+  String? _passwordError;
+
   @override
   Widget build(BuildContext context) {
     return BaseScreen(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          _buildAppBar(context),
           SizedBox(height: 16),
-          _buildPasswordField("كلمة المرور القديمة"),
-          _buildPasswordField("كلمة المرور الجديدة"),
-          _buildPasswordField("تأكيد كلمة المرور الجديدة"),
+          _buildPasswordField("كلمة المرور القديمة", _oldPasswordController, _obscureOldPassword, "كلمة المرور القديمة", () {
+            setState(() {
+              _obscureOldPassword = !_obscureOldPassword;
+            });
+          }),
+          _buildPasswordField("كلمة المرور الجديدة", _newPasswordController, _obscureNewPassword, "كلمة المرور الجديدة", () {
+            setState(() {
+              _obscureNewPassword = !_obscureNewPassword;
+            });
+          }),
+          _buildPasswordField("تأكيد كلمة المرور الجديدة", _confirmPasswordController, _obscureConfirmPassword, "تأكيد كلمة المرور الجديدة", () {
+            setState(() {
+              _obscureConfirmPassword = !_obscureConfirmPassword;
+            });
+          }),
+
+          /// ✅ **رسالة الخطأ أصبحت الآن على اليمين**
+          if (_passwordError != null)
+            Padding(
+              padding: const EdgeInsets.only(right: 8.0, top: 4.0, left: 16.0),
+              child: Align(
+                alignment: Alignment.centerRight,  // ✅ محاذاة النص إلى اليمين
+                child: Text(
+                  _passwordError!,
+                  style: TextStyle(color: Colors.red, fontSize: 14),
+                  textAlign: TextAlign.right,
+                ),
+              ),
+            ),
+
           Spacer(),
-          _buildUpdateButton(),
+          UpdateButton(
+            title: "تحديث",
+            onPressed: () {
+              if (_newPasswordController.text.isEmpty || _confirmPasswordController.text.isEmpty) {
+                setState(() {
+                  _passwordError = "يجب إدخال كلمة المرور الجديدة وتأكيدها";
+                });
+              } else if (_newPasswordController.text != _confirmPasswordController.text) {
+                setState(() {
+                  _passwordError = "كلمة المرور الجديدة غير متطابقة";
+                });
+              } else {
+                setState(() {
+                  _passwordError = null;
+                });
+                // ✅ تنفيذ عملية تحديث كلمة المرور
+              }
+            },
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildPasswordField(String label) {
+  /// ✅ **App Bar مع زر الرجوع**
+  Widget _buildAppBar(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+      decoration: BoxDecoration(
+        color: AppColors.primary500,
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(12),
+          bottomRight: Radius.circular(12),
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end, // ✅ جعل العنوان والزرار على اليمين
+        children: [
+          Text(
+            "تغيير كلمة المرور",
+            style: AppTexts.heading2Bold.copyWith(
+              color: AppColors.neutral100,
+            ),
+          ),
+          SizedBox(width: 12),
+          GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: Container(
+              width: 50,
+              height: 50,
+              padding: EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(Icons.arrow_forward, color: AppColors.primary500), // ✅ السهم لليمين لأنه عربي
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// ✅ **حقل كلمة المرور مع إظهار وإخفاء النص**
+  Widget _buildPasswordField(String label, TextEditingController controller, bool obscureText, String hint, VoidCallback toggleVisibility) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.end, // ✅ جعل العنوان على اليمين
       children: [
         Text(label, style: AppTexts.contentRegular),
         SizedBox(height: 8),
         TextField(
-          obscureText: true,
+          controller: controller,
+          textAlign: TextAlign.right,
+          obscureText: obscureText,
           decoration: InputDecoration(
-            hintText: "••••••••",
+            hintText: hint,
             hintStyle: AppTexts.contentRegular,
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: AppColors.primary500)),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: AppColors.neutral400),
+            ),
             filled: true,
             fillColor: Colors.white,
-            suffixIcon: Icon(Icons.visibility_off, color: AppColors.neutral400),
+            prefixIcon: GestureDetector(  // ✅ العين على اليسار
+              onTap: toggleVisibility,
+              child: Icon(
+                obscureText ? Icons.visibility_off : Icons.visibility,
+                color: AppColors.neutral400,
+              ),
+            ),
           ),
         ),
         SizedBox(height: 12),
       ],
     );
   }
+}
 
-  Widget _buildUpdateButton() {
+/// ✅ **زر التحديث بنفس الكود الذي أرسلته**
+class UpdateButton extends StatelessWidget {
+  final String title;
+  final VoidCallback onPressed;
+
+  const UpdateButton({required this.title, required this.onPressed, Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
     return ElevatedButton(
-      onPressed: () {},
-      style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary500, minimumSize: Size(double.infinity, 50)),
-      child: Text("تحديث", style: TextStyle(color: Colors.white, fontSize: 16)),
+      onPressed: onPressed,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: AppColors.primary500,
+        minimumSize: Size(double.infinity, 50),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+      child: Text(
+        title,
+        style: AppTexts.contentEmphasis.copyWith(
+          color: AppColors.neutral100,
+        ),
+      ),
     );
   }
 }
