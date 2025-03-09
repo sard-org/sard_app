@@ -91,7 +91,7 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  // ✅ تصميم عنصر الإعدادات
+
   Widget _buildSettingsItem(BuildContext context, String title, String iconPath, VoidCallback onTap, {bool isLogout = false}) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
