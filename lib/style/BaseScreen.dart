@@ -7,12 +7,13 @@ class BaseScreen extends StatelessWidget {
   const BaseScreen({
     Key? key,
     required this.child,
-    this.padding = const EdgeInsets.all(18.0),
+    this.padding = const EdgeInsets.all(20.0),
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white, // تعيين لون الخلفية إلى الأخضر
       body: Padding(
         padding: padding,
         child: child,
@@ -20,3 +21,4 @@ class BaseScreen extends StatelessWidget {
     );
   }
 }
+

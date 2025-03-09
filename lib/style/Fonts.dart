@@ -167,5 +167,6 @@ class AppTexts {
     fontSize: 10,
     fontWeight: FontWeight.w400,
   );
+
 }
 
