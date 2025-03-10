@@ -54,45 +54,56 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BaseScreen(
-      child: Column(
+    return Scaffold(
+      body: Stack(
         children: [
-          Container(
-            padding: EdgeInsets.symmetric(vertical: 16),
-            decoration: BoxDecoration(
-              color: AppColors.primary500,
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(12),
-                bottomRight: Radius.circular(12),
-              ),
-            ),
-            child: Center(
-              child: Text(
-                "المفضلات",
-                style: AppTexts.heading2Bold.copyWith(
-                  color: AppColors.neutral100,
+          BaseScreen(
+            child: Column(
+              children: [
+                SizedBox(height: 80), // تجنب تداخل المحتوى مع الـ AppBar
+                Expanded(
+                  child: books.isEmpty
+                      ? _buildEmptyFavorites() // عرض رسالة فارغة إذا لم يكن هناك كتب
+                      : ListView.builder(
+                    itemCount: books.length,
+                    itemBuilder: (context, index) {
+                      final book = books[index];
+                      return BookItem(
+                        author: book["author"]!,
+                        title: book["title"]!,
+                        description: book["description"]!,
+                        price: book["price"]!,
+                        currency: book["currency"]!,
+                        imageUrl: book["imageUrl"]!,
+                        onFavoritePressed: () => toggleFavorite(index),
+                      );
+                    },
+                  ),
                 ),
-              ),
+              ],
             ),
           ),
-          SizedBox(height: 18),
-          Expanded(
-            child: books.isEmpty
-                ? _buildEmptyFavorites() // عرض رسالة فارغة إذا لم يكن هناك كتب
-                : ListView.builder(
-              itemCount: books.length,
-              itemBuilder: (context, index) {
-                final book = books[index];
-                return BookItem(
-                  author: book["author"]!,
-                  title: book["title"]!,
-                  description: book["description"]!,
-                  price: book["price"]!,
-                  currency: book["currency"]!,
-                  imageUrl: book["imageUrl"]!,
-                  onFavoritePressed: () => toggleFavorite(index),
-                );
-              },
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              padding: EdgeInsets.symmetric(vertical: 32, horizontal: 16),
+              decoration: BoxDecoration(
+                color: AppColors.primary500,
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(12),
+                  bottomRight: Radius.circular(12),
+                ),
+              ),
+              child: Center(
+                child: Text(
+                  "المفضلات",
+                  style: AppTexts.heading2Bold.copyWith(
+                    color: AppColors.neutral100,
+                  ),
+                ),
+              ),
             ),
           ),
         ],
@@ -105,14 +116,17 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          kIsWeb?Image.network(
+          kIsWeb
+              ? Image.network(
             "assets/img/fav_embty.png",
             width: 300,
             height: 300,
-          ):
-          Image.asset("assets/img/fav_embty.png",
+          )
+              : Image.asset(
+            "assets/img/fav_embty.png",
             width: 300,
-            height: 300,),
+            height: 300,
+          ),
           SizedBox(height: 12),
           Text(
             "القائمة فارغة",
@@ -121,7 +135,8 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
           SizedBox(height: 8),
           Text(
             "أضف بعض الكتب إلى المفضلة لتظهر هنا",
-            style: AppTexts.contentRegular.copyWith(color: AppColors.neutral500),
+            style:
+            AppTexts.contentRegular.copyWith(color: AppColors.neutral500),
             textAlign: TextAlign.center,
           ),
         ],
@@ -213,20 +228,21 @@ class _BookItemState extends State<BookItem> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(widget.author, textAlign: TextAlign.start, style: AppTexts.footnoteRegular11.copyWith(
-                      color: AppColors.neutral400
-                  )),
-                  SizedBox(height: 4),
-                  Text(widget.title, textAlign: TextAlign.start, style: AppTexts.highlightStandard.copyWith(
-                      color: AppColors.neutral1000
-                  )),
+                  Text(widget.author,
+                      textAlign: TextAlign.start,
+                      style: AppTexts.captionRegular
+                          .copyWith(color: AppColors.neutral400)),
+                  SizedBox(height: 8),
+                  Text(widget.title,
+                      textAlign: TextAlign.start,
+                      style: AppTexts.highlightStandard
+                          .copyWith(color: AppColors.neutral1000)),
                   SizedBox(height: 8),
                   Text(
                     widget.description,
                     textAlign: TextAlign.start,
-                    style: AppTexts.contentRegular.copyWith(
-                        color: AppColors.neutral400
-                    ),
+                    style: AppTexts.contentRegular
+                        .copyWith(color: AppColors.neutral400),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -235,12 +251,14 @@ class _BookItemState extends State<BookItem> {
                     children: [
                       Text(
                         widget.price,
-                        style: AppTexts.highlightAccent.copyWith(color: AppColors.primary1000),
+                        style: AppTexts.highlightAccent
+                            .copyWith(color: AppColors.primary1000),
                       ),
                       SizedBox(width: 2),
                       Text(
                         widget.currency,
-                        style: AppTexts.footnoteRegular11.copyWith(color: AppColors.primary1000),
+                        style: AppTexts.footnoteRegular11
+                            .copyWith(color: AppColors.primary1000),
                       ),
                     ],
                   ),

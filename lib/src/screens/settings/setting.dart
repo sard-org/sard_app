@@ -8,82 +8,47 @@ import 'edit_profile_screen.dart';
 class SettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return BaseScreen(
-      child: Column(
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: Column(
         children: [
-          Container(
-            padding: EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-            decoration: BoxDecoration(
-              color: AppColors.primary500,
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(12),
-                bottomRight: Radius.circular(12),
-              ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                CircleAvatar(
-                  radius: 24,
-                  backgroundImage: AssetImage("assets/img/profile.jpg"),
-                ),
-                SizedBox(width: 8), // مسافة بين النص والصورة
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "يومك سعيد!",
-                      style: AppTexts.contentRegular.copyWith(
-                        color: AppColors.neutral400,
-                      ),
-                    ),
-                    Text(
-                      "أحمد حسام",
-                      style: AppTexts.heading2Bold.copyWith(
-                        color: AppColors.neutral100,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          SizedBox(height: 18),
-
-          // ✅ باقي عناصر الإعدادات
+          _buildAppBar(), // ✅ الـ AppBar خارج الـ BaseScreen
           Expanded(
-            child: Column(
-              children: [
-                _buildSettingsItem(
-                  context,
-                  "تعديل البيانات",
-                  "assets/img/Edit.png",
-                      () => Navigator.push(
+            child: BaseScreen(
+              child: Column(
+                children: [
+                  SizedBox(height: 18),
+                  _buildSettingsItem(
                     context,
-                    MaterialPageRoute(builder: (context) => EditProfileScreen()),
+                    "تعديل البيانات",
+                    "assets/img/Edit.png",
+                        () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => EditProfileScreen()),
+                    ),
                   ),
-                ),
-                _buildDivider(),
-                _buildSettingsItem(
-                  context,
-                  "تعديل كلمة المرور",
-                  "assets/img/password.png",
-                      () => Navigator.push(
+                  _buildDivider(),
+                  _buildSettingsItem(
                     context,
-                    MaterialPageRoute(builder: (context) => ChangePasswordScreen()),
+                    "تعديل كلمة المرور",
+                    "assets/img/password.png",
+                        () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => ChangePasswordScreen()),
+                    ),
                   ),
-                ),
-                _buildDivider(),
-                _buildSettingsItem(
-                  context,
-                  "تسجيل الخروج",
-                  "assets/img/Logout.png",
-                      () {
-                    print("تم تسجيل الخروج");
-                  },
-                  isLogout: true,
-                ),
-              ],
+                  _buildDivider(),
+                  _buildSettingsItem(
+                    context,
+                    "تسجيل الخروج",
+                    "assets/img/Logout.png",
+                        () {
+                      print("تم تسجيل الخروج");
+                    },
+                    isLogout: true,
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -91,6 +56,45 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
+  Widget _buildAppBar() {
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 32, horizontal: 18),
+      decoration: BoxDecoration(
+        color: AppColors.primary500,
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(12),
+          bottomRight: Radius.circular(12),
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          CircleAvatar(
+            radius: 24,
+            backgroundImage: AssetImage("assets/img/profile.jpg"),
+          ),
+          SizedBox(width: 8), // مسافة بين النص والصورة
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "يومك سعيد!",
+                style: AppTexts.contentRegular.copyWith(
+                  color: AppColors.neutral400,
+                ),
+              ),
+              Text(
+                "أحمد حسام",
+                style: AppTexts.heading2Bold.copyWith(
+                  color: AppColors.neutral100,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget _buildSettingsItem(BuildContext context, String title, String iconPath, VoidCallback onTap, {bool isLogout = false}) {
     return Padding(
@@ -136,7 +140,6 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  // ✅ خط فاصل بين العناصر
   Widget _buildDivider() {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16),

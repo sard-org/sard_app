@@ -39,7 +39,7 @@ class _MainScreenState extends State<MainScreen> {
     "assets/img/icons/home.png",
     "assets/img/icons/book.png",
     "assets/img/icons/Fav.png",
-    "assets/img/icons/not.png"
+    "assets/img/icons/Not.png"
   ];
 
   List<String> selectedIconPaths = [

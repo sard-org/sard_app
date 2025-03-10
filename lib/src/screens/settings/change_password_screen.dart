@@ -19,71 +19,78 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BaseScreen(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: Column(
         children: [
-          _buildAppBar(context),
-          SizedBox(height: 16),
-          _buildPasswordField("كلمة المرور القديمة", _oldPasswordController, _obscureOldPassword, "كلمة المرور القديمة", () {
-            setState(() {
-              _obscureOldPassword = !_obscureOldPassword;
-            });
-          }),
-          _buildPasswordField("كلمة المرور الجديدة", _newPasswordController, _obscureNewPassword, "كلمة المرور الجديدة", () {
-            setState(() {
-              _obscureNewPassword = !_obscureNewPassword;
-            });
-          }),
-          _buildPasswordField("تأكيد كلمة المرور الجديدة", _confirmPasswordController, _obscureConfirmPassword, "تأكيد كلمة المرور الجديدة", () {
-            setState(() {
-              _obscureConfirmPassword = !_obscureConfirmPassword;
-            });
-          }),
+          _buildAppBar(context), // ✅ الـ AppBar خارج الـ BaseScreen
+          Expanded(
+            child: BaseScreen(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(height: 16),
+                  _buildPasswordField("كلمة المرور القديمة", _oldPasswordController, _obscureOldPassword, "كلمة المرور القديمة", () {
+                    setState(() {
+                      _obscureOldPassword = !_obscureOldPassword;
+                    });
+                  }),
+                  _buildPasswordField("كلمة المرور الجديدة", _newPasswordController, _obscureNewPassword, "كلمة المرور الجديدة", () {
+                    setState(() {
+                      _obscureNewPassword = !_obscureNewPassword;
+                    });
+                  }),
+                  _buildPasswordField("تأكيد كلمة المرور الجديدة", _confirmPasswordController, _obscureConfirmPassword, "تأكيد كلمة المرور الجديدة", () {
+                    setState(() {
+                      _obscureConfirmPassword = !_obscureConfirmPassword;
+                    });
+                  }),
 
-          /// ✅ **رسالة الخطأ أصبحت الآن على اليمين**
-          if (_passwordError != null)
-            Padding(
-              padding: const EdgeInsets.only(right: 8.0, top: 4.0, left: 16.0),
-              child: Align(
-                alignment: Alignment.centerRight,  // ✅ محاذاة النص إلى اليمين
-                child: Text(
-                  _passwordError!,
-                  style: TextStyle(color: Colors.red, fontSize: 14),
-                  textAlign: TextAlign.right,
-                ),
+                  if (_passwordError != null)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8.0, top: 4.0, left: 16.0),
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: Text(
+                          _passwordError!,
+                          style: TextStyle(color: Colors.red, fontSize: 14),
+                          textAlign: TextAlign.right,
+                        ),
+                      ),
+                    ),
+
+                  Spacer(),
+                  UpdateButton(
+                    title: "تحديث",
+                    onPressed: () {
+                      if (_newPasswordController.text.isEmpty || _confirmPasswordController.text.isEmpty) {
+                        setState(() {
+                          _passwordError = "يجب إدخال كلمة المرور الجديدة وتأكيدها";
+                        });
+                      } else if (_newPasswordController.text != _confirmPasswordController.text) {
+                        setState(() {
+                          _passwordError = "كلمة المرور الجديدة غير متطابقة";
+                        });
+                      } else {
+                        setState(() {
+                          _passwordError = null;
+                        });
+                        // ✅ تنفيذ عملية تحديث كلمة المرور
+                      }
+                    },
+                  ),
+                ],
               ),
             ),
-
-          Spacer(),
-          UpdateButton(
-            title: "تحديث",
-            onPressed: () {
-              if (_newPasswordController.text.isEmpty || _confirmPasswordController.text.isEmpty) {
-                setState(() {
-                  _passwordError = "يجب إدخال كلمة المرور الجديدة وتأكيدها";
-                });
-              } else if (_newPasswordController.text != _confirmPasswordController.text) {
-                setState(() {
-                  _passwordError = "كلمة المرور الجديدة غير متطابقة";
-                });
-              } else {
-                setState(() {
-                  _passwordError = null;
-                });
-                // ✅ تنفيذ عملية تحديث كلمة المرور
-              }
-            },
           ),
         ],
       ),
     );
   }
 
-  /// ✅ **App Bar مع زر الرجوع**
   Widget _buildAppBar(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+      padding: EdgeInsets.symmetric(vertical: 32, horizontal: 16),
       decoration: BoxDecoration(
         color: AppColors.primary500,
         borderRadius: BorderRadius.only(
@@ -92,7 +99,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
         ),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.end, // ✅ جعل العنوان والزرار على اليمين
+        mainAxisAlignment: MainAxisAlignment.end, // ✅ زر الرجوع والعنوان على اليمين كما هو
         children: [
           Text(
             "تغيير كلمة المرور",
@@ -111,7 +118,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(Icons.arrow_forward, color: AppColors.primary500), // ✅ السهم لليمين لأنه عربي
+              child: Icon(Icons.arrow_forward, color: AppColors.primary500), // ✅ السهم على اليمين كما هو
             ),
           ),
         ],
@@ -119,10 +126,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     );
   }
 
-  /// ✅ **حقل كلمة المرور مع إظهار وإخفاء النص**
   Widget _buildPasswordField(String label, TextEditingController controller, bool obscureText, String hint, VoidCallback toggleVisibility) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.end, // ✅ جعل العنوان على اليمين
+      crossAxisAlignment: CrossAxisAlignment.end, // ✅ جعل العنوان على اليمين كما هو
       children: [
         Text(label, style: AppTexts.contentRegular),
         SizedBox(height: 8),
@@ -139,7 +145,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
             ),
             filled: true,
             fillColor: Colors.white,
-            prefixIcon: GestureDetector(  // ✅ العين على اليسار
+            prefixIcon: GestureDetector( // ✅ العين على اليسار كما هو
               onTap: toggleVisibility,
               child: Icon(
                 obscureText ? Icons.visibility_off : Icons.visibility,
@@ -154,7 +160,6 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   }
 }
 
-/// ✅ **زر التحديث بنفس الكود الذي أرسلته**
 class UpdateButton extends StatelessWidget {
   final String title;
   final VoidCallback onPressed;

@@ -14,36 +14,51 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   String? _emailError;
-  String selectedGender = "ذكر"; // ✅ الافتراضي
+  String selectedGender = "ذكر";
 
   @override
   Widget build(BuildContext context) {
-    return BaseScreen(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: Column(
         children: [
-          _buildAppBar(context),
-          SizedBox(height: 16),
-          Center(
-            child: CircleAvatar(
-              radius: 40,
-              backgroundImage: AssetImage("assets/img/profile.png"),
+          _buildAppBar(context), // ✅ الـ AppBar خارج الـ BaseScreen
+          Expanded(
+            child: BaseScreen(
+              child: GestureDetector(
+                onTap: () => FocusScope.of(context).unfocus(),
+                child: SingleChildScrollView(
+                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(height: 16),
+                      Center(
+                        child: CircleAvatar(
+                          radius: 40,
+                          backgroundImage: AssetImage("assets/img/profile.png"),
+                        ),
+                      ),
+                      SizedBox(height: 16),
+                      _buildTextField("الاسم", "أحمد حسام"),
+                      _buildEmailField(),
+                      _buildPhoneField(),
+                      _buildDropdownField("النوع", ["ذكر", "أنثى"], selectedGender, (value) {
+                        setState(() {
+                          selectedGender = value!;
+                        });
+                      }),
+                      _buildTextField("تاريخ الميلاد", "اختر تاريخ الميلاد", icon: Icons.calendar_today),
+                      SizedBox(height: 24),
+                      UpdateButton(
+                        title: "تحديث",
+                        onPressed: _validateAndUpdate,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ),
-          ),
-          SizedBox(height: 16),
-          _buildTextField("الاسم", "أحمد حسام"),
-          _buildEmailField(),
-          _buildPhoneField(),
-          _buildDropdownField("النوع", ["ذكر", "أنثى"], selectedGender, (value) {
-            setState(() {
-              selectedGender = value!;
-            });
-          }),
-          _buildTextField("تاريخ الميلاد", "اختر تاريخ الميلاد", icon: Icons.calendar_today),
-          Spacer(),
-          UpdateButton(
-            title: "تحديث",
-            onPressed: _validateAndUpdate,
           ),
         ],
       ),
@@ -52,7 +67,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   Widget _buildAppBar(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(vertical:32, horizontal: 18),
       decoration: BoxDecoration(
         color: AppColors.primary500,
         borderRadius: BorderRadius.only(
@@ -61,7 +77,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         ),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.end, // ✅ جعل العنوان على اليمين
+        mainAxisAlignment: MainAxisAlignment.end,
         children: [
           Text(
             "تعديل البيانات",
@@ -80,7 +96,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(Icons.arrow_forward, color: AppColors.primary500), // ✅ السهم لليمين
+              child: Icon(Icons.arrow_forward, color: AppColors.primary500),
             ),
           ),
         ],
@@ -90,12 +106,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   Widget _buildTextField(String label, String hint, {IconData? icon}) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.end, // ✅ العنوان على اليمين
+      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         Text(label, style: AppTexts.contentRegular),
         SizedBox(height: 8),
         TextField(
-          textAlign: TextAlign.right, // ✅ النص يبدأ من اليمين
+          textAlign: TextAlign.right,
           decoration: InputDecoration(
             hintText: hint,
             hintStyle: AppTexts.contentRegular,
@@ -141,11 +157,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         ),
         if (_emailError != null)
           Padding(
-            padding: EdgeInsets.only(top: 4, right: 8), // ✅ محاذاة اليمين
+            padding: EdgeInsets.only(top: 4, right: 8),
             child: Text(
               _emailError!,
               textAlign: TextAlign.right,
-              style: AppTexts.contentRegular.copyWith(color: Colors.red), // ✅ تحسين الفونت
+              style: AppTexts.contentRegular.copyWith(color: Colors.red),
             ),
           ),
         SizedBox(height: 12),
@@ -163,7 +179,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           controller: _phoneController,
           textAlign: TextAlign.right,
           keyboardType: TextInputType.number,
-          inputFormatters: [FilteringTextInputFormatter.digitsOnly], // ✅ يمنع الحروف والرموز
+          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
           decoration: InputDecoration(
             hintText: "01023359621",
             hintStyle: AppTexts.contentRegular,
@@ -179,6 +195,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       ],
     );
   }
+
   Widget _buildDropdownField(String label, List<String> options, String selectedValue, Function(String?) onChanged) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
@@ -194,16 +211,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             color: Colors.white,
           ),
           child: Directionality(
-            textDirection: TextDirection.rtl, // ✅ جعل الاتجاه من اليمين لليسار
+            textDirection: TextDirection.rtl,
             child: DropdownButtonHideUnderline(
               child: DropdownButton<String>(
                 isExpanded: true,
                 value: selectedValue,
-                icon: Icon(Icons.arrow_drop_down, color: AppColors.neutral500), // ✅ السهم على الشمال
+                icon: Icon(Icons.arrow_drop_down, color: AppColors.neutral500),
                 items: options.map((option) {
                   return DropdownMenuItem<String>(
                     value: option,
-                    child: Text(option, textAlign: TextAlign.right), // ✅ النص يظل على اليمين
+                    child: Text(option, textAlign: TextAlign.right),
                   );
                 }).toList(),
                 onChanged: onChanged,
@@ -226,7 +243,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     }
   }
 
-  /// ✅ **دالة التحقق من صحة البريد الإلكتروني**
   bool _isValidEmail(String email) {
     return RegExp(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$").hasMatch(email);
   }

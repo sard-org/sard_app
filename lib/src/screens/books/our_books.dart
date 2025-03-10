@@ -38,40 +38,51 @@ class BookListScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BaseScreen(
-      child: Column(
+    return Scaffold(
+      body: Stack(
         children: [
-          Container(
-            padding: EdgeInsets.symmetric(vertical: 16),
-            decoration: BoxDecoration(
-              color: AppColors.primary500,
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(12),
-                bottomRight: Radius.circular(12),
-              ),
-            ),
-            child: Center(
-              child: Text(
-                "كتبي",
-                style: AppTexts.heading2Bold.copyWith(
-                  color: AppColors.neutral100,
+          BaseScreen(
+            child: Column(
+              children: [
+                SizedBox(height: 80), // لإزاحة المحتوى بعيدًا عن الـ AppBar
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: books.length,
+                    itemBuilder: (context, index) {
+                      final book = books[index % books.length];
+                      return BookItem(
+                        author: book["author"]!,
+                        title: book["title"]!,
+                        description: book["description"]!,
+                        imageUrl: book["imageUrl"]!,
+                      );
+                    },
+                  ),
                 ),
-              ),
+              ],
             ),
           ),
-          SizedBox(height: 18),
-          Expanded(
-            child: ListView.builder(
-              itemCount: books.length * 1, // مضاعفة القائمة مرتين
-              itemBuilder: (context, index) {
-                final book = books[index % books.length];
-                return BookItem(
-                  author: book["author"]!,
-                  title: book["title"]!,
-                  description: book["description"]!,
-                  imageUrl: book["imageUrl"]!,
-                );
-              },
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              padding: EdgeInsets.symmetric(vertical: 32, horizontal: 16),
+              decoration: BoxDecoration(
+                color: AppColors.primary500,
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(12),
+                  bottomRight: Radius.circular(12),
+                ),
+              ),
+              child: Center(
+                child: Text(
+                  "كتبي",
+                  style: AppTexts.heading2Bold.copyWith(
+                    color: AppColors.neutral100,
+                  ),
+                ),
+              ),
             ),
           ),
         ],
@@ -130,21 +141,21 @@ class BookItem extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start, // جعل النص يبدأ من جانب الصورة مباشرة
                 mainAxisAlignment: MainAxisAlignment.center, // جعل النص في منتصف الكارد عمودياً
                 children: [
-                  Text(author, textAlign: TextAlign.start, style: AppTexts.footnoteRegular11.copyWith(
-                    color: AppColors.neutral400
+                  Text(author, textAlign: TextAlign.start, style: AppTexts.captionRegular.copyWith(
+                      color: AppColors.neutral400
                   )),
-                  SizedBox(height: 2),
+                  SizedBox(height: 4),
                   Text(title, textAlign: TextAlign.start, style: AppTexts.highlightStandard.copyWith(
-                    color: AppColors.neutral1000
+                      color: AppColors.neutral1000
                   )),
                   SizedBox(height: 8),
                   Text(
                     description,
                     textAlign: TextAlign.start,
                     style: AppTexts.contentRegular.copyWith(
-                      color: AppColors.neutral400
+                        color: AppColors.neutral400
                     ),
-                    maxLines: 1, // زيادة عدد الأسطر
+                    maxLines: 2, // زيادة عدد الأسطر
                     overflow: TextOverflow.ellipsis, // إضافة نقاط (...) عند تجاوز النص
                   ),
                 ],
