@@ -28,12 +28,16 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
+  flutter_launcher_icons: ^0.13.1
   flutter:
     sdk: flutter
+
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
+
+
 
   google_fonts:
 
@@ -89,3 +93,24 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+# use this command to run the package >> flutter pub run flutter_launcher_icons
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  padding: 0
+  image_path: "assets/img/Logo.png"
+  color: "#FF70A972"
+  min_sdk_android: 21 # android min sdk min:16, default 21
+  web:
+    generate: true
+    image_path: "assets/img/Logo.png"
+    background_color: "#70A972"
+    theme_color: "#F9F9F9"
+
+  windows:
+    generate: true
+    image_path: "assets/img/Logo.png"
+    icon_size: 48 # min:48, max:256, default: 48
+  macos:
+    generate: true
+    image_path: "assets/img/Logo.png"
