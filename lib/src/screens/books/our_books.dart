@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:sard/style/Colors.dart';
 import 'package:sard/style/Fonts.dart';
-import 'package:sard/style/BaseScreen.dart'; // استيراد ملف BaseScreen الذي يحتوي على الـ padding
+import 'package:sard/style/BaseScreen.dart';
+
+import '../AudioBook/audio_book.dart';
 
 void main() {
   runApp(MyApp());
@@ -13,7 +15,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Directionality(
-        textDirection: TextDirection.rtl, // جعل الاتجاه من اليمين إلى اليسار
+        textDirection: TextDirection.rtl,
         child: BookListScreen(),
       ),
     );
@@ -25,7 +27,7 @@ class BookListScreen extends StatelessWidget {
     {
       "author": "د.احمد حسين الرفاعي",
       "title": "كيف تكون إنسانا قويا قياديا رائعا محبوبا",
-      "description": "انشغلنا نحن العرب بقوة وعظمة الدول المتطورة تكنولوجيا وعلميا واقتصاديا،وضخامتها وعظمة تكنولوجياتها!ليس من منطلق السعي للوصول إلى ما وصلت إليه،",
+      "description": "انشغلنا نحن العرب بقوة وعظمة الدول المتطورة تكنولوجيا وعلميا واقتصاديا...",
       "imageUrl": "assets/img/Book_1.png"
     },
     {
@@ -44,7 +46,7 @@ class BookListScreen extends StatelessWidget {
           BaseScreen(
             child: Column(
               children: [
-                SizedBox(height: 80), // لإزاحة المحتوى بعيدًا عن الـ AppBar
+                SizedBox(height: 80),
                 Expanded(
                   child: ListView.builder(
                     itemCount: books.length,
@@ -55,6 +57,12 @@ class BookListScreen extends StatelessWidget {
                         title: book["title"]!,
                         description: book["description"]!,
                         imageUrl: book["imageUrl"]!,
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => AudioBookScreen(), // ✅ التنقل إلى صفحة الكتاب الصوتي
+                          ),
+                        ),
                       );
                     },
                   ),
@@ -96,72 +104,77 @@ class BookItem extends StatelessWidget {
   final String title;
   final String description;
   final String imageUrl;
+  final VoidCallback onTap; // ✅ استدعاء عند الضغط
 
   const BookItem({
     required this.author,
     required this.title,
     required this.description,
     required this.imageUrl,
+    required this.onTap, // ✅ استقبال الدالة
   });
 
   @override
   Widget build(BuildContext context) {
     return Directionality(
       textDirection: TextDirection.rtl,
-      child: Container(
-        margin: EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(12),
-        decoration: ShapeDecoration(
-          color: Color(0xFFFCFEF5),
-          shape: RoundedRectangleBorder(
-            side: BorderSide(width: 0.50, color: AppColors.primary900),
-            borderRadius: BorderRadius.circular(8),
+      child: GestureDetector(
+        onTap: onTap, // ✅ تنفيذ التنقل عند الضغط
+        child: Container(
+          margin: EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsets.all(12),
+          decoration: ShapeDecoration(
+            color: Color(0xFFFCFEF5),
+            shape: RoundedRectangleBorder(
+              side: BorderSide(width: 0.50, color: AppColors.primary900),
+              borderRadius: BorderRadius.circular(8),
+            ),
           ),
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Container(
-              width: 93,
-              height: 125,
-              decoration: ShapeDecoration(
-                image: DecorationImage(
-                  image: AssetImage(imageUrl), // استخدام AssetImage بدلاً من NetworkImage
-                  fit: BoxFit.fill,
-                ),
-                shape: RoundedRectangleBorder(
-                  side: BorderSide(width: 2, color: Color(0xFF2B2B2B)),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-              ),
-            ),
-            SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start, // جعل النص يبدأ من جانب الصورة مباشرة
-                mainAxisAlignment: MainAxisAlignment.center, // جعل النص في منتصف الكارد عمودياً
-                children: [
-                  Text(author, textAlign: TextAlign.start, style: AppTexts.captionRegular.copyWith(
-                      color: AppColors.neutral400
-                  )),
-                  SizedBox(height: 4),
-                  Text(title, textAlign: TextAlign.start, style: AppTexts.highlightStandard.copyWith(
-                      color: AppColors.neutral1000
-                  )),
-                  SizedBox(height: 8),
-                  Text(
-                    description,
-                    textAlign: TextAlign.start,
-                    style: AppTexts.contentRegular.copyWith(
-                        color: AppColors.neutral400
-                    ),
-                    maxLines: 2, // زيادة عدد الأسطر
-                    overflow: TextOverflow.ellipsis, // إضافة نقاط (...) عند تجاوز النص
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                width: 93,
+                height: 125,
+                decoration: ShapeDecoration(
+                  image: DecorationImage(
+                    image: AssetImage(imageUrl),
+                    fit: BoxFit.fill,
                   ),
-                ],
+                  shape: RoundedRectangleBorder(
+                    side: BorderSide(width: 2, color: Color(0xFF2B2B2B)),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
               ),
-            ),
-          ],
+              SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(author, textAlign: TextAlign.start, style: AppTexts.captionRegular.copyWith(
+                        color: AppColors.neutral400
+                    )),
+                    SizedBox(height: 4),
+                    Text(title, textAlign: TextAlign.start, style: AppTexts.highlightStandard.copyWith(
+                        color: AppColors.neutral1000
+                    )),
+                    SizedBox(height: 8),
+                    Text(
+                      description,
+                      textAlign: TextAlign.start,
+                      style: AppTexts.contentRegular.copyWith(
+                          color: AppColors.neutral400
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
