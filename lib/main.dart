@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:sard/src/screens/Home/home.dart';
+import 'package:sard/src/screens/auth/splash/Splash.dart';
 import 'package:sard/src/screens/books/our_books.dart';
 import 'package:sard/style/Colors.dart';
-
 import 'src/screens/Fav/Fav.dart';
 import 'src/screens/settings/setting.dart';
 
@@ -15,7 +15,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: MainScreen(),
+      home: SplashScreen(), // ✅ البداية من شاشة الـ Splash
     );
   }
 }
@@ -26,13 +26,13 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  int _currentIndex = 1;
+  int _currentIndex = 0; // ✅ تعيين `HomeScreen` كأول شاشة افتراضية
 
   final List<Widget> _screens = [
-    HomeScreen(), // الرئيسية
+    HomeScreen(), // ✅ الرئيسية أولًا
     BookListScreen(), // كتبي
     FavoritesScreen(), // المفضلات
-    SettingsScreen(), // الإشعارات
+    SettingsScreen(), // الإعدادات
   ];
 
   List<String> iconPaths = [
@@ -72,7 +72,7 @@ class _MainScreenState extends State<MainScreen> {
                 width: 28,
                 height: 28,
               ),
-              label: ["الرئيسية", "كتبي", "المفضلات", "الاعدادات"][index],
+              label: ["الرئيسية", "كتبي", "المفضلات", "الإعدادات"][index],
             );
           }),
         ),
