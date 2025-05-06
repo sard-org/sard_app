@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:sard/src/screens/Home/home.dart';
+import '../../../../main.dart';
 import '../../../../style/BaseScreen.dart';
 import '../../../../style/Colors.dart';
 import '../../../../style/Fonts.dart';
@@ -139,9 +141,10 @@ class _LoginScreenState extends State<LoginScreen> {
                         width: double.infinity,
                         child: ElevatedButton(
                           onPressed: () {
-                            // إزالة التركيز عن حقول الإدخال عند الضغط على الزر
-                            FocusScope.of(context).unfocus();
-                            // تنفيذ تسجيل الدخول
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => MainScreen()),
+                            );
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.primary500,

@@ -3,6 +3,7 @@ import '../../../../style/BaseScreen.dart';
 import '../../../../style/Colors.dart';
 import '../../../../style/Fonts.dart';
 import '../login/Login.dart';
+import '../otp/otp.dart';
 
 class RegisterScreen extends StatefulWidget {
   @override
@@ -117,11 +118,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
           onPressed: () {
             if (_passwordController.text != _confirmPasswordController.text) {
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text("كلمة المرور وتأكيد كلمة المرور غير متطابقين")),
+                SnackBar(
+                    content: Directionality(
+                      textDirection: TextDirection.rtl,
+                      child: Text('كلمة المرور وتأكيد كلمة المرور غير متطابقي'),
+                    ),
+                )
               );
               return;
             }
-            // تنفيذ إنشاء الحساب
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => VerificationCodeScreen(), // غيّر اسم الصفحة حسب ما عندك
+              ),
+            );
+
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.primary500,

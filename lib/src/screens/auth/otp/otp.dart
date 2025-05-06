@@ -220,7 +220,7 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
                                 textDirection: TextDirection.rtl,
                                 child: const Text('الرجاء إدخال الرمز كاملاً'),
                               ),
-                            )
+                                )
                           );
                         }
                       },
