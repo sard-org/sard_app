@@ -88,12 +88,10 @@ class _LoginScreenState extends State<LoginScreen> {
                             _obscurePassword = !_obscurePassword;
                           });
                         },
-                        // إضافة onSubmitted لإغلاق لوحة المفاتيح عند الضغط على زر Done
                         onSubmitted: (_) {
                           FocusScope.of(context).unfocus();
                         },
                       ),
-                      // إضافة Padding بدلاً من Row للتحكم بشكل أفضل في عرض المحتوى
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
                         child: Row(
@@ -235,7 +233,7 @@ class _LoginScreenState extends State<LoginScreen> {
               onSubmitted(value);
             }
           },
-          // استخدام TextField بدلاً من TextFormField للحصول على سلوك أفضل
+          
           decoration: InputDecoration(
             hintText: hint,
             hintStyle: AppTexts.contentRegular,
