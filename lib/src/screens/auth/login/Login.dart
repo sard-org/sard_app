@@ -233,7 +233,7 @@ class _LoginScreenState extends State<LoginScreen> {
               onSubmitted(value);
             }
           },
-          
+
           decoration: InputDecoration(
             hintText: hint,
             hintStyle: AppTexts.contentRegular,
