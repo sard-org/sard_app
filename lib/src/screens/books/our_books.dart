@@ -5,23 +5,6 @@ import 'package:sard/style/BaseScreen.dart';
 
 import '../AudioBook/audio_book.dart';
 
-void main() {
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Directionality(
-        textDirection: TextDirection.rtl,
-        child: BookListScreen(),
-      ),
-    );
-  }
-}
-
 class BookListScreen extends StatelessWidget {
   final List<Map<String, String>> books = [
     {
@@ -121,6 +104,7 @@ class BookItem extends StatelessWidget {
       child: GestureDetector(
         onTap: onTap, // ✅ تنفيذ التنقل عند الضغط
         child: Container(
+
           margin: EdgeInsets.only(bottom: 12),
           padding: const EdgeInsets.all(12),
           decoration: ShapeDecoration(

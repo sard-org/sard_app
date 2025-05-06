@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:sard/src/screens/Home/home.dart';
+import 'package:sard/src/screens/auth/Create%20a%20New%20Password/create_a_new_password.dart';
+import 'package:sard/src/screens/auth/Forgot%20Password/forgot_password_screen.dart';
+import 'package:sard/src/screens/auth/login/Login.dart';
+import 'package:sard/src/screens/auth/otp/otp.dart';
 import 'package:sard/src/screens/auth/splash/Splash.dart';
 import 'package:sard/src/screens/books/our_books.dart';
 import 'package:sard/style/Colors.dart';
@@ -15,7 +19,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: SplashScreen(), // ✅ البداية من شاشة الـ Splash
+      home: SplashScreen(), //  البداية من شاشة الـ .
     );
   }
 }

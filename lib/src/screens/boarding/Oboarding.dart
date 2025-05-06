@@ -3,6 +3,7 @@ import '../../../main.dart';
 import '../../../style/BaseScreen.dart';
 import '../../../style/Colors.dart';
 import '../../../style/Fonts.dart';
+import '../auth/login/Login.dart';
 
 class OnboardingScreen extends StatefulWidget {
   @override
@@ -134,7 +135,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               if (_currentPage == onboardingData.length - 1) {
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => MainScreen()),
+                  MaterialPageRoute(builder: (context) => LoginScreen()),
                 );
               } else {
                 _pageController.nextPage(

@@ -34,7 +34,7 @@ class SettingsScreen extends StatelessWidget {
                     "assets/img/password.png",
                         () => Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => ChangePasswordScreen()),
+                      MaterialPageRoute(builder: (context) => ChangePassword()),
                     ),
                   ),
                   _buildDivider(),

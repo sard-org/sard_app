@@ -3,12 +3,12 @@ import '../../../style/BaseScreen.dart';
 import '../../../style/Colors.dart';
 import '../../../style/Fonts.dart';
 
-class ChangePasswordScreen extends StatefulWidget {
+class ChangePassword extends StatefulWidget {
   @override
-  _ChangePasswordScreenState createState() => _ChangePasswordScreenState();
+  _ChangePasswordState createState() => _ChangePasswordState();
 }
 
-class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
+class _ChangePasswordState extends State<ChangePassword> {
   final TextEditingController _oldPasswordController = TextEditingController();
   final TextEditingController _newPasswordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
