@@ -2,13 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sard/src/screens/Fav/Fav.dart';
 import 'package:sard/src/screens/Home/home.dart';
-import 'package:sard/src/screens/auth/Craete%20Account/registration/View/register_screen.dart';
-import 'package:sard/src/screens/auth/login/View/Login.dart';
 import 'package:sard/src/screens/auth/login/data/dio_login_helper.dart';
 import 'package:sard/src/screens/auth/login/logic/login_cubit.dart';
-import 'package:sard/src/screens/auth/splash/Splash.dart';
 import 'package:sard/src/screens/books/our_books.dart';
 import 'package:sard/src/screens/settings/setting.dart';
+import 'package:sard/src/screens/splash/Splash.dart';
 import 'package:sard/style/Colors.dart';
 
 void main() {
@@ -28,7 +26,7 @@ class MyApp extends StatelessWidget {
         ],
         child: MaterialApp(
           debugShowCheckedModeBanner: false,
-          home: RegisterScreen(), //  البداية من شاشة الـ .
+          home: SplashScreen(), //  البداية من شاشة الـ .
         ));
   }
 }
