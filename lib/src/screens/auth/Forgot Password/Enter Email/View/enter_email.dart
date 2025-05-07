@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../../../style/BaseScreen.dart';
 import '../../../../../../style/Colors.dart';
 import '../../../../../../style/Fonts.dart';
-
-import '../../../Craete Account/otp/View/otp.dart';
+import '../../otp Forgot Password/View/otp_forget.dart';
 
 class ForgotPasswordScreen extends StatelessWidget {
   final TextEditingController _emailController = TextEditingController();
@@ -68,7 +67,7 @@ class ForgotPasswordScreen extends StatelessWidget {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => VerificationCodeScreen()),
+                    MaterialPageRoute(builder: (context) => OtpVerificationCodeScreen()),
                   );                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary500,

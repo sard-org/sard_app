@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import '../../../../../main.dart';
-import '../../../../../style/BaseScreen.dart';
-import '../../../../../style/Colors.dart';
-import '../../../../../style/Fonts.dart';
-import '../../../Home/home.dart';
-import '../../login/View/Login.dart';
+
+import '../../../../../../main.dart';
+import '../../../../../../style/BaseScreen.dart';
+import '../../../../../../style/Colors.dart';
+import '../../../../../../style/Fonts.dart';
+import '../../../login/View/Login.dart';
+
 
 class CreateNewPassword extends StatefulWidget {
   const CreateNewPassword({super.key});

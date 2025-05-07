@@ -7,10 +7,10 @@ import '../../../../../style/BaseScreen.dart';
 import '../../../../../style/Colors.dart';
 import '../../../../../style/Fonts.dart';
 import '../../Craete Account/registration/View/register_screen.dart';
-import '../../Forgot Password/Enter Email/View/forgot_password.dart';
+import '../../Forgot Password/Enter Email/View/enter_email.dart';
 
-import '../logic/auth_cubit.dart';
-import '../logic/auth_state.dart';
+import '../logic/login_cubit.dart';
+import '../logic/login_state.dart';
 
 class LoginScreen extends StatefulWidget {
   @override

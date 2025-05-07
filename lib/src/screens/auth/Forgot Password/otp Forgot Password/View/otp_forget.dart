@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:sard/src/screens/auth/login/View/Login.dart';
 import '../../../../../../style/BaseScreen.dart';
 import '../../../../../../style/Colors.dart';
 import '../../../../../../style/Fonts.dart';
-import '../../../Create a New Password/View/create_a_new_password.dart';
+import '../../../login/View/Login.dart';
+import '../../Create a New Password/View/create_a_new_password.dart';
 
 
 class OtpVerificationCodeScreen extends StatefulWidget {
