@@ -4,7 +4,6 @@ import 'package:sard/src/screens/Fav/Fav.dart';
 import 'package:sard/src/screens/Home/home.dart';
 import 'package:sard/src/screens/auth/Create%20a%20New%20Password/create_a_new_password.dart';
 import 'package:sard/src/screens/auth/Forgot%20Password/forgot_password_screen.dart';
-import 'package:sard/src/screens/auth/Register/register_screen.dart';
 import 'package:sard/src/screens/auth/login/View/Login.dart';
 import 'package:sard/src/screens/auth/login/data/dio_helper.dart';
 import 'package:sard/src/screens/auth/login/logic/auth_cubit.dart';

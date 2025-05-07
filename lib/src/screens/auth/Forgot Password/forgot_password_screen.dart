@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../style/BaseScreen.dart';
 import '../../../../style/Colors.dart';
 import '../../../../style/Fonts.dart';
-import '../otp/otp.dart';
-
+import '../Craete Account/otp/View/otp.dart';
 class ForgotPasswordScreen extends StatelessWidget {
   final TextEditingController _emailController = TextEditingController();
 

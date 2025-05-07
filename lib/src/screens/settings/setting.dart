@@ -3,7 +3,6 @@ import 'package:sard/src/screens/auth/login/View/Login.dart';
 import 'package:sard/style/Colors.dart';
 import 'package:sard/style/Fonts.dart';
 import 'package:sard/style/BaseScreen.dart';
-import '../auth/Register/register_screen.dart';
 import 'change_password_screen.dart';
 import 'edit_profile_screen.dart';
 

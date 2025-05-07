@@ -74,9 +74,6 @@ class AuthCubit extends Cubit<AuthState> {
         'Success'
       ));
 
-      // في حالة عدم التعرف على شكل البيانات
-      // log('Unrecognized data structure or missing token');
-      // emit(AuthError("تنسيق الاستجابة غير متوقع، يرجى المحاولة لاحقًا"));
 
     } on DioException catch (e) {
       log('DioException: ${e.type}, ${e.message}');

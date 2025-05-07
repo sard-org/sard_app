@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import '../../../../style/BaseScreen.dart';
-import '../../../../style/Colors.dart';
-import '../../../../style/Fonts.dart';
-import '../login/View/Login.dart';
-import '../otp/otp.dart';
+import '../../../../../../style/BaseScreen.dart';
+import '../../../../../../style/Colors.dart';
+import '../../../../../../style/Fonts.dart';
+import '../../../login/View/Login.dart';
+import '../../otp/View/otp.dart';
 
 class RegisterScreen extends StatefulWidget {
   @override
