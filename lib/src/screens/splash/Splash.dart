@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../style/Colors.dart';
 import '../../../../style/Fonts.dart';
-import '../../boarding/Oboarding.dart'; // استيراد شاشة Onboarding
+import '../onboarding/Oboarding.dart';
 
 class SplashScreen extends StatefulWidget {
   @override

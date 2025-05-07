@@ -3,8 +3,8 @@ import 'package:sard/src/screens/auth/login/View/Login.dart';
 import 'package:sard/style/Colors.dart';
 import 'package:sard/style/Fonts.dart';
 import 'package:sard/style/BaseScreen.dart';
-import 'change_password_screen.dart';
-import 'edit_profile_screen.dart';
+import 'Change Password/change_password.dart';
+import 'Edit Profile/edit_profile.dart';
 
 class SettingsScreen extends StatelessWidget {
   @override

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../../style/BaseScreen.dart';
-import '../../../style/Colors.dart';
-import '../../../style/Fonts.dart';
-import 'change_password_screen.dart';
+import '../../../../style/BaseScreen.dart';
+import '../../../../style/Colors.dart';
+import '../../../../style/Fonts.dart';
+import '../Change Password/change_password.dart';
 
 class EditProfileScreen extends StatefulWidget {
   @override

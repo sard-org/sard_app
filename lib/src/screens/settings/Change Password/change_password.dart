@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../style/BaseScreen.dart';
-import '../../../style/Colors.dart';
-import '../../../style/Fonts.dart';
+import '../../../../style/BaseScreen.dart';
+import '../../../../style/Colors.dart';
+import '../../../../style/Fonts.dart';
 
 class ChangePassword extends StatefulWidget {
   @override
