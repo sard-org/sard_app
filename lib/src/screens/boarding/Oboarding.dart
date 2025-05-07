@@ -3,7 +3,7 @@ import '../../../main.dart';
 import '../../../style/BaseScreen.dart';
 import '../../../style/Colors.dart';
 import '../../../style/Fonts.dart';
-import '../auth/login/Login.dart';
+import '../auth/login/View/Login.dart';
 
 class OnboardingScreen extends StatefulWidget {
   @override

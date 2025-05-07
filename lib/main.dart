@@ -1,27 +1,36 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sard/src/screens/Fav/Fav.dart';
 import 'package:sard/src/screens/Home/home.dart';
 import 'package:sard/src/screens/auth/Create%20a%20New%20Password/create_a_new_password.dart';
 import 'package:sard/src/screens/auth/Forgot%20Password/forgot_password_screen.dart';
 import 'package:sard/src/screens/auth/Register/register_screen.dart';
-import 'package:sard/src/screens/auth/login/Login.dart';
-import 'package:sard/src/screens/auth/otp/otp.dart';
+import 'package:sard/src/screens/auth/login/View/Login.dart';
+import 'package:sard/src/screens/auth/login/data/dio_helper.dart';
+import 'package:sard/src/screens/auth/login/logic/auth_cubit.dart';
 import 'package:sard/src/screens/auth/splash/Splash.dart';
 import 'package:sard/src/screens/books/our_books.dart';
+import 'package:sard/src/screens/settings/setting.dart';
 import 'package:sard/style/Colors.dart';
-import 'src/screens/Fav/Fav.dart';
-import 'src/screens/settings/setting.dart';
 
 void main() {
+  DioHelper.init();
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: SplashScreen(), //  البداية من شاشة الـ .
-    );
+    return MultiBlocProvider(
+        providers: [
+          BlocProvider<AuthCubit>(
+            create: (context) => AuthCubit(),
+          ),
+        ],
+        child: MaterialApp(
+          debugShowCheckedModeBanner: false,
+          home: LoginScreen(), //  البداية من شاشة الـ .
+        ));
   }
 }
 
@@ -73,7 +82,9 @@ class _MainScreenState extends State<MainScreen> {
           items: List.generate(4, (index) {
             return BottomNavigationBarItem(
               icon: Image.asset(
-                _currentIndex == index ? selectedIconPaths[index] : iconPaths[index],
+                _currentIndex == index
+                    ? selectedIconPaths[index]
+                    : iconPaths[index],
                 width: 28,
                 height: 28,
               ),

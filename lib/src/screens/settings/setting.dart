@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sard/src/screens/auth/login/Login.dart';
+import 'package:sard/src/screens/auth/login/View/Login.dart';
 import 'package:sard/style/Colors.dart';
 import 'package:sard/style/Fonts.dart';
 import 'package:sard/style/BaseScreen.dart';

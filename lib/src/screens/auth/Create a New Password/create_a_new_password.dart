@@ -4,7 +4,7 @@ import '../../../../style/BaseScreen.dart';
 import '../../../../style/Colors.dart';
 import '../../../../style/Fonts.dart';
 import '../../Home/home.dart';
-import '../login/Login.dart';
+import '../login/View/Login.dart';
 
 class CreateNewPassword extends StatefulWidget {
   const CreateNewPassword({super.key});

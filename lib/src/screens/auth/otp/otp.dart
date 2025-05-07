@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:sard/src/screens/auth/login/Login.dart';
+import 'package:sard/src/screens/auth/login/View/Login.dart';
 import '../../../../style/BaseScreen.dart';
 import '../../../../style/Colors.dart';
 import '../../../../style/Fonts.dart';
