@@ -1,12 +1,11 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:sard/src/screens/Home/home.dart';
 import 'package:sard/src/screens/auth/login/View/Login.dart';
-
 import '../../../../../../style/BaseScreen.dart';
 import '../../../../../../style/Colors.dart';
 import '../../../../../../style/Fonts.dart';
-import '../../../Create a New Password/create_a_new_password.dart';
 
 
 class VerificationCodeScreen extends StatefulWidget {
@@ -212,7 +211,7 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
                           // إذا كانت الحقول مكتملة، انتقل إلى صفحة CreateNewPassword
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => CreateNewPassword()),
+                            MaterialPageRoute(builder: (context) => HomeScreen()),
                           );
                         } else {
                           // إذا لم يكن الرمز كاملاً، عرض رسالة تحذير

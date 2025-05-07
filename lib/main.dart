@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sard/src/screens/Fav/Fav.dart';
 import 'package:sard/src/screens/Home/home.dart';
+import 'package:sard/src/screens/auth/Craete%20Account/registration/View/register_screen.dart';
 import 'package:sard/src/screens/auth/Create%20a%20New%20Password/create_a_new_password.dart';
 import 'package:sard/src/screens/auth/Forgot%20Password/forgot_password_screen.dart';
 import 'package:sard/src/screens/auth/login/View/Login.dart';
@@ -14,6 +15,7 @@ import 'package:sard/style/Colors.dart';
 
 void main() {
   DioHelper.init();
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(MyApp());
 }
 
@@ -28,7 +30,7 @@ class MyApp extends StatelessWidget {
         ],
         child: MaterialApp(
           debugShowCheckedModeBanner: false,
-          home: LoginScreen(), //  البداية من شاشة الـ .
+          home: RegisterScreen(), //  البداية من شاشة الـ .
         ));
   }
 }
