@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../data/dio_helper.dart';
+import '../data/dio_auth_helper.dart';
 import 'auth_state.dart';
 import 'package:dio/dio.dart';
 import 'dart:developer';

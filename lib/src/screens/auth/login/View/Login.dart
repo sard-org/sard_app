@@ -7,7 +7,7 @@ import '../../../../../style/BaseScreen.dart';
 import '../../../../../style/Colors.dart';
 import '../../../../../style/Fonts.dart';
 import '../../Craete Account/registration/View/register_screen.dart';
-import '../../Forgot Password/forgot_password_screen.dart';
+import '../../Forgot Password/Enter Email/View/forgot_password.dart';
 
 import '../logic/auth_cubit.dart';
 import '../logic/auth_state.dart';

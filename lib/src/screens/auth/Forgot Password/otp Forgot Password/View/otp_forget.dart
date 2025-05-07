@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:sard/src/screens/Home/home.dart';
 import 'package:sard/src/screens/auth/login/View/Login.dart';
 import '../../../../../../style/BaseScreen.dart';
 import '../../../../../../style/Colors.dart';
@@ -9,14 +8,14 @@ import '../../../../../../style/Fonts.dart';
 import '../../../Create a New Password/View/create_a_new_password.dart';
 
 
-class VerificationCodeScreen extends StatefulWidget {
-  const VerificationCodeScreen({super.key});
+class OtpVerificationCodeScreen extends StatefulWidget {
+  const OtpVerificationCodeScreen({super.key});
 
   @override
-  State<VerificationCodeScreen> createState() => _VerificationCodeScreenState();
+  State<OtpVerificationCodeScreen> createState() => _OtpVerificationCodeScreenState();
 }
 
-class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
+class _OtpVerificationCodeScreenState extends State<OtpVerificationCodeScreen> {
   final List<TextEditingController> _controllers = List.generate(4, (_) => TextEditingController());
   final List<FocusNode> _focusNodes = List.generate(4, (_) => FocusNode());
 
