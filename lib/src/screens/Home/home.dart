@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../style/BaseScreen.dart';
 import '../../../style/Colors.dart';
 import '../../../style/Fonts.dart';
+import '../AudioBook/audio_book.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -236,82 +237,89 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
                   itemCount: 10,
-                  itemBuilder: (context, index) => Container(
-                    width: 280,
-                    margin: EdgeInsets.only(right: index == 0 ? 0 : 12),
-                    padding: const EdgeInsets.all(12),
-                    decoration: ShapeDecoration(
-                      color: Color(0xFFFCFEF5),
-                      shape: RoundedRectangleBorder(
-                        side: BorderSide(width: 0.50, color: AppColors.primary900),
-                        borderRadius: BorderRadius.circular(8),
+                  itemBuilder: (context, index) => GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => AudioBookScreen()),
+                      );
+                      print('Item $index tapped');
+                    },
+                    child: Container(
+                      width: 280,
+                      margin: EdgeInsets.only(right: index == 0 ? 0 : 12),
+                      padding: const EdgeInsets.all(12),
+                      decoration: ShapeDecoration(
+                        color: Color(0xFFFCFEF5),
+                        shape: RoundedRectangleBorder(
+                          side: BorderSide(width: 0.50, color: AppColors.primary900),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                       ),
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Container(
-                          width: 93,
-                          height: 125,
-                          decoration: ShapeDecoration(
-                            image: DecorationImage(
-                              image: AssetImage('assets/img/Book_1.png'),
-                              fit: BoxFit.fill,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              side: BorderSide(width: 2, color: Color(0xFF2B2B2B)),
-                              borderRadius: BorderRadius.circular(4),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Container(
+                            width: 93,
+                            height: 125,
+                            decoration: ShapeDecoration(
+                              image: DecorationImage(
+                                image: AssetImage('assets/img/Book_1.png'),
+                                fit: BoxFit.fill,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                side: BorderSide(width: 2, color: Color(0xFF2B2B2B)),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
                             ),
                           ),
-                        ),
-                        SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                'د.أحمد حسين الرفاعي',
-                                style: AppTexts.captionRegular.copyWith(
-                                  color: AppColors.neutral400,
+                          SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  'د.أحمد حسين الرفاعي',
+                                  style: AppTexts.captionRegular.copyWith(
+                                    color: AppColors.neutral400,
+                                  ),
                                 ),
-                              ),
-                              SizedBox(height: 4),
-                              Text(
-                                'كيف تكون إنساناً قوياً قيادياً رائعاً محبوباً',
-                                style: AppTexts.highlightStandard.copyWith(
-                                  color: AppColors.neutral1000,
+                                SizedBox(height: 4),
+                                Text(
+                                  'كيف تكون إنساناً قوياً قيادياً رائعاً محبوباً',
+                                  style: AppTexts.highlightStandard.copyWith(
+                                    color: AppColors.neutral1000,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              SizedBox(height: 4),
-                              Text(
-                                'انشغلنا بقوة وعظمة الدول المتطورة تكنولوجياً...',
-                                style: AppTexts.contentRegular.copyWith(
-                                  color: AppColors.neutral400,
+                                SizedBox(height: 4),
+                                Text(
+                                  'انشغلنا بقوة وعظمة الدول المتطورة تكنولوجياً...',
+                                  style: AppTexts.contentRegular.copyWith(
+                                    color: AppColors.neutral400,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              SizedBox(height: 4),
-                              Text(
-                                '19.99 ر.س',
-                                style: AppTexts.highlightStandard.copyWith(
-                                  color: AppColors.primary600,
+                                SizedBox(height: 4),
+                                Text(
+                                  '19.99 ر.س',
+                                  style: AppTexts.highlightStandard.copyWith(
+                                    color: AppColors.primary600,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
-
               const SizedBox(height: 24),
-
               // Rewards Section (استبدل نقاطك)
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
