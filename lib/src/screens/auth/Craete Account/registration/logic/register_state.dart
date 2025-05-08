@@ -1,17 +1,56 @@
-abstract class RegisterScreenState {}
+abstract class RegisterStates {}
 
-class RegisterInitial extends RegisterScreenState {}
+class RegisterInitialState extends RegisterStates {}
 
-class RegisterLoading extends RegisterScreenState {}
-
-class RegisterSuccess extends RegisterScreenState {
+// حالات تسجيل المستخدم
+class RegisterLoadingState extends RegisterStates {}
+class RegisterSuccessState extends RegisterStates {
   final String message;
+  final String email;
 
-  RegisterSuccess(this.message);
+  RegisterSuccessState({required this.message, required this.email});
 }
-
-class RegisterError extends RegisterScreenState {
+class RegisterErrorState extends RegisterStates {
   final String error;
 
-  RegisterError(this.error);
+  RegisterErrorState({required this.error});
 }
+
+// حالات التحقق من الرمز (OTP)
+class OtpSendingState extends RegisterStates {}
+class OtpSentSuccessState extends RegisterStates {
+  final String message;
+
+  OtpSentSuccessState({required this.message});
+}
+class OtpSendErrorState extends RegisterStates {
+  final String error;
+
+  OtpSendErrorState({required this.error});
+}
+
+// حالات التحقق من صحة OTP
+class OtpVerificationLoadingState extends RegisterStates {}
+class OtpVerificationSuccessState extends RegisterStates {
+  final String message;
+
+  OtpVerificationSuccessState({required this.message});
+}
+class OtpVerificationErrorState extends RegisterStates {
+  final String error;
+  final int attemptsLeft; // عدد المحاولات المتبقية
+
+  OtpVerificationErrorState({required this.error, this.attemptsLeft = 0});
+}
+
+// حالة تجاوز الحد الأقصى للمحاولات
+class MaxAttemptsReachedState extends RegisterStates {}
+
+// حالات عامة
+class TimerTickState extends RegisterStates {
+  final int secondsRemaining;
+
+  TimerTickState({required this.secondsRemaining});
+}
+
+class PasswordsNotMatchingState extends RegisterStates {}

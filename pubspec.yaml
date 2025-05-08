@@ -43,6 +43,7 @@ dependencies:
 
   google_fonts:
   dio:
+  pinput:
 
 
 dev_dependencies:

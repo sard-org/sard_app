@@ -1,11 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
 import '../../../../../../style/BaseScreen.dart';
 import '../../../../../../style/Colors.dart';
 import '../../../../../../style/Fonts.dart';
 import '../../../login/View/Login.dart';
 import '../../otp/View/otp.dart';
 
+import '../logic/register_cubit.dart';
+import '../logic/register_state.dart';
+
 class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({Key? key}) : super(key: key);
+
   @override
   _RegisterScreenState createState() => _RegisterScreenState();
 }
@@ -32,108 +39,133 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: BaseScreen(
-        child: SafeArea(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              return SingleChildScrollView(
-                controller: _scrollController,
-                physics: const AlwaysScrollableScrollPhysics(),
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    minHeight: constraints.maxHeight,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 40),
-                      Align(
-                        alignment: Alignment.center,
-                        child: Text(
-                          "مرحبًا بك في سرد",
-                          style: AppTexts.display1Bold,
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Align(
-                        alignment: Alignment.center,
-                        child: Text(
-                          "الرجاء إدخال بريدك الإلكتروني وسنرسل رمز التأكيد إلى بريدك الإلكتروني",
-                          style: AppTexts.highlightEmphasis,
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      _buildTextField("الاسم الكامل", "أدخل اسمك", _nameController),
-                      _buildTextField("البريد الإلكتروني", "أدخل بريدك الإلكتروني", _emailController),
-                      _buildTextField(
-                        "كلمة المرور",
-                        "أدخل كلمة المرور",
-                        _passwordController,
-                        obscureText: _obscurePassword,
-                        toggleVisibility: () {
-                          setState(() {
-                            _obscurePassword = !_obscurePassword;
-                          });
-                        },
-                      ),
-                      _buildTextField(
-                        "تأكيد كلمة المرور",
-                        "أعد إدخال كلمة المرور",
-                        _confirmPasswordController,
-                        obscureText: _obscurePassword,
-                        toggleVisibility: () {
-                          setState(() {
-                            _obscurePassword = !_obscurePassword;
-                          });
-                        },
-                      ),
-                      const SizedBox(height: 24),
-                      _buildRegisterButton(),
-                      const SizedBox(height: 16),
-                      _buildLoginLink(),
-                      const SizedBox(height: 24),
-                    ],
-                  ),
+    return BlocProvider(
+      create: (context) => RegisterCubit(),
+      child: BlocConsumer<RegisterCubit, RegisterStates>(
+        listener: (context, state) {
+          if (state is RegisterSuccessState) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => VerificationCodeScreen(email: state.email),
+              ),
+            );
+          } else if (state is RegisterErrorState) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Directionality(
+                  textDirection: TextDirection.rtl,
+                  child: Text(state.error),
                 ),
-              );
-            },
-          ),
-        ),
+              ),
+            );
+          } else if (state is PasswordsNotMatchingState) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Directionality(
+                  textDirection: TextDirection.rtl,
+                  child: Text('كلمة المرور وتأكيد كلمة المرور غير متطابقين'),
+                ),
+              ),
+            );
+          }
+        },
+        builder: (context, state) {
+          return Scaffold(
+            backgroundColor: Colors.white,
+            body: BaseScreen(
+              child: SafeArea(
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    return SingleChildScrollView(
+                      controller: _scrollController,
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          minHeight: constraints.maxHeight,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(height: 40),
+                            Align(
+                              alignment: Alignment.center,
+                              child: Text(
+                                "مرحبًا بك في سرد",
+                                style: AppTexts.display1Bold,
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Align(
+                              alignment: Alignment.center,
+                              child: Text(
+                                "الرجاء إدخال بريدك الإلكتروني وسنرسل رمز التأكيد إلى بريدك الإلكتروني",
+                                style: AppTexts.highlightEmphasis,
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+                            _buildTextField("الاسم الكامل", "أدخل اسمك", _nameController),
+                            _buildTextField("البريد الإلكتروني", "أدخل بريدك الإلكتروني", _emailController),
+                            _buildTextField(
+                              "كلمة المرور",
+                              "أدخل كلمة المرور",
+                              _passwordController,
+                              obscureText: _obscurePassword,
+                              toggleVisibility: () {
+                                setState(() {
+                                  _obscurePassword = !_obscurePassword;
+                                });
+                              },
+                            ),
+                            _buildTextField(
+                              "تأكيد كلمة المرور",
+                              "أعد إدخال كلمة المرور",
+                              _confirmPasswordController,
+                              obscureText: _obscurePassword,
+                              toggleVisibility: () {
+                                setState(() {
+                                  _obscurePassword = !_obscurePassword;
+                                });
+                              },
+                            ),
+                            const SizedBox(height: 24),
+                            _buildRegisterButton(context, state),
+                            const SizedBox(height: 16),
+                            _buildLoginLink(),
+                            const SizedBox(height: 24),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+            // إضافة resizeToAvoidBottomInset لمنع المشاكل عند ظهور لوحة المفاتيح
+            resizeToAvoidBottomInset: true,
+          );
+        },
       ),
-      // إضافة resizeToAvoidBottomInset لمنع المشاكل عند ظهور لوحة المفاتيح
-      resizeToAvoidBottomInset: true,
     );
   }
 
-  Widget _buildRegisterButton() {
+  Widget _buildRegisterButton(BuildContext context, RegisterStates state) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8),
       child: SizedBox(
         width: double.infinity,
         child: ElevatedButton(
-          onPressed: () {
-            if (_passwordController.text != _confirmPasswordController.text) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                    content: Directionality(
-                      textDirection: TextDirection.rtl,
-                      child: Text('كلمة المرور وتأكيد كلمة المرور غير متطابقي'),
-                    ),
-                )
-              );
-              return;
-            }
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => VerificationCodeScreen(), // غيّر اسم الصفحة حسب ما عندك
-              ),
+          onPressed: state is RegisterLoadingState
+              ? null
+              : () {
+            BlocProvider.of<RegisterCubit>(context).registerUser(
+              name: _nameController.text,
+              email: _emailController.text,
+              password: _passwordController.text,
+              confirmPassword: _confirmPasswordController.text,
             );
-
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.primary500,
@@ -143,7 +175,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
             ),
             padding: const EdgeInsets.symmetric(vertical: 12),
           ),
-          child: Text(
+          child: state is RegisterLoadingState
+              ? const CircularProgressIndicator(color: Colors.white)
+              : Text(
             "إنشاء حساب",
             style: AppTexts.contentEmphasis.copyWith(color: AppColors.neutral100),
           ),
@@ -206,11 +240,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
             onTap: () {
               // التمرير لأسفل عند الضغط على الحقل لتجنب مشكلة الـ overflow
               Future.delayed(const Duration(milliseconds: 300), () {
-                _scrollController.animateTo(
-                  _scrollController.position.maxScrollExtent,
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeOut,
-                );
+                if (_scrollController.hasClients) {
+                  _scrollController.animateTo(
+                    _scrollController.position.maxScrollExtent,
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeOut,
+                  );
+                }
               });
             },
             decoration: InputDecoration(

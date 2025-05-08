@@ -1,32 +1,35 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sard/src/screens/Home/home.dart';
 import 'package:sard/src/screens/auth/login/View/Login.dart';
+
 import '../../../../../../main.dart';
 import '../../../../../../style/BaseScreen.dart';
 import '../../../../../../style/Colors.dart';
 import '../../../../../../style/Fonts.dart';
+import '../../registration/logic/register_cubit.dart';
+import '../../registration/logic/register_state.dart';
 
 
 class VerificationCodeScreen extends StatefulWidget {
-  const VerificationCodeScreen({super.key});
+  final String email;
+
+  const VerificationCodeScreen({Key? key, required this.email}) : super(key: key);
 
   @override
   State<VerificationCodeScreen> createState() => _VerificationCodeScreenState();
 }
 
 class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
-  final List<TextEditingController> _controllers = List.generate(4, (_) => TextEditingController());
+  final List<TextEditingController> _controllers = List.generate(
+      4, (_) => TextEditingController());
   final List<FocusNode> _focusNodes = List.generate(4, (_) => FocusNode());
-
-  Timer? _timer;
-  int _secondsRemaining = 60;
+  bool _isErrorShown = false;
 
   @override
   void initState() {
     super.initState();
-    _startTimer();
 
     for (int i = 0; i < 3; i++) {
       _controllers[i].addListener(() {
@@ -37,55 +40,26 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
     }
   }
 
-  void _startTimer() {
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      setState(() {
-        if (_secondsRemaining > 0) {
-          _secondsRemaining--;
-        } else {
-          _timer?.cancel();
-        }
-      });
-    });
-  }
-
   String _formatTime(int seconds) {
     final int minutes = seconds ~/ 60;
     final int remainingSeconds = seconds % 60;
     return '$minutes:${remainingSeconds.toString().padLeft(2, '0')}';
   }
 
-  void _resendCode() {
-    setState(() {
-      _secondsRemaining = 60;
-    });
-    _startTimer();
+  String _getFullOtpCode() {
+    return _controllers.map((controller) => controller.text).join();
+  }
 
+  // إعادة تعيين حقول الإدخال
+  void _resetInputFields() {
     for (var controller in _controllers) {
       controller.clear();
     }
     _focusNodes[0].requestFocus();
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('تم إعادة إرسال الرمز')),
-    );
-  }
-
-  void _verify() {
-    String code = _controllers.map((controller) => controller.text).join();
-    if (code.length == 4) {
-      print('Verifying code: $code');
-      // تنفيذ التحقق هنا
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('الرجاء إدخال الرمز كاملاً')),
-      );
-    }
   }
 
   @override
   void dispose() {
-    _timer?.cancel();
     for (var controller in _controllers) {
       controller.dispose();
     }
@@ -97,189 +71,313 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: Directionality(
-        textDirection: TextDirection.rtl,
-        child: Column(
-          children: [
-            _buildAppBar(context),
-            Expanded(
-              child: BaseScreen(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    const SizedBox(height: 40),
-                    Text(
-                      'أدخل رمز التحقق',
-                      style: AppTexts.display1Bold,
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'لقد قمنا بإرسال رمز التأكيد للبريد الإلكتروني التالي:',
-                      style: AppTexts.highlightEmphasis,
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      'uxui@gmail.com',
-                      style: AppTexts.contentEmphasis,
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 36),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: List.generate(4, (index) {
-                        return SizedBox(
-                          width: 60,
-                          child: TextField(
-                            controller: _controllers[index],
-                            focusNode: _focusNodes[index],
-                            textAlign: TextAlign.center,
-                            textDirection: TextDirection.rtl, // لضبط الكتابة من اليمين
-                            keyboardType: TextInputType.number,
-                            maxLength: 1,
-                            style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: _controllers[index].text.isNotEmpty
-                                  ? AppColors.primary800
-                                  : Colors.black,
-                            ),
-                            decoration: InputDecoration(
-                              counterText: '',
-                              enabledBorder: OutlineInputBorder(
-                                borderSide: BorderSide(color: AppColors.neutral300),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(color: AppColors.primary500, width: 2),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                            onChanged: (value) {
-                              setState(() {});
-                              if (value.isNotEmpty && index < 3) {
-                                _focusNodes[index + 1].requestFocus();
-                              } else if (value.isEmpty && index > 0) {
-                                _focusNodes[index - 1].requestFocus();
-                              }
-                            },
-                          ),
-                        );
-                      }),
-                    ),
-                    const SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          '(${_formatTime(_secondsRemaining)}) سينتهي الرمز خلال',
-                          style: AppTexts.contentRegular.copyWith(color: AppColors.primary500),
-                        ),
-                        const SizedBox(width: 4),
-                        TextButton(
-                          onPressed: _secondsRemaining == 0 ? _resendCode : null,
-                          child: Text(
-                            'إعادة الإرسال',
-                            style: AppTexts.contentEmphasis.copyWith(
-                              color: _secondsRemaining == 0 ? AppColors.primary500 : AppColors.neutral400,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const Spacer(), // يسمح بالمسافة بين العناصر في الأعلى والزراير في الأسفل
-                  ],
+    return BlocProvider(
+      create: (context) {
+        final cubit = RegisterCubit();
+        // إرسال رمز التحقق عند فتح الصفحة
+        cubit.sendOtp(email: widget.email);
+        return cubit;
+      },
+      child: BlocConsumer<RegisterCubit, RegisterStates>(
+        listener: (context, state) {
+          if (state is OtpVerificationSuccessState) {
+            // التنقل إلى الصفحة الرئيسية بعد التحقق من الرمز بنجاح
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => MainScreen()),
+                  (route) => false,
+            );
+          } else if (state is OtpVerificationErrorState) {
+            setState(() {
+              _isErrorShown = true;
+            });
+
+            // إظهار رسالة الخطأ مع عدد المحاولات المتبقية
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                backgroundColor: AppColors.red100,
+                content: Directionality(
+                  textDirection: TextDirection.rtl,
+                  child: Text(
+                    '${state.error}. المحاولات المتبقية: ${state.attemptsLeft}',
+                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                  ),
                 ),
+                duration: const Duration(seconds: 3),
               ),
-            ),
-            // هذا الجزء يمثل الـ "ناڤ بار" الذي يحتوي على الأزرار في أسفل الصفحة
-            Padding(
-              padding: const EdgeInsets.all(16.0),
+            );
+
+            // إعادة تعيين حقول الإدخال
+            _resetInputFields();
+          } else if (state is MaxAttemptsReachedState) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                backgroundColor: AppColors.red100,
+                content: Directionality(
+                  textDirection: TextDirection.rtl,
+                  child: Text(
+                    'تم تجاوز الحد الأقصى للمحاولات، سيتم إرسال رمز جديد',
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                duration: Duration(seconds: 3),
+              ),
+            );
+
+            // إعادة تعيين حقول الإدخال
+            _resetInputFields();
+          } else if (state is OtpSentSuccessState) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                backgroundColor: AppColors.green100,
+                content: Directionality(
+                  textDirection: TextDirection.rtl,
+                  child: Text(
+                    state.message,
+                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                duration: const Duration(seconds: 3),
+              ),
+            );
+
+            // إعادة تعيين حالة الخطأ وحقول الإدخال
+            setState(() {
+              _isErrorShown = false;
+            });
+            _resetInputFields();
+          }
+        },
+        builder: (context, state) {
+          final registerCubit = BlocProvider.of<RegisterCubit>(context);
+          final secondsRemaining = state is TimerTickState ? state
+              .secondsRemaining : registerCubit.secondsRemaining;
+
+          return Scaffold(
+            backgroundColor: Colors.white,
+            body: Directionality(
+              textDirection: TextDirection.rtl,
               child: Column(
                 children: [
-                  SizedBox(
-                    width: double.infinity,
-                    height: 48,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        // التحقق من أن المستخدم قد أدخل رمز التحقق كاملاً
-                        String code = _controllers.map((controller) => controller.text).join();
-                        if (code.length == 4) {
-                          // إذا كانت الحقول مكتملة، انتقل إلى صفحة CreateNewPassword
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => MainScreen()),
-                          );
-                        } else {
-                          // إذا لم يكن الرمز كاملاً، عرض رسالة تحذير
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Directionality(
-                                textDirection: TextDirection.rtl,
-                                child: const Text('الرجاء إدخال الرمز كاملاً'),
+                  _buildAppBar(context),
+                  Expanded(
+                    child: BaseScreen(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          const SizedBox(height: 40),
+                          Text(
+                            'أدخل رمز التحقق',
+                            style: AppTexts.display1Bold,
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            'لقد قمنا بإرسال رمز التأكيد للبريد الإلكتروني التالي:',
+                            style: AppTexts.highlightEmphasis,
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            widget.email,
+                            style: AppTexts.contentEmphasis,
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 36),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: List.generate(4, (index) {
+                              return SizedBox(
+                                width: 60,
+                                child: TextField(
+                                  controller: _controllers[index],
+                                  focusNode: _focusNodes[index],
+                                  textAlign: TextAlign.center,
+                                  textDirection: TextDirection.rtl,
+                                  keyboardType: TextInputType.number,
+                                  maxLength: 1,
+                                  style: TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                    color: _isErrorShown
+                                        ? AppColors.red100
+                                        : (_controllers[index].text.isNotEmpty
+                                        ? AppColors.primary800
+                                        : AppColors.neutral1000 ),
+                                  ),
+                                  decoration: InputDecoration(
+                                    counterText: '',
+                                    enabledBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                          color: _isErrorShown
+                                              ? AppColors.red100
+                                              : AppColors.neutral300),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                          color: _isErrorShown
+                                              ? AppColors.red100
+                                              : AppColors.primary500,
+                                          width: 2),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter.digitsOnly
+                                  ],
+                                  onChanged: (value) {
+                                    setState(() {
+                                      if (_isErrorShown) {
+                                        _isErrorShown = false;
+                                      }
+                                    });
+
+                                    if (value.isNotEmpty && index < 3) {
+                                      _focusNodes[index + 1].requestFocus();
+                                    } else if (value.isEmpty && index > 0) {
+                                      _focusNodes[index - 1].requestFocus();
+                                    }
+
+                                    // إذا تم إدخال جميع الأرقام الأربعة، قم بالتحقق تلقائيًا
+                                    if (index == 3 && value.isNotEmpty) {
+                                      final otp = _getFullOtpCode();
+                                      if (otp.length == 4) {
+                                        // تأخير بسيط لإظهار الرقم الأخير قبل التحقق
+                                        Future.delayed(const Duration(
+                                            milliseconds: 200), () {
+                                          registerCubit.verifyOtp(otp: otp);
+                                        });
+                                      }
+                                    }
+                                  },
+                                ),
+                              );
+                            }),
+                          ),
+                          const SizedBox(height: 20),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                '(${_formatTime(
+                                    secondsRemaining)}) سينتهي الرمز خلال',
+                                style: AppTexts.contentRegular.copyWith(
+                                    color: AppColors.primary500),
                               ),
-                                )
-                          );
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary500,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      child: Text(
-                        'تحقق',
-                        style: AppTexts.contentEmphasis.copyWith(color: Colors.white),
+                              const SizedBox(width: 4),
+                              TextButton(
+                                onPressed: secondsRemaining == 0
+                                    ? () => registerCubit.resendOtp()
+                                    : null,
+                                child: Text(
+                                  'إعادة الإرسال',
+                                  style: AppTexts.contentEmphasis.copyWith(
+                                    color: secondsRemaining == 0 ? AppColors
+                                        .primary500 : AppColors.neutral400,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const Spacer(),
+                        ],
                       ),
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  Center(
-                    child: Wrap(
+                  // هذا الجزء يمثل الـ "ناڤ بار" الذي يحتوي على الأزرار في أسفل الصفحة
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
                       children: [
-                        Text(
-                          "هل لديك حساب بالفعل؟",
-                          style: AppTexts.contentRegular.copyWith(color: AppColors.neutral900),
-                        ),
-                        const SizedBox(width: 4),
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => LoginScreen()),
-                            );
-                          },
-                          child: Text(
-                            "تسجيل الدخول",
-                            style: AppTexts.contentEmphasis.copyWith(
-                              color: AppColors.primary500,
-                              decoration: TextDecoration.underline,
+                        SizedBox(
+                          width: double.infinity,
+                          height: 48,
+                          child: ElevatedButton(
+                            onPressed: state is OtpVerificationLoadingState
+                                ? null
+                                : () {
+                              final otp = _getFullOtpCode();
+                              if (otp.length == 4) {
+                                registerCubit.verifyOtp(otp: otp);
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    backgroundColor: Colors.orange,
+                                    content: Directionality(
+                                      textDirection: TextDirection.rtl,
+                                      child: Text(
+                                        'الرجاء إدخال الرمز كاملاً (4 أرقام)',
+                                        style: TextStyle(fontWeight: FontWeight.bold),
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primary500,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            child: state is OtpVerificationLoadingState
+                                ? const CircularProgressIndicator(
+                                color: Colors.white)
+                                : Text(
+                              'تحقق',
+                              style: AppTexts.contentEmphasis.copyWith(
+                                  color: Colors.white),
                             ),
                           ),
                         ),
+                        const SizedBox(height: 16),
+                        Center(
+                          child: Wrap(
+                            children: [
+                              Text(
+                                "هل لديك حساب بالفعل؟",
+                                style: AppTexts.contentRegular.copyWith(
+                                    color: AppColors.neutral900),
+                              ),
+                              const SizedBox(width: 4),
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => LoginScreen()),
+                                  );
+                                },
+                                child: Text(
+                                  "تسجيل الدخول",
+                                  style: AppTexts.contentEmphasis.copyWith(
+                                    color: AppColors.primary500,
+                                    decoration: TextDecoration.underline,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Container(
+                    width: 40,
+                    height: 4,
+                    margin: const EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.black,
+                      borderRadius: BorderRadius.circular(2),
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 16),
-            Container(
-              width: 40,
-              height: 4,
-              margin: const EdgeInsets.only(bottom: 16),
-              decoration: BoxDecoration(
-                color: Colors.black,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
