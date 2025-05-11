@@ -15,6 +15,7 @@ class BookListScreen extends StatelessWidget {
     },
     {
       "author": "د.محمد علي",
+      
       "title": "فن القيادة والتأثير في الآخرين",
       "description": "تعلم كيفية التأثير على الآخرين وبناء شخصية قيادية قوية في مختلف المجالات.",
       "imageUrl": "assets/img/Book_1.png"

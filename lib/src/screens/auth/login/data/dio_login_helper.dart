@@ -3,6 +3,7 @@ import 'dart:developer';
 
 class DioHelper {
   static Dio dio = Dio();
+  static String? _token;
 
   static void init() {
     dio.options.baseUrl = 'https://api.mohamed-ramadan.me/api/';
@@ -26,17 +27,27 @@ class DioHelper {
     ));
   }
 
+  static void setToken(String token) {
+    _token = token;
+    dio.options.headers = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': 'Bearer $token',
+    };
+  }
+
+  static void removeToken() {
+    _token = null;
+    dio.options.headers = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    };
+  }
+
   static Future<Response> getData({
     required String url,
-    String? token,
   }) async {
     try {
-      dio.options.headers = {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        if (token != null) 'Authorization': 'Bearer $token',
-      };
-
       // طباعة تفاصيل الطلب
       log('Making GET request to: ${dio.options.baseUrl}$url');
       log('Headers: ${dio.options.headers}');
@@ -57,15 +68,8 @@ class DioHelper {
   static Future<Response> postData({
     required String url,
     required Map<String, dynamic> data,
-    String? token,
   }) async {
     try {
-      dio.options.headers = {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        if (token != null) 'Authorization': 'Bearer $token',
-      };
-
       // طباعة تفاصيل الطلب
       log('Making POST request to: ${dio.options.baseUrl}$url');
       log('Headers: ${dio.options.headers}');

@@ -11,7 +11,6 @@ class AuthCubit extends Cubit<AuthState> {
   Future<void> login(String email, String password, {bool rememberMe = false}) async {
     emit(AuthLoading());
     try {
-      // طباعة بيانات الطلب للتشخيص
       log('Attempting login with email: $email');
 
       Response response = await DioHelper.postData(
@@ -22,58 +21,53 @@ class AuthCubit extends Cubit<AuthState> {
         },
       );
 
-      // طباعة الاستجابة للتشخيص
       log('Response status: ${response.statusCode}');
       log('Response data: ${response.data}');
 
       if (response.statusCode == 200) {
-        // تحقق من بنية البيانات المستلمة
         var data = response.data;
         if (data is Map<String, dynamic>) {
-          if (data.containsKey('token') || data.containsKey('access_token') ||
-              (data.containsKey('data') && data['data'] is Map<String, dynamic> &&
-                  (data['data'].containsKey('token') || data['data'].containsKey('access_token')))) {
-
-            // استخراج الرمز بناءً على هيكل البيانات
-            String? token;
-            if (data.containsKey('token')) {
-              token = data['token'];
-            } else if (data.containsKey('access_token')) {
-              token = data['access_token'];
-            } else if (data['data'].containsKey('token')) {
+          String? token;
+          
+          // استخراج التوكين من الاستجابة
+          if (data.containsKey('token')) {
+            token = data['token'];
+          } else if (data.containsKey('access_token')) {
+            token = data['access_token'];
+          } else if (data.containsKey('data') && data['data'] is Map<String, dynamic>) {
+            if (data['data'].containsKey('token')) {
               token = data['data']['token'];
             } else if (data['data'].containsKey('access_token')) {
               token = data['data']['access_token'];
             }
-
-            if (token != null) {
-              // تخزين الرمز
-              final prefs = await SharedPreferences.getInstance();
-              await prefs.setString('auth_token', token);
-
-              // تخزين خيار "تذكرني" إذا تم اختياره
-              if (rememberMe) {
-                await prefs.setBool('remember_me', true);
-                await prefs.setString('saved_email', email);
-              } else {
-                await prefs.setBool('remember_me', false);
-                await prefs.remove('saved_email');
-              }
-
-              emit(AuthSuccess(data));
-              return;
-            }
           }
 
-          // حتى لو لم نجد الرمز، ولكن الاستجابة كانت ناجحة، نعتبر ذلك نجاحًا
-          emit(AuthSuccess(data));
-          return;
-        }
-      }
-      emit(AuthSuccess(
-        'Success'
-      ));
+          if (token != null) {
+            // تخزين التوكين
+            final prefs = await SharedPreferences.getInstance();
+            await prefs.setString('auth_token', token);
+            print(prefs.getString('auth_token'));
 
+            // تخزين خيار "تذكرني"
+            if (rememberMe) {
+              await prefs.setBool('remember_me', true);
+              await prefs.setString('saved_email', email);
+            } else {
+              await prefs.setBool('remember_me', false);
+              await prefs.remove('saved_email');
+            }
+
+            // إضافة التوكين إلى DioHelper للاستخدام في الطلبات اللاحقة
+            DioHelper.setToken(token);
+            
+            emit(AuthSuccess(data));
+            return;
+          }
+        }
+        emit(AuthSuccess(data));
+        return;
+      }
+      emit(AuthSuccess('Success'));
 
     } on DioException catch (e) {
       log('DioException: ${e.type}, ${e.message}');
@@ -129,22 +123,23 @@ class AuthCubit extends Cubit<AuthState> {
       final token = prefs.getString('auth_token');
 
       if (token != null && token.isNotEmpty) {
-        // التحقق من صلاحية الرمز مع الخادم
+        // إضافة التوكين إلى DioHelper
+        DioHelper.setToken(token);
+        
         try {
           Response response = await DioHelper.getData(
             url: 'auth/user',
-            token: token,
           );
 
           if (response.statusCode == 200) {
             emit(AuthSuccess(response.data));
           } else {
-            // الرمز غير صالح - مسح وطلب تسجيل الدخول
             await prefs.remove('auth_token');
+            DioHelper.removeToken(); // إزالة التوكين من DioHelper
             emit(AuthInitial());
           }
         } catch (e) {
-          // خطأ في الشبكة أو فشل في التحقق من الرمز
+          DioHelper.removeToken(); // إزالة التوكين من DioHelper
           emit(AuthInitial());
         }
       } else {
@@ -162,20 +157,19 @@ class AuthCubit extends Cubit<AuthState> {
       final token = prefs.getString('auth_token');
 
       if (token != null) {
-        // إخطار الخادم بتسجيل الخروج (اختياري)
         try {
           await DioHelper.postData(
             url: 'auth/logout',
-            token: token,
             data: {},
           );
         } catch (e) {
-          // حتى لو فشل تسجيل الخروج من الخادم، نريد مسح بيانات الجلسة المحلية
+          // تجاهل أخطاء تسجيل الخروج من الخادم
         }
       }
 
-      // مسح بيانات الجلسة المحلية
+      // مسح بيانات الجلسة
       await prefs.remove('auth_token');
+      DioHelper.removeToken(); // إزالة التوكين من DioHelper
 
       emit(AuthInitial());
     } catch (e) {

@@ -4,6 +4,7 @@ import 'package:sard/src/screens/AudioBook/audio_book.dart';
 
 import 'package:sard/src/screens/Home/home.dart';
 import 'package:sard/src/screens/PlayerScreen/audio_book_player_screen.dart';
+import 'package:sard/src/screens/Settings/Change%20Password/change_password.dart';
 import 'package:sard/src/screens/auth/Craete%20Account/registration/View/register_screen.dart';
 import 'package:sard/src/screens/auth/login/data/dio_login_helper.dart';
 import 'package:sard/src/screens/auth/login/logic/login_cubit.dart';
@@ -31,7 +32,7 @@ class MyApp extends StatelessWidget {
         ],
         child: MaterialApp(
           debugShowCheckedModeBanner: false,
-          home: AudioBookPlayerScreen(), //  البداية من شاشة الـ .
+          home: SplashScreen(), //  البداية من شاشة الـ .
         ));
   }
 }

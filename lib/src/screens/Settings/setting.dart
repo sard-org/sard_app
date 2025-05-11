@@ -3,6 +3,7 @@ import 'package:sard/src/screens/auth/login/View/Login.dart';
 import 'package:sard/style/Colors.dart';
 import 'package:sard/style/Fonts.dart';
 import 'package:sard/style/BaseScreen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'Change Password/change_password.dart';
 import 'Edit Profile/edit_profile.dart';
 
@@ -43,12 +44,18 @@ class SettingsScreen extends StatelessWidget {
                     context,
                     "تسجيل الخروج",
                     "assets/img/Logout.png",
-                        () {
-                          Navigator.push(
+                        () async {
+                          // Clear cache and preferences
+                          final prefs = await SharedPreferences.getInstance();
+                          await prefs.clear();
+                          
+                          // Navigate to login screen
+                          Navigator.pushAndRemoveUntil(
                             context,
                             MaterialPageRoute(builder: (context) => LoginScreen()),
+                            (route) => false,
                           );
-                      print("تم تسجيل الخروج");
+                          print("تم تسجيل الخروج");
                     },
                     isLogout: true,
                   ),
