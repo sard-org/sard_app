@@ -81,6 +81,11 @@ class DioClient {
     required String otp,
   }) async {
     try {
+      // التأكد من عدم إرسال email فارغ أبدًا
+      if (email.isEmpty) {
+        throw Exception('البريد الإلكتروني مطلوب للتحقق من رمز OTP');
+      }
+
       final response = await _dio.post(
         '/api/auth/validate-email-otp',
         data: {

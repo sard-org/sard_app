@@ -78,10 +78,12 @@ class RegisterCubit extends Cubit<RegisterStates> {
     emit(OtpSendingState());
 
     try {
+      // حفظ البريد الإلكتروني في المتغير للاستخدام لاحقًا
+      _registeredEmail = email;
+
       final response = await _dioClient.validateEmail(email: email);
 
       if (response.statusCode == 200) {
-        _registeredEmail = email;
         _otpAttempts = 0; // إعادة تعيين عدد المحاولات عند إرسال رمز جديد
         emit(OtpSentSuccessState(
           message: response.data['message'] ?? 'تم إرسال رمز التحقق بنجاح',
@@ -106,6 +108,15 @@ class RegisterCubit extends Cubit<RegisterStates> {
   // دالة التحقق من رمز OTP
   Future<void> verifyOtp({required String otp}) async {
     emit(OtpVerificationLoadingState());
+
+    // التأكد من وجود بريد إلكتروني مسجل
+    if (_registeredEmail.isEmpty) {
+      emit(OtpVerificationErrorState(
+          error: 'خطأ: البريد الإلكتروني غير متوفر، الرجاء المحاولة مرة أخرى',
+          attemptsLeft: remainingAttempts
+      ));
+      return;
+    }
 
     // زيادة عدد المحاولات
     _otpAttempts++;
@@ -178,7 +189,7 @@ class RegisterCubit extends Cubit<RegisterStates> {
 
   // إعادة إرسال رمز التحقق
   void resendOtp() {
-    if (_secondsRemaining == 0) {
+    if (_secondsRemaining == 0 && _registeredEmail.isNotEmpty) {
       sendOtp(email: _registeredEmail);
     }
   }

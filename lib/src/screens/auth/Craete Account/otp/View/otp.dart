@@ -184,16 +184,20 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 36),
+                          // عكس ترتيب حقول الإدخال ليكون من اليسار لليمين
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: List.generate(4, (index) {
+                              // استخدام index معكوس للحصول على ترتيب من اليسار لليمين
+                              final reversedIndex = 3 - index;
                               return SizedBox(
                                 width: 60,
                                 child: TextField(
-                                  controller: _controllers[index],
-                                  focusNode: _focusNodes[index],
+                                  controller: _controllers[reversedIndex],
+                                  focusNode: _focusNodes[reversedIndex],
                                   textAlign: TextAlign.center,
-                                  textDirection: TextDirection.rtl,
+                                  // استخدام TextDirection.ltr لجعل الكتابة من اليسار لليمين
+                                  textDirection: TextDirection.ltr,
                                   keyboardType: TextInputType.number,
                                   maxLength: 1,
                                   style: TextStyle(
@@ -201,7 +205,7 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
                                     fontWeight: FontWeight.bold,
                                     color: _isErrorShown
                                         ? AppColors.red100
-                                        : (_controllers[index].text.isNotEmpty
+                                        : (_controllers[reversedIndex].text.isNotEmpty
                                         ? AppColors.primary800
                                         : AppColors.neutral1000 ),
                                   ),
@@ -233,22 +237,21 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
                                       }
                                     });
 
-                                    if (value.isNotEmpty && index < 3) {
-                                      _focusNodes[index + 1].requestFocus();
-                                    } else if (value.isEmpty && index > 0) {
-                                      _focusNodes[index - 1].requestFocus();
+                                    if (value.isNotEmpty && reversedIndex > 0) {
+                                      _focusNodes[reversedIndex - 1].requestFocus();
+                                    } else if (value.isEmpty && reversedIndex < 3) {
+                                      _focusNodes[reversedIndex + 1].requestFocus();
                                     }
 
                                     // إذا تم إدخال جميع الأرقام الأربعة، قم بالتحقق تلقائيًا
-                                    if (index == 3 && value.isNotEmpty) {
-                                      final otp = _getFullOtpCode();
-                                      if (otp.length == 4) {
-                                        // تأخير بسيط لإظهار الرقم الأخير قبل التحقق
-                                        Future.delayed(const Duration(
-                                            milliseconds: 200), () {
+                                    if (_controllers.every((controller) => controller.text.isNotEmpty)) {
+                                      // تأخير بسيط لإظهار الرقم الأخير قبل التحقق
+                                      Future.delayed(const Duration(milliseconds: 200), () {
+                                        final otp = _getFullOtpCode();
+                                        if (otp.length == 4) {
                                           registerCubit.verifyOtp(otp: otp);
-                                        });
-                                      }
+                                        }
+                                      });
                                     }
                                   },
                                 ),
