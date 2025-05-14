@@ -24,29 +24,39 @@ class AuthCubit extends Cubit<AuthState> {
       log('Response status: ${response.statusCode}');
       log('Response data: ${response.data}');
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
         var data = response.data;
         if (data is Map<String, dynamic>) {
           String? token;
           
           // استخراج التوكين من الاستجابة
           if (data.containsKey('token')) {
+            // ده هستعمله في الابلكين كلو
             token = data['token'];
+            log('---------------------------------');
+            print(token);
+            final prefs = await SharedPreferences.getInstance();
+            await prefs.setString('auth_token', token!);
+            print(prefs.getString('auth_token'));
+
           } else if (data.containsKey('access_token')) {
-            token = data['access_token'];
-          } else if (data.containsKey('data') && data['data'] is Map<String, dynamic>) {
-            if (data['data'].containsKey('token')) {
-              token = data['data']['token'];
-            } else if (data['data'].containsKey('access_token')) {
-              token = data['data']['access_token'];
-            }
+            // token = data['access_token'];
+          // } else if (data.containsKey('data') && data['data'] is Map<String, dynamic>) {
+          //   if (data['data'].containsKey('token')) {
+          //     token = data['data']['token'];
+          //   } else if (data['data'].containsKey('access_token')) {
+          //     // token = data['data']['access_token'];
+          //   }
           }
 
           if (token != null) {
             // تخزين التوكين
             final prefs = await SharedPreferences.getInstance();
             await prefs.setString('auth_token', token);
-            print(prefs.getString('auth_token'));
+            log('---------------------------------');
+
+            // تخزين البريد الإلكتروني في الكاش لاستخدامه لاحقاً
+            await prefs.setString('email', email);
 
             // تخزين خيار "تذكرني"
             if (rememberMe) {
@@ -56,6 +66,7 @@ class AuthCubit extends Cubit<AuthState> {
               await prefs.setBool('remember_me', false);
               await prefs.remove('saved_email');
             }
+
 
             // إضافة التوكين إلى DioHelper للاستخدام في الطلبات اللاحقة
             DioHelper.setToken(token);

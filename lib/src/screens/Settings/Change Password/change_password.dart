@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:dio/dio.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../style/BaseScreen.dart';
 import '../../../../style/Colors.dart';
 import '../../../../style/Fonts.dart';
@@ -20,6 +21,22 @@ class _ChangePasswordState extends State<ChangePassword> {
   bool _obscureNewPassword = true;
   bool _obscureConfirmPassword = true;
   String? _passwordError;
+
+  @override
+  void dispose() {
+    _oldPasswordController.dispose();
+    _newPasswordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
+  }
+
+  void _clearError() {
+    if (_passwordError != null) {
+      setState(() {
+        _passwordError = null;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,21 +67,42 @@ class _ChangePasswordState extends State<ChangePassword> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         SizedBox(height: 16),
-                        _buildPasswordField("كلمة المرور القديمة", _oldPasswordController, _obscureOldPassword, "كلمة المرور القديمة", () {
-                          setState(() {
-                            _obscureOldPassword = !_obscureOldPassword;
-                          });
-                        }),
-                        _buildPasswordField("كلمة المرور الجديدة", _newPasswordController, _obscureNewPassword, "كلمة المرور الجديدة", () {
-                          setState(() {
-                            _obscureNewPassword = !_obscureNewPassword;
-                          });
-                        }),
-                        _buildPasswordField("تأكيد كلمة المرور الجديدة", _confirmPasswordController, _obscureConfirmPassword, "تأكيد كلمة المرور الجديدة", () {
-                          setState(() {
-                            _obscureConfirmPassword = !_obscureConfirmPassword;
-                          });
-                        }),
+                        _buildPasswordField(
+                          "كلمة المرور القديمة",
+                          _oldPasswordController,
+                          _obscureOldPassword,
+                          "كلمة المرور القديمة",
+                              () {
+                            setState(() {
+                              _obscureOldPassword = !_obscureOldPassword;
+                            });
+                          },
+                          onChanged: (_) => _clearError(),
+                        ),
+                        _buildPasswordField(
+                          "كلمة المرور الجديدة",
+                          _newPasswordController,
+                          _obscureNewPassword,
+                          "كلمة المرور الجديدة",
+                              () {
+                            setState(() {
+                              _obscureNewPassword = !_obscureNewPassword;
+                            });
+                          },
+                          onChanged: (_) => _clearError(),
+                        ),
+                        _buildPasswordField(
+                          "تأكيد كلمة المرور الجديدة",
+                          _confirmPasswordController,
+                          _obscureConfirmPassword,
+                          "تأكيد كلمة المرور الجديدة",
+                              () {
+                            setState(() {
+                              _obscureConfirmPassword = !_obscureConfirmPassword;
+                            });
+                          },
+                          onChanged: (_) => _clearError(),
+                        ),
 
                         if (_passwordError != null)
                           Padding(
@@ -85,20 +123,13 @@ class _ChangePasswordState extends State<ChangePassword> {
                           onPressed: state is ChangePasswordLoading
                               ? () {}
                               : () {
-                                  if (_oldPasswordController.text.isEmpty ||
-                                      _newPasswordController.text.isEmpty ||
-                                      _confirmPasswordController.text.isEmpty) {
-                                    setState(() {
-                                      _passwordError = "يجب إدخال جميع الحقول المطلوبة";
-                                    });
-                                  } else {
-                                    context.read<ChangePasswordCubit>().changePassword(
-                                          oldPassword: _oldPasswordController.text,
-                                          newPassword: _newPasswordController.text,
-                                          confirmPassword: _confirmPasswordController.text,
-                                        );
-                                  }
-                                },
+                            FocusScope.of(context).unfocus(); // Hide keyboard
+                            context.read<ChangePasswordCubit>().changePassword(
+                              oldPassword: _oldPasswordController.text,
+                              newPassword: _newPasswordController.text,
+                              confirmPassword: _confirmPasswordController.text,
+                            );
+                          },
                         ),
                       ],
                     ),
@@ -123,7 +154,7 @@ class _ChangePasswordState extends State<ChangePassword> {
         ),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.end, // ✅ زر الرجوع والعنوان على اليمين كما هو
+        mainAxisAlignment: MainAxisAlignment.end, // زر الرجوع والعنوان على اليمين
         children: [
           Text(
             "تغيير كلمة المرور",
@@ -142,7 +173,7 @@ class _ChangePasswordState extends State<ChangePassword> {
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(Icons.arrow_forward, color: AppColors.primary500), // ✅ السهم على اليمين كما هو
+              child: Icon(Icons.arrow_forward, color: AppColors.primary500), // السهم على اليمين
             ),
           ),
         ],
@@ -150,9 +181,16 @@ class _ChangePasswordState extends State<ChangePassword> {
     );
   }
 
-  Widget _buildPasswordField(String label, TextEditingController controller, bool obscureText, String hint, VoidCallback toggleVisibility) {
+  Widget _buildPasswordField(
+      String label,
+      TextEditingController controller,
+      bool obscureText,
+      String hint,
+      VoidCallback toggleVisibility,
+      {Function(String)? onChanged}
+      ) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.end, // ✅ جعل العنوان على اليمين كما هو
+      crossAxisAlignment: CrossAxisAlignment.end, // جعل العنوان على اليمين
       children: [
         Text(label, style: AppTexts.contentRegular),
         SizedBox(height: 8),
@@ -160,6 +198,7 @@ class _ChangePasswordState extends State<ChangePassword> {
           controller: controller,
           textAlign: TextAlign.right,
           obscureText: obscureText,
+          onChanged: onChanged,
           decoration: InputDecoration(
             hintText: hint,
             hintStyle: AppTexts.contentRegular,
@@ -169,7 +208,7 @@ class _ChangePasswordState extends State<ChangePassword> {
             ),
             filled: true,
             fillColor: Colors.white,
-            prefixIcon: GestureDetector( // ✅ العين على اليسار كما هو
+            prefixIcon: GestureDetector( // العين على اليسار
               onTap: toggleVisibility,
               child: Icon(
                 obscureText ? Icons.visibility_off : Icons.visibility,

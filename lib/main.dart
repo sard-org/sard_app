@@ -31,7 +31,7 @@ class MyApp extends StatelessWidget {
         ],
         child: MaterialApp(
           debugShowCheckedModeBanner: false,
-          home: ForgotPasswordScreen(), //  البداية من شاشة الـ .
+          home:  SplashScreen(), //  البداية من شاشة الـ .
         ));
   }
 }
