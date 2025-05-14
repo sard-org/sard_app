@@ -49,9 +49,9 @@ class ChangePasswordCubit extends Cubit<ChangePasswordState> {
       }
 
       // تحضير البيانات للإرسال - لن نرسل البريد الإلكتروني
-      final Map<String, dynamic> requestData = {
-        'oldPassword': oldPassword,
-        'newPassword': newPassword,
+      final Map<String, String> requestData = {
+        'old_password': oldPassword,
+        'new_password': newPassword,
       };
 
       final response = await _dio.patch(
