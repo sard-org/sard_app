@@ -78,7 +78,7 @@ class DioClient {
   // التحقق من رمز OTP المرسل إلى البريد الإلكتروني
   Future<Response> validateEmailOtp({
     required String email,
-    required String otp,
+    required String code,
   }) async {
     try {
       // التأكد من عدم إرسال email فارغ أبدًا
@@ -90,7 +90,7 @@ class DioClient {
         '/api/auth/validate-email-otp',
         data: {
           'email': email,
-          'otp': otp,
+          'code': code,
         },
       );
       return response;

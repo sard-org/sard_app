@@ -38,6 +38,12 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
         }
       });
     }
+
+    // Send OTP when screen is first opened
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final registerCubit = BlocProvider.of<RegisterCubit>(context);
+      registerCubit.sendOtp(email: widget.email);
+    });
   }
 
   String _formatTime(int seconds) {
@@ -74,18 +80,31 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
     return BlocProvider(
       create: (context) {
         final cubit = RegisterCubit();
-        // إرسال رمز التحقق عند فتح الصفحة
-        cubit.sendOtp(email: widget.email);
+        // Remove automatic OTP send on screen creation
         return cubit;
       },
       child: BlocConsumer<RegisterCubit, RegisterStates>(
         listener: (context, state) {
           if (state is OtpVerificationSuccessState) {
-            // التنقل إلى الصفحة الرئيسية بعد التحقق من الرمز بنجاح
+            // إظهار رسالة النجاح
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                backgroundColor: AppColors.green100,
+                content: Directionality(
+                  textDirection: TextDirection.rtl,
+                  child: Text(
+                    state.message,
+                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                duration: const Duration(seconds: 2),
+              ),
+            );
+            // التنقل إلى صفحة تسجيل الدخول بعد التحقق من الرمز بنجاح
             Navigator.pushAndRemoveUntil(
               context,
-              MaterialPageRoute(builder: (context) => MainScreen()),
-                  (route) => false,
+              MaterialPageRoute(builder: (context) => LoginScreen()),
+              (route) => false,
             );
           } else if (state is OtpVerificationErrorState) {
             setState(() {

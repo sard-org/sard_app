@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:sard/src/screens/auth/Craete%20Account/registration/logic/register_state.dart';
+import 'package:sard/src/screens/auth/Create%20Account/registration/logic/register_state.dart';
 import '../../otp/data/dio_otp_helper.dart';
 
 class RegisterCubit extends Cubit<RegisterStates> {
@@ -15,6 +15,7 @@ class RegisterCubit extends Cubit<RegisterStates> {
   // تعديل مدة المؤقت إلى 10 دقائق (600 ثانية)
   int _secondsRemaining = 600;
   int _otpAttempts = 0; // عدد محاولات إدخال الرمز
+  bool _isSendingOtp = false;
 
   // الحصول على قيمة البريد الإلكتروني المسجل
   String get registeredEmail => _registeredEmail;
@@ -54,9 +55,6 @@ class RegisterCubit extends Cubit<RegisterStates> {
           message: response.data['message'] ?? 'تم التسجيل بنجاح',
           email: email,
         ));
-
-        // إرسال رمز التحقق مباشرة بعد التسجيل
-        sendOtp(email: email);
       } else {
         emit(RegisterErrorState(error: response.data['message'] ?? 'حدث خطأ أثناء التسجيل'));
       }
@@ -75,16 +73,17 @@ class RegisterCubit extends Cubit<RegisterStates> {
 
   // دالة إرسال رمز التحقق OTP
   Future<void> sendOtp({required String email}) async {
+    if (_isSendingOtp) return; // حماية من التكرار
+    _isSendingOtp = true;
+
     emit(OtpSendingState());
 
     try {
-      // حفظ البريد الإلكتروني في المتغير للاستخدام لاحقًا
       _registeredEmail = email;
-
       final response = await _dioClient.validateEmail(email: email);
 
       if (response.statusCode == 200) {
-        _otpAttempts = 0; // إعادة تعيين عدد المحاولات عند إرسال رمز جديد
+        _otpAttempts = 0;
         emit(OtpSentSuccessState(
           message: response.data['message'] ?? 'تم إرسال رمز التحقق بنجاح',
         ));
@@ -94,15 +93,14 @@ class RegisterCubit extends Cubit<RegisterStates> {
       }
     } on DioException catch (e) {
       String errorMsg = 'فشل في إرسال رمز التحقق';
-
       if (e.response != null) {
         errorMsg = e.response?.data['message'] ?? errorMsg;
       }
-
       emit(OtpSendErrorState(error: errorMsg));
     } catch (e) {
       emit(OtpSendErrorState(error: 'حدث خطأ غير متوقع، الرجاء المحاولة مرة أخرى'));
     }
+    _isSendingOtp = false;
   }
 
   // دالة التحقق من رمز OTP
@@ -124,7 +122,7 @@ class RegisterCubit extends Cubit<RegisterStates> {
     try {
       final response = await _dioClient.validateEmailOtp(
         email: _registeredEmail,
-        otp: otp,
+        code: otp,
       );
 
       if (response.statusCode == 200) {
