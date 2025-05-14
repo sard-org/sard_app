@@ -143,11 +143,12 @@ class _OtpVerificationCodeScreenState extends State<OtpVerificationCodeScreen> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: List.generate(4, (index) {
+                              int rtlIndex = 3 - index;
                               return SizedBox(
                                 width: 60,
                                 child: TextField(
-                                  controller: _controllers[index],
-                                  focusNode: _focusNodes[index],
+                                  controller: _controllers[rtlIndex],
+                                  focusNode: _focusNodes[rtlIndex],
                                   textAlign: TextAlign.center,
                                   textDirection: TextDirection.rtl,
                                   keyboardType: TextInputType.number,
@@ -155,7 +156,7 @@ class _OtpVerificationCodeScreenState extends State<OtpVerificationCodeScreen> {
                                   style: TextStyle(
                                     fontSize: 24,
                                     fontWeight: FontWeight.bold,
-                                    color: _controllers[index].text.isNotEmpty
+                                    color: _controllers[rtlIndex].text.isNotEmpty
                                         ? AppColors.primary800
                                         : Colors.black,
                                   ),
@@ -173,10 +174,10 @@ class _OtpVerificationCodeScreenState extends State<OtpVerificationCodeScreen> {
                                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                                   onChanged: (value) {
                                     setState(() {});
-                                    if (value.isNotEmpty && index < 3) {
-                                      _focusNodes[index + 1].requestFocus();
-                                    } else if (value.isEmpty && index > 0) {
-                                      _focusNodes[index - 1].requestFocus();
+                                    if (value.isNotEmpty && rtlIndex < 3) {
+                                      _focusNodes[rtlIndex + 1].requestFocus();
+                                    } else if (value.isEmpty && rtlIndex > 0) {
+                                      _focusNodes[rtlIndex - 1].requestFocus();
                                     }
                                   },
                                 ),

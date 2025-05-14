@@ -20,9 +20,8 @@ class PasswordResetApiService {
         data: {'email': email},
       );
 
-      // Check if the response contains success message or status
-      if (response.statusCode == 200) {
-        // If the API returns a success message in the response data
+      // Consider any 2xx status code as success
+      if (response.statusCode != null && response.statusCode! >= 200 && response.statusCode! < 300) {
         if (response.data is Map<String, dynamic>) {
           return response.data['success'] == true || response.data['status'] == 'success';
         }
@@ -46,7 +45,14 @@ class PasswordResetApiService {
         },
       );
 
-      return response.statusCode == 200;
+      // Consider any 2xx status code as success
+      if (response.statusCode != null && response.statusCode! >= 200 && response.statusCode! < 300) {
+        if (response.data is Map<String, dynamic>) {
+          return response.data['success'] == true || response.data['status'] == 'success';
+        }
+        return true;
+      }
+      return false;
     } catch (e) {
       _handleError(e);
       return false;
