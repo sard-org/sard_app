@@ -24,6 +24,18 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   String? _emailError;
   String selectedGender = "ذكر";
   XFile? _pickedImage;
+  String? _lastUserName;
+  String? _lastPhoneNumber;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      try {
+        BlocProvider.of<ProfileCubit>(context).getUserProfile();
+      } catch (_) {}
+    });
+  }
 
   @override
   void dispose() {
@@ -35,56 +47,30 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    try {
-      BlocProvider.of<ProfileCubit>(context);
-      // إذا لم يحصل خطأ، يوجد BlocProvider بالفعل
-      return _buildContent(context);
-    } catch (_) {
-      // إذا لم يوجد BlocProvider، نهيئه تلقائيًا
-      return FutureBuilder<ProfileCubit>(
-        future: _initProfileCubit(),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return Scaffold(
-              backgroundColor: Colors.white,
-              body: Center(child: CircularProgressIndicator()),
-            );
-          }
-          return BlocProvider<ProfileCubit>.value(
-            value: snapshot.data!,
-            child: _buildContent(context),
-          );
-        },
-      );
-    }
-  }
-
-  Future<ProfileCubit> _initProfileCubit() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('auth_token');
-    if (token == null) throw Exception('No auth token found');
-    final profileService = ProfileApiService.init(token);
-    return ProfileCubit(profileService);
-  }
-
-  Widget _buildContent(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       body: BlocListener<ProfileCubit, ProfileState>(
         listener: (context, state) {
+          if (state is ProfileLoaded || state is ProfileUpdateSuccess) {
+            final user = state is ProfileLoaded ? state.user : (state as ProfileUpdateSuccess).user;
+            if (_lastUserName != user.name || _lastPhoneNumber != user.phone || selectedGender != (user.gender == 'male' ? 'ذكر' : 'أنثى')) {
+              _emailController.text = user.email;
+              _nameController.text = user.name;
+              _phoneController.text = user.phone ?? '';
+              selectedGender = user.gender == 'male' ? 'ذكر' : 'أنثى';
+              _lastUserName = user.name;
+              _lastPhoneNumber = user.phone;
+              setState(() {});
+            }
+          }
           if (state is ProfileUpdateSuccess) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('تم تحديث البيانات بنجاح!')),
+              SnackBar(content: Text('تم تحديث البيانات بنجاح')),
             );
           }
         },
         child: BlocBuilder<ProfileCubit, ProfileState>(
           builder: (context, state) {
-            if (state is ProfileLoaded || state is ProfileUpdateSuccess) {
-              final user = state is ProfileLoaded ? state.user : (state as ProfileUpdateSuccess).user;
-              if (_emailController.text != user.email) _emailController.text = user.email;
-              if (_nameController.text != user.name) _nameController.text = user.name;
-            }
             return Column(
               children: [
                 _buildAppBar(context),
@@ -188,7 +174,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                 selectedGender = value!;
                               });
                             }),
-                            _buildTextField("تاريخ الميلاد", "اختر تاريخ الميلاد", icon: Icons.calendar_today),
                             SizedBox(height: 24),
                             if (state is ProfileUpdateLoading)
                               Center(child: CircularProgressIndicator()),

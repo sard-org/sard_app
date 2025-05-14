@@ -3,12 +3,16 @@ class UserModel {
   final String name;
   final String email;
   final String? imageUrl;
+  final String? phone;
+  final String? gender;
 
   UserModel({
     required this.id,
     required this.name,
     required this.email,
     this.imageUrl,
+    this.phone,
+    this.gender,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -17,6 +21,8 @@ class UserModel {
       name: json['name'] ?? '',
       email: json['email'] ?? '',
       imageUrl: json['photo'],
+      phone: json['phone'],
+      gender: json['gender'],
     );
   }
 
@@ -26,6 +32,8 @@ class UserModel {
       'name': name,
       'email': email,
       'photo': imageUrl,
+      'phone': phone,
+      'gender': gender,
     };
   }
 } 
