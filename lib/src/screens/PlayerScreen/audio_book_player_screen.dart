@@ -3,12 +3,12 @@ import '../../../style/BaseScreen.dart';
 import '../../../style/Colors.dart';
 import '../../../style/Fonts.dart';
 
-class AudioBookPlayerScreen extends StatefulWidget {
+class AudioBookPlayer extends StatefulWidget {
   @override
-  _AudioBookPlayerScreenState createState() => _AudioBookPlayerScreenState();
+  _AudioBookPlayerState createState() => _AudioBookPlayerState();
 }
 
-class _AudioBookPlayerScreenState extends State<AudioBookPlayerScreen> {
+class _AudioBookPlayerState extends State<AudioBookPlayer> {
   double _sliderValue = 0.25; // For demonstration purposes
   bool _isPlaying = false;
 
