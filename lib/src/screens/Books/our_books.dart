@@ -8,6 +8,7 @@ import 'package:sard/style/BaseScreen.dart';
 import 'package:sard/src/screens/Books/book_model.dart';
 
 import '../AudioBook/audio_book.dart';
+import '../PlayerScreen/audio_book_player_screen.dart';
 import 'logic/books_cubit.dart';
 import 'logic/books_state.dart';
 
@@ -54,7 +55,7 @@ class BookListScreen extends StatelessWidget {
                                 onTap: () => Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => SplashScreen(),
+                                    builder: (context) => AudioBookPlayer(),
                                   ),
                                 ),
                               );
