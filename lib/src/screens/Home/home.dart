@@ -6,6 +6,8 @@ import '../../../style/Fonts.dart';
 import '../Home/Logic/home_cubit.dart';
 import '../Home/Logic/home_state.dart';
 import '../Home/Data/home_model.dart';
+import '../Home/Withoutcategories/WithoutCategoryDetailsPage.dart';
+import '../Home/categories/CategoryDetailsPage.dart';
 
 class CategoryItem extends StatelessWidget {
   final Map<String, dynamic> category;
@@ -61,15 +63,14 @@ class CategorySection extends StatefulWidget {
 
 class _CategorySectionState extends State<CategorySection> {
   final List<Map<String, dynamic>> categories = [
-    {'label': 'فانتازيا', 'icon': Icons.auto_awesome},
-    {'label': 'دراما', 'icon': Icons.theater_comedy},
-    {'label': 'تحقيق', 'icon': Icons.person_search},
-    {'label': 'رعب', 'icon': Icons.nightlight_round},
-    {'label': 'تاريخي', 'icon': Icons.account_balance},
+    {'id': 1, 'label': 'فانتازيا', 'icon': Icons.auto_awesome},
+    {'id': 2, 'label': 'دراما', 'icon': Icons.theater_comedy},
+    {'id': 3, 'label': 'تحقيق', 'icon': Icons.person_search},
+    {'id': 4, 'label': 'رعب', 'icon': Icons.nightlight_round},
+    {'id': 5, 'label': 'تاريخي', 'icon': Icons.account_balance},
   ];
 
   int selectedIndex = -1;
-  String displayText = 'كتاب 321';
 
   @override
   Widget build(BuildContext context) {
@@ -88,10 +89,8 @@ class _CategorySectionState extends State<CategorySection> {
                     setState(() {
                       if (selectedIndex == index) {
                         selectedIndex = -1;
-                        displayText = 'كتاب 321';
                       } else {
                         selectedIndex = index;
-                        displayText = '1';
                       }
                     });
                   },
@@ -127,16 +126,10 @@ class _CategorySectionState extends State<CategorySection> {
             }),
           ),
         ),
-        const SizedBox(height: 24),
-        Center(
-          child: Text(
-            displayText,
-            style: AppTexts.heading1Bold.copyWith(
-              fontSize: 24,
-              color: AppColors.neutral900,
-            ),
-          ),
-        ),
+        if (selectedIndex == -1)
+          WithoutCategoryDetailsPage()
+        else
+          CategoryDetailsPage(id: categories[selectedIndex]['id'] as int),
       ],
     );
   }
@@ -269,7 +262,11 @@ class HomeScreen extends StatelessWidget {
                       style: AppTexts.contentEmphasis.copyWith(color: AppColors.neutral1000),
                     ),
                     const SizedBox(height: 12),
-                    CategorySection(),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        child: CategorySection(),
+                      ),
+                    ),
                   ],
                 );
               } else if (state is HomeError) {
