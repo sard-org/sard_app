@@ -1,112 +1,115 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:dio/dio.dart';
+import 'data/dio_Fav.dart';
+import 'logic/favorite_cubit.dart';
+import 'logic/favorite_state.dart';
 import 'package:sard/style/Colors.dart';
 import 'package:sard/style/Fonts.dart';
 import 'package:sard/style/BaseScreen.dart';
 
-void main() {
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Directionality(
-        textDirection: TextDirection.rtl,
-        child: FavoritesScreen(),
-      ),
-    );
-  }
-}
-
 class FavoritesScreen extends StatefulWidget {
+  const FavoritesScreen({super.key});
+
   @override
-  _FavoritesScreenState createState() => _FavoritesScreenState();
+  State<FavoritesScreen> createState() => _FavoritesScreenState();
 }
 
 class _FavoritesScreenState extends State<FavoritesScreen> {
-  List<Map<String, String>> books = [
-    {
-      "author": "د.احمد حسين الرفاعي",
-      "title": "كيف تكون إنسانا قويا قياديا رائعا محبوبا",
-      "description": "انشغلنا نحن العرب بقوة وعظمة الدول المتطورة تكنولوجيا وعلميا واقتصاديا،وضخامتها وعظمة تكنولوجياتها!ليس من منطلق السعي للوصول إلى ما وصلت إليه،",
-      "price": "45",
-      "currency": "ريال",
-      "imageUrl": "assets/img/Book_1.png"
-    },
-    {
-      "author": "د.محمد علي",
-      "title": "فن القيادة والتأثير في الآخرين",
-      "description": "تعلم كيفية التأثير على الآخرين وبناء شخصية قيادية قوية في مختلف المجالات.",
-      "price": "50",
-      "currency": "ريال",
-      "imageUrl": "assets/img/Book_1.png"
-    },
-  ];
+  late FavoriteCubit cubit;
 
-  void toggleFavorite(int index) {
-    setState(() {
-      books.removeAt(index);
-    });
+  @override
+  void initState() {
+    super.initState();
+    initCubit();
+  }
+
+  Future<void> initCubit() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('auth_token') ?? ''; // التوكين الصحيح
+    cubit = FavoriteCubit(
+      dioFav: DioFav(Dio()..options.baseUrl = 'https://api.mohamed-ramadan.me/api/'),
+      token: token,
+    );
+    cubit.getFavorites();
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          BaseScreen(
-            child: Column(
-              children: [
-                SizedBox(height: 80), // تجنب تداخل المحتوى مع الـ AppBar
-                Expanded(
-                  child: books.isEmpty
-                      ? _buildEmptyFavorites() // عرض رسالة فارغة إذا لم يكن هناك كتب
-                      : ListView.builder(
-                    itemCount: books.length,
-                    itemBuilder: (context, index) {
-                      final book = books[index];
-                      return BookItem(
-                        author: book["author"]!,
-                        title: book["title"]!,
-                        description: book["description"]!,
-                        price: book["price"]!,
-                        currency: book["currency"]!,
-                        imageUrl: book["imageUrl"]!,
-                        onFavoritePressed: () => toggleFavorite(index),
-                      );
-                    },
+    if (!this.mounted || cubit == null) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    return BlocProvider.value(
+      value: cubit,
+      child: Scaffold(
+        body: Stack(
+          children: [
+            BaseScreen(
+              child: Column(
+                children: [
+                  const SizedBox(height: 80),
+                  Expanded(
+                    child: BlocBuilder<FavoriteCubit, FavoriteState>(
+                      builder: (context, state) {
+                        if (state is FavoriteLoadingState) {
+                          return const Center(child: CircularProgressIndicator());
+                        } else if (state is FavoriteErrorState) {
+                          return Center(child: Text('حدث خطأ: ${state.message}'));
+                        } else if (state is FavoriteSuccessState) {
+                          final books = state.favorites;
+                          if (books.isEmpty) return _buildEmptyFavorites();
+
+                          return ListView.builder(
+                            itemCount: books.length,
+                            itemBuilder: (context, index) {
+                              final book = books[index];
+                              return BookItem(
+                                author: book["Author"]?["name"] ?? 'مؤلف غير معروف',
+                                title: book["title"] ?? 'عنوان غير معروف',
+                                description: book["description"] ?? '',
+                                price: "—",
+                                currency: "",
+                                imageUrl: book["cover"] ?? 'assets/img/Book_1.png',
+                                onFavoritePressed: () => cubit.removeFavorite(book['id']),
+                              );
+                            },
+                          );
+                        } else {
+                          return const SizedBox.shrink();
+                        }
+                      },
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ),
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: Container(
-              padding: EdgeInsets.symmetric(vertical: 32, horizontal: 16),
-              decoration: BoxDecoration(
-                color: AppColors.primary500,
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(12),
-                  bottomRight: Radius.circular(12),
-                ),
-              ),
-              child: Center(
-                child: Text(
-                  "المفضلات",
-                  style: AppTexts.heading2Bold.copyWith(
-                    color: AppColors.neutral100,
-                  ),
-                ),
+                ],
               ),
             ),
-          ),
-        ],
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
+                decoration: BoxDecoration(
+                  color: AppColors.primary500,
+                  borderRadius: const BorderRadius.only(
+                    bottomLeft: Radius.circular(12),
+                    bottomRight: Radius.circular(12),
+                  ),
+                ),
+                child: Center(
+                  child: Text(
+                    "المفضلات",
+                    style: AppTexts.heading2Bold.copyWith(color: AppColors.neutral100),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -116,27 +119,20 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          kIsWeb
-              ? Image.network(
-            "assets/img/fav_embty.png",
-            width: 300,
-            height: 300,
-          )
-              : Image.asset(
+          Image.asset(
             "assets/img/fav_embty.png",
             width: 300,
             height: 300,
           ),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
           Text(
             "القائمة فارغة",
             style: AppTexts.heading3Bold.copyWith(color: AppColors.neutral800),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(
             "أضف بعض الكتب إلى المفضلة لتظهر هنا",
-            style:
-            AppTexts.contentRegular.copyWith(color: AppColors.neutral500),
+            style: AppTexts.contentRegular.copyWith(color: AppColors.neutral500),
             textAlign: TextAlign.center,
           ),
         ],
@@ -174,18 +170,13 @@ class _BookItemState extends State<BookItem> {
 
   void toggleFavorite() {
     setState(() {
-      isFavorite = !isFavorite;
-      size = 1.2; // تكبير الحجم مؤقتًا
+      isFavorite = false;
+      size = 1.2;
     });
 
-    Future.delayed(Duration(milliseconds: 200), () {
-      setState(() {
-        size = 1.0; // إعادة الحجم الطبيعي
-      });
-
-      if (!isFavorite) {
-        widget.onFavoritePressed(); // إزالة العنصر من القائمة
-      }
+    Future.delayed(const Duration(milliseconds: 200), () {
+      setState(() => size = 1.0);
+      widget.onFavoritePressed();
     });
   }
 
@@ -194,71 +185,61 @@ class _BookItemState extends State<BookItem> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: AnimatedContainer(
-        duration: Duration(milliseconds: 200),
+        duration: const Duration(milliseconds: 200),
         transform: Matrix4.identity()..scale(size),
-        margin: EdgeInsets.only(bottom: 12),
+        margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(12),
         decoration: ShapeDecoration(
-          color: Color(0xFFFCFEF5),
+          color: const Color(0xFFFCFEF5),
           shape: RoundedRectangleBorder(
-            side: BorderSide(width: 0.50, color: AppColors.primary900),
+            side: const BorderSide(width: 0.50, color: AppColors.primary900),
             borderRadius: BorderRadius.circular(8),
           ),
         ),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Container(
               width: 93,
               height: 125,
               decoration: ShapeDecoration(
                 image: DecorationImage(
-                  image: AssetImage(widget.imageUrl),
+                  image: NetworkImage(widget.imageUrl),
                   fit: BoxFit.fill,
                 ),
                 shape: RoundedRectangleBorder(
-                  side: BorderSide(width: 2, color: Color(0xFF2B2B2B)),
+                  side: const BorderSide(width: 2, color: Color(0xFF2B2B2B)),
                   borderRadius: BorderRadius.circular(4),
                 ),
               ),
             ),
-            SizedBox(width: 12),
+            const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(widget.author,
-                      textAlign: TextAlign.start,
-                      style: AppTexts.captionRegular
-                          .copyWith(color: AppColors.neutral400)),
-                  SizedBox(height: 8),
+                      style: AppTexts.captionRegular.copyWith(color: AppColors.neutral400)),
+                  const SizedBox(height: 8),
                   Text(widget.title,
-                      textAlign: TextAlign.start,
-                      style: AppTexts.highlightStandard
-                          .copyWith(color: AppColors.neutral1000)),
-                  SizedBox(height: 8),
+                      style: AppTexts.highlightStandard.copyWith(color: AppColors.neutral1000)),
+                  const SizedBox(height: 8),
                   Text(
                     widget.description,
-                    textAlign: TextAlign.start,
-                    style: AppTexts.contentRegular
-                        .copyWith(color: AppColors.neutral400),
+                    style: AppTexts.contentRegular.copyWith(color: AppColors.neutral400),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   Row(
                     children: [
                       Text(
                         widget.price,
-                        style: AppTexts.highlightAccent
-                            .copyWith(color: AppColors.primary1000),
+                        style: AppTexts.highlightAccent.copyWith(color: AppColors.primary1000),
                       ),
-                      SizedBox(width: 2),
+                      const SizedBox(width: 2),
                       Text(
                         widget.currency,
-                        style: AppTexts.footnoteRegular11
-                            .copyWith(color: AppColors.primary1000),
+                        style: AppTexts.footnoteRegular11.copyWith(color: AppColors.primary1000),
                       ),
                     ],
                   ),
@@ -266,10 +247,7 @@ class _BookItemState extends State<BookItem> {
               ),
             ),
             IconButton(
-              icon: Icon(
-                isFavorite ? Icons.favorite : Icons.favorite_border,
-                color: isFavorite ? Colors.red : AppColors.primary900,
-              ),
+              icon: Icon(Icons.favorite, color: isFavorite ? Colors.red : AppColors.primary900),
               onPressed: toggleFavorite,
             ),
           ],
