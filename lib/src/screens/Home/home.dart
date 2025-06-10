@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:dio/dio.dart';
 import '../../../style/BaseScreen.dart';
 import '../../../style/Colors.dart';
 import '../../../style/Fonts.dart';
@@ -8,6 +9,9 @@ import '../Home/Logic/home_state.dart';
 import '../Home/Data/home_model.dart';
 import '../Home/Withoutcategories/WithoutCategoryDetailsPage.dart';
 import '../Home/categories/CategoryDetailsPage.dart';
+import '../Home/categories/Logic/categories_cubit.dart';
+import '../Home/categories/Logic/categories_state.dart';
+import '../Home/categories/Data/categories_dio.dart';
 
 class CategoryItem extends StatelessWidget {
   final Map<String, dynamic> category;
@@ -62,84 +66,121 @@ class CategorySection extends StatefulWidget {
 }
 
 class _CategorySectionState extends State<CategorySection> {
-  final List<Map<String, dynamic>> categories = [
-    {'id': 1, 'label': 'فانتازيا', 'icon': Icons.auto_awesome},
-    {'id': 2, 'label': 'دراما', 'icon': Icons.theater_comedy},
-    {'id': 3, 'label': 'تحقيق', 'icon': Icons.person_search},
-    {'id': 4, 'label': 'رعب', 'icon': Icons.nightlight_round},
-    {'id': 5, 'label': 'تاريخي', 'icon': Icons.account_balance},
-  ];
-
   int selectedIndex = -1;
 
   @override
+  void initState() {
+    super.initState();
+    context.read<CategoriesCubit>().getCategories();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        const SizedBox(height: 12),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: List.generate(categories.length, (index) {
-              final isSelected = selectedIndex == index;
-              return Padding(
-                padding: EdgeInsets.only(right: index == 0 ? 0 : 8),
-                child: InkWell(
-                  onTap: () {
-                    setState(() {
-                      if (selectedIndex == index) {
-                        selectedIndex = -1;
-                      } else {
-                        selectedIndex = index;
-                      }
-                    });
-                  },
-                  child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: isSelected ? AppColors.primary100 : Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: isSelected ? AppColors.primary600 : AppColors.neutral300,
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          categories[index]['icon'] as IconData,
-                          size: 16,
-                          color: isSelected ? AppColors.primary600 : AppColors.neutral700,
-                        ),
-                        SizedBox(width: 4),
-                        Text(
-                          categories[index]['label'] as String,
-                          style: AppTexts.contentRegular.copyWith(
-                            color: isSelected ? AppColors.primary600 : AppColors.neutral700,
+    return BlocBuilder<CategoriesCubit, CategoriesState>(
+      builder: (context, state) {
+        if (state is CategoriesLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (state is CategoriesLoaded) {
+          final categories = state.categories;
+
+          return Column(
+            children: [
+              const SizedBox(height: 12),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: List.generate(categories.length, (index) {
+                    final category = categories[index];
+                    final isSelected = selectedIndex == index;
+                    return Padding(
+                      padding: EdgeInsets.only(right: index == 0 ? 0 : 8),
+                      child: InkWell(
+                        onTap: () {
+                          setState(() {
+                            if (selectedIndex == index) {
+                              selectedIndex = -1;
+                            } else {
+                              selectedIndex = index;
+                            }
+                          });
+                        },
+                        child: Container(
+                          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: isSelected ? AppColors.primary100 : Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: isSelected ? AppColors.primary600 : AppColors.neutral300,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: Image.network(
+                                  category.photo,
+                                  width: 24,
+                                  height: 24,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Icon(
+                                      Icons.category,
+                                      size: 24,
+                                      color: isSelected ? AppColors.primary600 : AppColors.neutral700,
+                                    );
+                                  },
+                                ),
+                              ),
+                              SizedBox(width: 4),
+                              Text(
+                                category.name,
+                                style: AppTexts.contentRegular.copyWith(
+                                  color: isSelected ? AppColors.primary600 : AppColors.neutral700,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                      ],
-                    ),
-                  ),
+                      ),
+                    );
+                  }),
                 ),
-              );
-            }),
-          ),
-        ),
-        if (selectedIndex == -1)
-          WithoutCategoryDetailsPage()
-        else
-          CategoryDetailsPage(id: categories[selectedIndex]['id'] as int),
-      ],
+              ),
+              if (selectedIndex == -1)
+                WithoutCategoryDetailsPage()
+              else
+                CategoryDetailsPage(id: categories[selectedIndex].id),
+            ],
+          );
+        }
+
+        if (state is CategoriesError) {
+          return Center(child: Text('Error: ${state.message}'));
+        }
+
+        return const SizedBox();
+      },
     );
   }
 }
 
 class HomeScreen extends StatelessWidget {
+  final dio = Dio()..options.baseUrl = 'https://api.mohamed-ramadan.me/api/';
+  
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => HomeCubit()..getUserData(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (_) => HomeCubit()..getUserData()),
+        BlocProvider(
+          create: (_) => CategoriesCubit(
+            CategoriesService(dio),
+          ),
+        ),
+      ],
       child: Directionality(
         textDirection: TextDirection.rtl,
         child: BaseScreen(

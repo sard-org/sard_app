@@ -1,19 +1,42 @@
+import 'package:equatable/equatable.dart';
 import '../Data/categories_model.dart';
 
-abstract class CategoriesState {}
+abstract class CategoriesState extends Equatable {
+  const CategoriesState();
+
+  @override
+  List<Object> get props => [];
+}
 
 class CategoriesInitial extends CategoriesState {}
 
 class CategoriesLoading extends CategoriesState {}
 
 class CategoriesLoaded extends CategoriesState {
-  final List<CategoryModel> categories;
+  final List<Category> categories;
 
-  CategoriesLoaded(this.categories);
+  const CategoriesLoaded(this.categories);
+
+  @override
+  List<Object> get props => [categories];
+}
+
+class CategoryBooksLoading extends CategoriesState {}
+
+class CategoryBooksLoaded extends CategoriesState {
+  final List<dynamic> books;
+
+  const CategoryBooksLoaded(this.books);
+
+  @override
+  List<Object> get props => [books];
 }
 
 class CategoriesError extends CategoriesState {
   final String message;
 
-  CategoriesError(this.message);
+  const CategoriesError(this.message);
+
+  @override
+  List<Object> get props => [message];
 }

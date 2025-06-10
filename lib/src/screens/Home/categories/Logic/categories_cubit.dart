@@ -1,19 +1,27 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../Data/categories_dio.dart';
-import '../Data/categories_model.dart';
 import 'categories_state.dart';
 
 class CategoriesCubit extends Cubit<CategoriesState> {
-  final CategoriesDio _categoriesDio;
+  final CategoriesService _categoriesService;
 
-  CategoriesCubit(this._categoriesDio) : super(CategoriesInitial());
+  CategoriesCubit(this._categoriesService) : super(CategoriesInitial());
 
-  void fetchCategories() async {
-    emit(CategoriesLoading());
+  Future<void> getCategories() async {
     try {
-      final data = await _categoriesDio.getCategories();
-      final categories = data.map((e) => CategoryModel.fromJson(e)).toList();
-      emit(CategoriesLoaded(List<CategoryModel>.from(categories)));
+      emit(CategoriesLoading());
+      final categories = await _categoriesService.getCategories();
+      emit(CategoriesLoaded(categories.categories));
+    } catch (e) {
+      emit(CategoriesError(e.toString()));
+    }
+  }
+
+  Future<void> getCategoryBooks(String categoryId) async {
+    try {
+      emit(CategoryBooksLoading());
+      final books = await _categoriesService.getCategoryBooks(categoryId);
+      emit(CategoryBooksLoaded(books));
     } catch (e) {
       emit(CategoriesError(e.toString()));
     }
