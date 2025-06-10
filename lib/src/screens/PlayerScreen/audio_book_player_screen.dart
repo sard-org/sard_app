@@ -49,35 +49,31 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
                     borderRadius: BorderRadius.circular(3),
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      SizedBox(width: 44),
-                      Text(
-                        "ملخص الكتاب",
-                        style: AppTexts.heading2Bold,
-                      ),
-                      GestureDetector(
-                        onTap: () => Navigator.pop(context),
-                        child: Container(
-                          width: 44,
-                          height: 44,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Icon(Icons.arrow_forward, color: AppColors.primary500),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    SizedBox(width: 44),
+                    Text(
+                      "ملخص الكتاب",
+                      style: AppTexts.heading2Bold,
+                    ),
+                    GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: Container(
+                        width: 44,
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8),
                         ),
+                        child: Icon(Icons.arrow_forward, color: AppColors.primary500),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
                 Expanded(
                   child: SingleChildScrollView(
                     controller: scrollController,
-                    padding: EdgeInsets.symmetric(horizontal: 24, vertical: 8),
                     child: Directionality(
                       textDirection: TextDirection.rtl,
                       child: Text(
@@ -88,22 +84,19 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
                     ),
                   ),
                 ),
-                Padding(
-                  padding: EdgeInsets.only(bottom: 24),
-                  child: GestureDetector(
-                    onTap: () {},
-                    child: Container(
-                      width: 60,
-                      height: 60,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: AppColors.primary500,
-                      ),
-                      child: Icon(
-                        Icons.volume_up_outlined,
-                        size: 30,
-                        color: Colors.white,
-                      ),
+                GestureDetector(
+                  onTap: () {},
+                  child: Container(
+                    width: 60,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: AppColors.primary500,
+                    ),
+                    child: Icon(
+                      Icons.volume_up_outlined,
+                      size: 30,
+                      color: Colors.white,
                     ),
                   ),
                 ),
@@ -332,23 +325,19 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
               _buildAppBar(context),
               Expanded(
                 child: SingleChildScrollView(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        SizedBox(height: 24),
-                        _buildBookCover(),
-                        SizedBox(height: 24),
-                        _buildBookInfo(),
-                        SizedBox(height: 32),
-                      ],
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      SizedBox(height: 24),
+                      _buildBookCover(),
+                      SizedBox(height: 24),
+                      _buildBookInfo(),
+                      SizedBox(height: 32),
+                    ],
                   ),
                 ),
               ),
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                 color: Colors.white,
                 child: Column(
                   children: [

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../../../style/Colors.dart';
 import '../../../../style/Fonts.dart';
+import '../../AudioBook/audio_book.dart';
 import '../categories/CategoryDetailsPage.dart';
+import '../widgets/BookCardWidget.dart';
 import 'ExchangeBookCard.dart';
 
 class WithoutCategoryDetailsPage extends StatelessWidget {
@@ -146,7 +148,12 @@ class WithoutCategoryDetailsPage extends StatelessWidget {
                         pricePoints: book['pricePoints'] as int?,
                         isFree: book['isFree'] as bool,
                         onTap: () {
-                          print('Book tapped: ${book['title']}');
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => AudioBookScreen(),
+                            ),
+                          );
                         },
                       ),
                     );
@@ -168,7 +175,12 @@ class WithoutCategoryDetailsPage extends StatelessWidget {
                       pricePoints: book['pricePoints'] as int,
                       isFavorite: book['isFavorite'] as bool,
                       onTap: () {
-                        print('Book tapped: ${book['title']}');
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => AudioBookScreen(),
+                          ),
+                        );
                       },
                       onFavoriteTap: () {
                         print('Favorite tapped for: ${book['title']}');
