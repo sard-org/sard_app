@@ -166,12 +166,12 @@ class HomeScreen extends StatelessWidget {
                         const SizedBox(width: 8),
                         RichText(
                           text: TextSpan(
-                            text: 'أهلاً ',
-                            style: AppTexts.heading1Standard.copyWith(color: AppColors.neutral700, fontSize: 14),
+                            text: 'اهلا, ',
+                            style: AppTexts.heading1Standard.copyWith(color: AppColors.neutral600),
                             children: [
                               TextSpan(
                                 text: user.name,
-                                style: AppTexts.heading1Bold.copyWith(fontSize: 16, color: AppColors.primary900),
+                                style: AppTexts.heading3Bold.copyWith( color: AppColors.neutral1000),
                               ),
                             ],
                           ),
@@ -182,7 +182,7 @@ class HomeScreen extends StatelessWidget {
                     Text(
                       'أنت تبلي حسنًا 💪 استمر في الاستماع للكتب يوميًا',
                       textDirection: TextDirection.rtl,
-                      style: AppTexts.heading1Standard.copyWith(fontSize: 14, color: AppColors.neutral600),
+                      style: AppTexts.contentRegular.copyWith(color: AppColors.neutral600),
                     ),
                     const SizedBox(height: 12),
                     Row(
@@ -208,18 +208,15 @@ class HomeScreen extends StatelessWidget {
                                 assetPath = 'assets/img/streak week done.png';
                                 break;
                             }
-                            return Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 4),
-                              child: Image.asset(
-                                assetPath,
-                                width: 36,
-                                height: 36,
-                              ),
+                            return Image.asset(
+                              assetPath,
+                              width: 36,
+                              height: 36,
                             );
                           }).toList(),
                         ),
                         Container(
-                          padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(
                             color: AppColors.primary100,
                             borderRadius: BorderRadius.circular(10),
@@ -230,11 +227,11 @@ class HomeScreen extends StatelessWidget {
                                 '${user.points}',
                                 style: AppTexts.heading1Bold.copyWith(fontSize: 16, color: AppColors.primary700),
                               ),
-                              const SizedBox(width: 6),
+                              const SizedBox(width: 4),
                               Image.asset(
                                 'assets/img/coin.png',
-                                width: 20,
-                                height: 20,
+                                width: 24,
+                                height: 24,
                               ),
                             ],
                           ),

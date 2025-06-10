@@ -89,7 +89,7 @@ class WithoutCategoryDetailsPage extends StatelessWidget {
                       color: AppColors.primary700,
                     ),
                   ),
-                  if (title == 'استبدل نقاطك') ...[
+                  if (title == 'ستبدل نقاطك') ...[
                     const SizedBox(width: 4),
                     Image.asset('assets/img/coin.png', width: 16, height: 16),
                   ],
@@ -123,12 +123,12 @@ class WithoutCategoryDetailsPage extends StatelessWidget {
       children: [
         const SizedBox(height: 24),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildSectionHeader('كتب مرشحة لك', recommendedBooks.length),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
@@ -153,9 +153,9 @@ class WithoutCategoryDetailsPage extends StatelessWidget {
                   }).toList(),
                 ),
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 24),
               _buildSectionHeader('استبدل نقاطك', exchangeBooks.length),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
