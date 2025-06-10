@@ -17,10 +17,10 @@ class CategoriesCubit extends Cubit<CategoriesState> {
     }
   }
 
-  Future<void> getCategoryBooks(String categoryId) async {
+  Future<void> getCategoryBooks(String category_id) async {
     try {
       emit(CategoryBooksLoading());
-      final books = await _categoriesService.getCategoryBooks(categoryId);
+      final books = await _categoriesService.getCategoryBooks(category_id);
       emit(CategoryBooksLoaded(books));
     } catch (e) {
       emit(CategoriesError(e.toString()));

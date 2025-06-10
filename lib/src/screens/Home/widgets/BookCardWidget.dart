@@ -10,7 +10,7 @@ class BookCardWidget extends StatelessWidget {
   final String description;
   final String imageUrl;
   final VoidCallback onTap;
-  final bool isFavorite;
+  final bool is_favorite;
   final int? price;
   final int? pricePoints;
   final bool isFree;
@@ -21,7 +21,7 @@ class BookCardWidget extends StatelessWidget {
     required this.description,
     required this.imageUrl,
     required this.onTap,
-    required this.isFavorite,
+    required this.is_favorite,
     this.price,
     this.pricePoints,
     required this.isFree,
@@ -115,7 +115,7 @@ class BookCardWidget extends StatelessWidget {
                         ),
                         Spacer(),
                         Icon(
-                          isFavorite ? Icons.favorite : Icons.favorite_border,
+                          is_favorite ? Icons.favorite : Icons.favorite_border,
                           color: AppColors.neutral600,
                           size: 20,
                         ),

@@ -148,6 +148,7 @@ class _CategorySectionState extends State<CategorySection> {
                     );
                   }),
                 ),
+
               ),
               if (selectedIndex == -1)
                 WithoutCategoryDetailsPage()
@@ -318,3 +319,4 @@ class HomeScreen extends StatelessWidget {
     );
   }
 }
+

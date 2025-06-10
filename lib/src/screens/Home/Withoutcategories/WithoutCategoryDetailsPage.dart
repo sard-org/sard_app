@@ -117,7 +117,7 @@ class WithoutCategoryDetailsPage extends StatelessWidget {
                         title: book['title'] as String,
                         description: book['description'] as String,
                         imageUrl: book['imageUrl'] as String,
-                        isFavorite: book['isFavorite'] as bool,
+                        is_favorite: book['isFavorite'] as bool,
                         price: book['price'] as int?,
                         pricePoints: book['pricePoints'] as int?,
                         isFree: book['isFree'] as bool,
