@@ -67,38 +67,12 @@ class WithoutCategoryDetailsPage extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Row(
-          children: [
-            Text(
-              title,
-              style: AppTexts.heading1Bold.copyWith(
-                fontSize: 24,
-                color: AppColors.neutral900,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: AppColors.primary100,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                children: [
-                  Text(
-                    '$count كتب',
-                    style: AppTexts.contentRegular.copyWith(
-                      color: AppColors.primary700,
-                    ),
-                  ),
-                  if (title == 'ستبدل نقاطك') ...[
-                    const SizedBox(width: 4),
-                    Image.asset('assets/img/coin.png', width: 16, height: 16),
-                  ],
-                ],
-              ),
-            ),
-          ],
+        Text(
+          title,
+          style: AppTexts.heading1Bold.copyWith(
+            fontSize: 24,
+            color: AppColors.neutral900,
+          ),
         ),
         TextButton(
           onPressed: () {
