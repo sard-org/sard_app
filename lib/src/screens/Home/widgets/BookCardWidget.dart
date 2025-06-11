@@ -32,12 +32,21 @@ class BookCardWidget extends StatelessWidget {
     if (isFree) {
       return Text(
         'Free',
-        style: AppTexts.heading2Bold.copyWith(color: AppColors.primary700),
+        style: AppTexts.highlightAccent.copyWith(color: AppColors.primary1000),
       );
     } else if (price != null) {
-      return Text(
-        '$price ج.م',
-        style: AppTexts.heading2Bold.copyWith(color: AppColors.primary700),
+      return Row(
+        children: [
+          Text(
+            '$price',
+            style: AppTexts.highlightAccent.copyWith(color: AppColors.primary1000),
+          ),
+          const SizedBox(width: 2),
+          Text(
+            'ج.م',
+            style: AppTexts.footnoteRegular11.copyWith(color: AppColors.primary1000),
+          ),
+        ],
       );
     } else if (pricePoints != null) {
       return Container(
@@ -51,7 +60,7 @@ class BookCardWidget extends StatelessWidget {
           children: [
             Text(
               '$pricePoints',
-              style: AppTexts.heading2Bold.copyWith(color: AppColors.primary800),
+              style: AppTexts.highlightAccent.copyWith(color: AppColors.primary800),
             ),
             const SizedBox(width: 4),
             Image.asset('assets/img/coin.png', width: 20, height: 20),
@@ -70,17 +79,17 @@ class BookCardWidget extends StatelessWidget {
       child: GestureDetector(
         onTap: onTap,
         child: Container(
-          margin: EdgeInsets.only(bottom: 12),
+          margin: const EdgeInsets.only(bottom: 12),
           padding: const EdgeInsets.all(12),
           decoration: ShapeDecoration(
-            color: Color(0xFFFCFEF5),
+            color: const Color(0xFFFCFEF5),
             shape: RoundedRectangleBorder(
-              side: BorderSide(width: 0.50, color: AppColors.primary900),
+              side: const BorderSide(width: 0.50, color: AppColors.primary900),
               borderRadius: BorderRadius.circular(8),
             ),
           ),
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
                 width: 93,
@@ -93,56 +102,43 @@ class BookCardWidget extends StatelessWidget {
                     fit: BoxFit.fill,
                   ),
                   shape: RoundedRectangleBorder(
-                    side: BorderSide(width: 2, color: Color(0xFF2B2B2B)),
+                    side: const BorderSide(width: 2, color: Color(0xFF2B2B2B)),
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
               ),
-              SizedBox(width: 12),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Row(
-                      children: [
-                        Text(
-                          author,
-                          textAlign: TextAlign.start,
-                          style: AppTexts.captionRegular.copyWith(
-                            color: AppColors.neutral400,
-                          ),
-                        ),
-                        Spacer(),
-                        Icon(
-                          is_favorite ? Icons.favorite : Icons.favorite_border,
-                          color: AppColors.neutral600,
-                          size: 20,
-                        ),
-                      ],
+                    Text(
+                      author,
+                      style: AppTexts.captionRegular.copyWith(color: AppColors.neutral400),
                     ),
-                    SizedBox(height: 4),
+                    const SizedBox(height: 8),
                     Text(
                       title,
-                      textAlign: TextAlign.start,
-                      style: AppTexts.highlightStandard.copyWith(
-                        color: AppColors.neutral1000,
-                      ),
+                      style: AppTexts.highlightStandard.copyWith(color: AppColors.neutral1000),
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     Text(
                       description,
-                      textAlign: TextAlign.start,
-                      style: AppTexts.contentRegular.copyWith(
-                        color: AppColors.neutral400,
-                      ),
+                      style: AppTexts.contentRegular.copyWith(color: AppColors.neutral400),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     buildPriceTag(),
                   ],
                 ),
+              ),
+              IconButton(
+                icon: Icon(
+                  is_favorite ? Icons.favorite : Icons.favorite_border,
+                  color: is_favorite ? Colors.red : AppColors.primary900,
+                ),
+                onPressed: onTap,
               ),
             ],
           ),
