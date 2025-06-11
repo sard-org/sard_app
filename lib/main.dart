@@ -8,10 +8,12 @@ import 'package:sard/src/screens/books/our_books.dart';
 import 'package:sard/src/screens/favorite/Fav.dart';
 import 'package:sard/src/screens/settings/setting.dart';
 import 'package:sard/style/Colors.dart';
+import 'package:sard/style/bloc_observar.dart';
 
 void main() {
   DioHelper.init();
   WidgetsFlutterBinding.ensureInitialized();
+  Bloc.observer = MyBlocObserver();
   runApp(MyApp());
 }
 

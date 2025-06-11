@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import '../Data/categories_dio.dart';
 import 'categories_state.dart';
 
@@ -17,10 +18,19 @@ class CategoriesCubit extends Cubit<CategoriesState> {
     }
   }
 
-  Future<void> getCategoryBooks(String category_id) async {
+  // Future<void> getCategoryBooks(String category_id) async {
+  //   try {
+  //     emit(CategoryBooksLoading());
+  //     final books = await _categoriesService.getCategoryBooks(category_id);
+  //     emit(CategoryBooksLoaded(books));
+  //   } catch (e) {
+  //     emit(CategoriesError(e.toString()));
+  //   }
+  // }
+  Future<void> getCategoryBooks(String categoryId) async {
     try {
       emit(CategoryBooksLoading());
-      final books = await _categoriesService.getCategoryBooks(category_id);
+      final books = await _categoriesService.getCategoryBooks(categoryId);
       emit(CategoryBooksLoaded(books));
     } catch (e) {
       emit(CategoriesError(e.toString()));

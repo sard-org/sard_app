@@ -1,17 +1,18 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:dio/dio.dart';
+
 import '../../../style/BaseScreen.dart';
 import '../../../style/Colors.dart';
 import '../../../style/Fonts.dart';
+import '../Home/Data/home_model.dart';
 import '../Home/Logic/home_cubit.dart';
 import '../Home/Logic/home_state.dart';
-import '../Home/Data/home_model.dart';
 import '../Home/Withoutcategories/WithoutCategoryDetailsPage.dart';
 import '../Home/categories/CategoryDetailsPage.dart';
+import '../Home/categories/Data/categories_dio.dart';
 import '../Home/categories/Logic/categories_cubit.dart';
 import '../Home/categories/Logic/categories_state.dart';
-import '../Home/categories/Data/categories_dio.dart';
 
 class CategoryItem extends StatelessWidget {
   final Map<String, dynamic> category;
@@ -19,11 +20,11 @@ class CategoryItem extends StatelessWidget {
   final VoidCallback onTap;
 
   const CategoryItem({
-    Key? key,
+    super.key,
     required this.category,
     required this.isSelected,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +35,8 @@ class CategoryItem extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: isSelected ? AppColors.primary600 : AppColors.neutral300),
+          border: Border.all(
+              color: isSelected ? AppColors.primary600 : AppColors.neutral300),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -59,7 +61,7 @@ class CategoryItem extends StatelessWidget {
 }
 
 class CategorySection extends StatefulWidget {
-  const CategorySection({Key? key}) : super(key: key);
+  const CategorySection({super.key});
 
   @override
   State<CategorySection> createState() => _CategorySectionState();
@@ -77,11 +79,13 @@ class _CategorySectionState extends State<CategorySection> {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<CategoriesCubit, CategoriesState>(
+      buildWhen: (previous, current) =>
+          current is CategoriesLoading || current is CategoriesLoaded,
       builder: (context, state) {
         if (state is CategoriesLoading) {
           return const Center(child: CircularProgressIndicator());
         }
-
+      
         if (state is CategoriesLoaded) {
           final categories = state.categories;
 
@@ -107,12 +111,17 @@ class _CategorySectionState extends State<CategorySection> {
                           });
                         },
                         child: Container(
-                          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          padding:
+                              EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                           decoration: BoxDecoration(
-                            color: isSelected ? AppColors.primary100 : Colors.white,
+                            color: isSelected
+                                ? AppColors.primary100
+                                : Colors.white,
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                              color: isSelected ? AppColors.primary600 : AppColors.neutral300,
+                              color: isSelected
+                                  ? AppColors.primary600
+                                  : AppColors.neutral300,
                             ),
                           ),
                           child: Row(
@@ -129,7 +138,9 @@ class _CategorySectionState extends State<CategorySection> {
                                     return Icon(
                                       Icons.category,
                                       size: 24,
-                                      color: isSelected ? AppColors.primary600 : AppColors.neutral700,
+                                      color: isSelected
+                                          ? AppColors.primary600
+                                          : AppColors.neutral700,
                                     );
                                   },
                                 ),
@@ -138,7 +149,9 @@ class _CategorySectionState extends State<CategorySection> {
                               Text(
                                 category.name,
                                 style: AppTexts.contentRegular.copyWith(
-                                  color: isSelected ? AppColors.primary600 : AppColors.neutral700,
+                                  color: isSelected
+                                      ? AppColors.primary600
+                                      : AppColors.neutral700,
                                 ),
                               ),
                             ],
@@ -148,7 +161,6 @@ class _CategorySectionState extends State<CategorySection> {
                     );
                   }),
                 ),
-
               ),
               if (selectedIndex == -1)
                 WithoutCategoryDetailsPage()
@@ -170,7 +182,9 @@ class _CategorySectionState extends State<CategorySection> {
 
 class HomeScreen extends StatelessWidget {
   final dio = Dio()..options.baseUrl = 'https://api.mohamed-ramadan.me/api/';
-  
+
+  HomeScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
@@ -190,9 +204,15 @@ class HomeScreen extends StatelessWidget {
               if (state is HomeLoading) {
                 return Center(child: CircularProgressIndicator());
               } else if (state is HomeLoaded) {
-                UserModelhome user = state.user as UserModelhome;
+                UserModelhome user = state.user;
                 List<String> streakTypes = [
-                  '1', '2', '3', '4', '5', '6', '7',
+                  '1',
+                  '2',
+                  '3',
+                  '4',
+                  '5',
+                  '6',
+                  '7',
                 ];
 
                 return Column(
@@ -209,11 +229,13 @@ class HomeScreen extends StatelessWidget {
                         RichText(
                           text: TextSpan(
                             text: 'اهلا, ',
-                            style: AppTexts.heading1Standard.copyWith(color: AppColors.neutral600),
+                            style: AppTexts.heading1Standard
+                                .copyWith(color: AppColors.neutral600),
                             children: [
                               TextSpan(
                                 text: user.name,
-                                style: AppTexts.heading3Bold.copyWith( color: AppColors.neutral1000),
+                                style: AppTexts.heading3Bold
+                                    .copyWith(color: AppColors.neutral1000),
                               ),
                             ],
                           ),
@@ -224,7 +246,8 @@ class HomeScreen extends StatelessWidget {
                     Text(
                       'أنت تبلي حسنًا 💪 استمر في الاستماع للكتب يوميًا',
                       textDirection: TextDirection.rtl,
-                      style: AppTexts.contentRegular.copyWith(color: AppColors.neutral600),
+                      style: AppTexts.contentRegular
+                          .copyWith(color: AppColors.neutral600),
                     ),
                     const SizedBox(height: 12),
                     Row(
@@ -258,7 +281,8 @@ class HomeScreen extends StatelessWidget {
                           }).toList(),
                         ),
                         Container(
-                          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          padding:
+                              EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(
                             color: AppColors.primary100,
                             borderRadius: BorderRadius.circular(10),
@@ -267,7 +291,8 @@ class HomeScreen extends StatelessWidget {
                             children: [
                               Text(
                                 '${user.points}',
-                                style: AppTexts.heading1Bold.copyWith(fontSize: 16, color: AppColors.primary700),
+                                style: AppTexts.heading1Bold.copyWith(
+                                    fontSize: 16, color: AppColors.primary700),
                               ),
                               const SizedBox(width: 4),
                               Image.asset(
@@ -284,9 +309,12 @@ class HomeScreen extends StatelessWidget {
                     TextField(
                       decoration: InputDecoration(
                         hintText: 'عن ماذا تبحث؟',
-                        hintStyle: AppTexts.contentEmphasis.copyWith(color: AppColors.neutral600),
-                        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        prefixIcon: Icon(Icons.search, color: AppColors.neutral600),
+                        hintStyle: AppTexts.contentEmphasis
+                            .copyWith(color: AppColors.neutral600),
+                        contentPadding:
+                            EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        prefixIcon:
+                            Icon(Icons.search, color: AppColors.neutral600),
                         filled: true,
                         fillColor: Colors.white,
                         enabledBorder: OutlineInputBorder(
@@ -298,7 +326,8 @@ class HomeScreen extends StatelessWidget {
                           borderSide: BorderSide(color: AppColors.primary600),
                         ),
                       ),
-                      style: AppTexts.contentEmphasis.copyWith(color: AppColors.neutral1000),
+                      style: AppTexts.contentEmphasis
+                          .copyWith(color: AppColors.neutral1000),
                     ),
                     const SizedBox(height: 12),
                     Expanded(
@@ -319,4 +348,3 @@ class HomeScreen extends StatelessWidget {
     );
   }
 }
-
