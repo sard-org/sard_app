@@ -85,7 +85,7 @@ class _CategorySectionState extends State<CategorySection> {
         if (state is CategoriesLoading) {
           return const Center(child: CircularProgressIndicator());
         }
-      
+
         if (state is CategoriesLoaded) {
           final categories = state.categories;
 
@@ -244,7 +244,7 @@ class HomeScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'أنت تبلي حسنًا 💪 استمر في الاستماع للكتب يوميًا',
+                      '${user.message}',
                       textDirection: TextDirection.rtl,
                       style: AppTexts.contentRegular
                           .copyWith(color: AppColors.neutral600),
