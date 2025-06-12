@@ -205,15 +205,39 @@ class HomeScreen extends StatelessWidget {
                 return Center(child: CircularProgressIndicator());
               } else if (state is HomeLoaded) {
                 UserModelhome user = state.user;
-                List<String> streakTypes = [
-                  '1',
-                  '2',
-                  '3',
-                  '4',
-                  '5',
-                  '6',
-                  '7',
-                ];
+
+                // Generate dynamic streak icons based on user's actual streak
+                List<Widget> _buildStreakIcons(int currentStreak) {
+                  List<Widget> icons = [];
+
+                  for (int i = 1; i <= 7; i++) {
+                    String assetPath = '';
+
+                    if (currentStreak == 0) {
+                      // If streak is 0 (just reset after completing 7 days) - show all as waiting
+                      assetPath = 'assets/img/streak_waiting.png';
+                    } else if (i < currentStreak) {
+                      // Completed days
+                      assetPath = 'assets/img/streakDone.png';
+                    } else if (i == currentStreak) {
+                      // Current day
+                      assetPath = 'assets/img/streak_Today.png';
+                    } else {
+                      // Future days
+                      assetPath = 'assets/img/streak_waiting.png';
+                    }
+
+                    icons.add(
+                      Image.asset(
+                        assetPath,
+                        width: 36,
+                        height: 36,
+                      ),
+                    );
+                  }
+
+                  return icons;
+                }
 
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -254,31 +278,7 @@ class HomeScreen extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Row(
-                          children: streakTypes.map((type) {
-                            String assetPath = '';
-                            switch (type) {
-                              case '1':
-                              case '2':
-                                assetPath = 'assets/img/streakDone.png';
-                                break;
-                              case '3':
-                                assetPath = 'assets/img/streak_Today.png';
-                                break;
-                              case '4':
-                              case '5':
-                              case '6':
-                                assetPath = 'assets/img/streak_waiting.png';
-                                break;
-                              case '7':
-                                assetPath = 'assets/img/streak week done.png';
-                                break;
-                            }
-                            return Image.asset(
-                              assetPath,
-                              width: 36,
-                              height: 36,
-                            );
-                          }).toList(),
+                          children: _buildStreakIcons(user.streak),
                         ),
                         Container(
                           padding:
