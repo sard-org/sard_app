@@ -13,6 +13,7 @@ import '../Home/categories/CategoryDetailsPage.dart';
 import '../Home/categories/Data/categories_dio.dart';
 import '../Home/categories/Logic/categories_cubit.dart';
 import '../Home/categories/Logic/categories_state.dart';
+import '../Home/search/search_results_screen.dart';
 
 class CategoryItem extends StatelessWidget {
   final Map<String, dynamic> category;
@@ -306,28 +307,43 @@ class HomeScreen extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 16),
-                    TextField(
-                      decoration: InputDecoration(
-                        hintText: 'عن ماذا تبحث؟',
-                        hintStyle: AppTexts.contentEmphasis
-                            .copyWith(color: AppColors.neutral600),
-                        contentPadding:
-                            EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        prefixIcon:
-                            Icon(Icons.search, color: AppColors.neutral600),
-                        filled: true,
-                        fillColor: Colors.white,
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: AppColors.neutral300),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: AppColors.primary600),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                SearchResultsScreen(searchQuery: ''),
+                          ),
+                        );
+                      },
+                      child: AbsorbPointer(
+                        child: TextField(
+                          decoration: InputDecoration(
+                            hintText: 'عن ماذا تبحث؟',
+                            hintStyle: AppTexts.contentEmphasis
+                                .copyWith(color: AppColors.neutral600),
+                            contentPadding: EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 12),
+                            prefixIcon:
+                                Icon(Icons.search, color: AppColors.neutral600),
+                            filled: true,
+                            fillColor: Colors.white,
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide:
+                                  BorderSide(color: AppColors.neutral300),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide:
+                                  BorderSide(color: AppColors.primary600),
+                            ),
+                          ),
+                          style: AppTexts.contentEmphasis
+                              .copyWith(color: AppColors.neutral1000),
                         ),
                       ),
-                      style: AppTexts.contentEmphasis
-                          .copyWith(color: AppColors.neutral1000),
                     ),
                     const SizedBox(height: 12),
                     Expanded(
