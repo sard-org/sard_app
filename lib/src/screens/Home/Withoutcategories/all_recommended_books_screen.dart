@@ -117,97 +117,101 @@ class _AllRecommendedBooksScreenState extends State<AllRecommendedBooksScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          BaseScreen(
-            child: Column(
-              children: [
-                const SizedBox(height: 80),
-                Expanded(
-                  child: isLoading
-                      ? const Center(
-                          child: CircularProgressIndicator(
-                            color: AppColors.primary700,
-                          ),
-                        )
-                      : errorMessage != null
-                          ? _buildErrorState()
-                          : recommendedBooks.isEmpty
-                              ? _buildEmptyState()
-                              : ListView.builder(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 16, vertical: 16),
-                                  itemCount: recommendedBooks.length,
-                                  physics: const BouncingScrollPhysics(),
-                                  itemBuilder: (context, index) {
-                                    final book = recommendedBooks[index];
-                                    return Padding(
-                                      padding:
-                                          const EdgeInsets.only(bottom: 16),
-                                      child: BookCardWidget(
-                                        author: book.author.name,
-                                        title: book.title,
-                                        description: book.description,
-                                        imageUrl: book.cover,
-                                        is_favorite: book.isFavorite,
-                                        price: book.price,
-                                        pricePoints: null,
-                                        isFree: book.price == 0,
-                                        onTap: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) =>
-                                                  AudioBookScreen(),
-                                            ),
-                                          );
-                                        },
-                                      ),
-                                    );
-                                  },
-                                ),
-                ),
-              ],
-            ),
-          ),
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
-              decoration: const BoxDecoration(
-                color: AppColors.neutral100,
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(16),
-                  bottomRight: Radius.circular(16),
-                ),
-              ),
-              child: SafeArea(
-                child: Row(
-                  children: [
-                    IconButton(
-                      onPressed: () => Navigator.pop(context),
-                      icon: const Icon(
-                        Icons.arrow_back_ios,
-                        color: AppColors.neutral900,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'الكتب المقترحة',
-                      style: AppTexts.heading1Bold.copyWith(
-                        color: AppColors.neutral900,
-                        fontSize: 20,
-                      ),
-                    ),
-                  ],
-                ),
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Scaffold(
+        body: Stack(
+          children: [
+            BaseScreen(
+              child: Column(
+                children: [
+                  const SizedBox(height: 80),
+                  Expanded(
+                    child: isLoading
+                        ? const Center(
+                            child: CircularProgressIndicator(
+                              color: AppColors.primary700,
+                            ),
+                          )
+                        : errorMessage != null
+                            ? _buildErrorState()
+                            : recommendedBooks.isEmpty
+                                ? _buildEmptyState()
+                                : ListView.builder(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 16, vertical: 16),
+                                    itemCount: recommendedBooks.length,
+                                    physics: const BouncingScrollPhysics(),
+                                    itemBuilder: (context, index) {
+                                      final book = recommendedBooks[index];
+                                      return Padding(
+                                        padding:
+                                            const EdgeInsets.only(bottom: 16),
+                                        child: BookCardWidget(
+                                          author: book.author.name,
+                                          title: book.title,
+                                          description: book.description,
+                                          imageUrl: book.cover,
+                                          is_favorite: book.isFavorite,
+                                          price: book.price,
+                                          pricePoints: null,
+                                          isFree: book.price == 0,
+                                          onTap: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    AudioBookScreen(),
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                      );
+                                    },
+                                  ),
+                  ),
+                ],
               ),
             ),
-          ),
-        ],
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
+                decoration: const BoxDecoration(
+                  color: AppColors.neutral100,
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(16),
+                    bottomRight: Radius.circular(16),
+                  ),
+                ),
+                child: SafeArea(
+                  child: Row(
+                    children: [
+                      IconButton(
+                        onPressed: () => Navigator.pop(context),
+                        icon: const Icon(
+                          Icons.arrow_back_ios,
+                          color: AppColors.neutral900,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'الكتب المقترحة',
+                        style: AppTexts.heading1Bold.copyWith(
+                          color: AppColors.neutral900,
+                          fontSize: 20,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

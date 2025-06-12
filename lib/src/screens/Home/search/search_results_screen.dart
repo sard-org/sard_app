@@ -154,13 +154,14 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
               Expanded(
                 child: TextField(
                   controller: _searchController,
+                  textDirection: TextDirection.rtl,
                   decoration: InputDecoration(
                     hintText: 'عن ماذا تبحث؟',
                     hintStyle: AppTexts.contentEmphasis
                         .copyWith(color: AppColors.neutral600),
                     contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16, vertical: 12),
-                    prefixIcon:
+                    suffixIcon:
                         const Icon(Icons.search, color: AppColors.neutral600),
                     filled: true,
                     fillColor: Colors.white,
@@ -211,55 +212,58 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildSearchHeader(),
-            Expanded(
-              child: isLoading
-                  ? const Center(
-                      child: CircularProgressIndicator(
-                        color: AppColors.primary700,
-                      ),
-                    )
-                  : errorMessage != null
-                      ? _buildErrorState()
-                      : searchResults.isEmpty
-                          ? _buildEmptyState()
-                          : ListView.builder(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 16, vertical: 8),
-                              itemCount: searchResults.length,
-                              physics: const BouncingScrollPhysics(),
-                              itemBuilder: (context, index) {
-                                final book = searchResults[index];
-                                return Padding(
-                                  padding: const EdgeInsets.only(bottom: 16),
-                                  child: BookCardWidget(
-                                    author: book.author.name,
-                                    title: book.title,
-                                    description: book.description,
-                                    imageUrl: book.cover,
-                                    is_favorite: book.isFavorite,
-                                    price: book.isFree ? null : book.price,
-                                    pricePoints: book.pricePoints,
-                                    isFree: book.isFree,
-                                    onTap: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              AudioBookScreen(),
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                );
-                              },
-                            ),
-            ),
-          ],
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Scaffold(
+        body: SafeArea(
+          child: Column(
+            children: [
+              _buildSearchHeader(),
+              Expanded(
+                child: isLoading
+                    ? const Center(
+                        child: CircularProgressIndicator(
+                          color: AppColors.primary700,
+                        ),
+                      )
+                    : errorMessage != null
+                        ? _buildErrorState()
+                        : searchResults.isEmpty
+                            ? _buildEmptyState()
+                            : ListView.builder(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 8),
+                                itemCount: searchResults.length,
+                                physics: const BouncingScrollPhysics(),
+                                itemBuilder: (context, index) {
+                                  final book = searchResults[index];
+                                  return Padding(
+                                    padding: const EdgeInsets.only(bottom: 16),
+                                    child: BookCardWidget(
+                                      author: book.author.name,
+                                      title: book.title,
+                                      description: book.description,
+                                      imageUrl: book.cover,
+                                      is_favorite: book.isFavorite,
+                                      price: book.isFree ? null : book.price,
+                                      pricePoints: book.pricePoints,
+                                      isFree: book.isFree,
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                AudioBookScreen(),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  );
+                                },
+                              ),
+              ),
+            ],
+          ),
         ),
       ),
     );
