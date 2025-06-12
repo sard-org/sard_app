@@ -2,68 +2,107 @@ import 'package:flutter/material.dart';
 import '../../../../style/Colors.dart';
 import '../../../../style/Fonts.dart';
 import '../../AudioBook/audio_book.dart';
-import '../categories/CategoryDetailsPage.dart';
 import '../widgets/BookCardWidget.dart';
 import 'ExchangeBookCard.dart';
+import 'data/recommendations_api_service.dart';
+import 'data/exchange_books_api_service.dart';
+import 'all_recommended_books_screen.dart';
+import 'all_exchange_books_screen.dart';
 
-class WithoutCategoryDetailsPage extends StatelessWidget {
-  final List<Map<String, dynamic>> recommendedBooks = [
-    {
-      'author': 'أحمد خالد توفيق',
-      'title': 'يوتوبيا',
-      'description': 'رواية خيال علمي مصرية تدور أحداثها في مستقبل قريب حول مجتمع منقسم',
-      'imageUrl': 'https://picsum.photos/200/300',
-      'isFavorite': true,
-      'price': 150,
-      'isFree': false,
-    },
-    {
-      'author': 'نجيب محفوظ',
-      'title': 'أولاد حارتنا',
-      'description': 'رواية ملحمية تحكي قصة حارة مصرية على مر الأجيال',
-      'imageUrl': 'https://picsum.photos/200/301',
-      'isFavorite': false,
-      'pricePoints': 100,
-      'isFree': false,
-    },
-    {
-      'author': 'طه حسين',
-      'title': 'الأيام',
-      'description': 'سيرة ذاتية تحكي قصة حياة عميد الأدب العربي',
-      'imageUrl': 'https://picsum.photos/200/302',
-      'isFavorite': false,
-      'isFree': true,
-    },
-  ];
+class WithoutCategoryDetailsPage extends StatefulWidget {
+  const WithoutCategoryDetailsPage({Key? key}) : super(key: key);
 
-  final List<Map<String, dynamic>> exchangeBooks = [
-    {
-      'id': '1',
-      'author': 'مارك مانسون',
-      'title': 'فن اللامبالاة',
-      'coverUrl': 'https://picsum.photos/200/303',
-      'pricePoints': 7,
-      'isFavorite': false,
-    },
-    {
-      'id': '2',
-      'author': 'مارك مانسون',
-      'title': 'فن اللامبالاة',
-      'coverUrl': 'https://picsum.photos/200/304',
-      'pricePoints': 7,
-      'isFavorite': false,
-    },
-    {
-      'id': '3',
-      'author': 'مارك مانسون',
-      'title': 'فن اللامبالاة',
-      'coverUrl': 'https://picsum.photos/200/305',
-      'pricePoints': 7,
-      'isFavorite': false,
-    },
-  ];
+  @override
+  State<WithoutCategoryDetailsPage> createState() =>
+      _WithoutCategoryDetailsPageState();
+}
 
-  Widget _buildSectionHeader(String title, int count) {
+class _WithoutCategoryDetailsPageState
+    extends State<WithoutCategoryDetailsPage> {
+  final RecommendationsApiService _recommendationsApiService =
+      RecommendationsApiService();
+  final ExchangeBooksApiService _exchangeBooksApiService =
+      ExchangeBooksApiService();
+
+  List<Map<String, dynamic>> recommendedBooks = [];
+  List<Map<String, dynamic>> exchangeBooks = [];
+
+  bool isLoadingRecommendations = true;
+  bool isLoadingExchangeBooks = true;
+
+  String? recommendationsErrorMessage;
+  String? exchangeBooksErrorMessage;
+  @override
+  void initState() {
+    super.initState();
+    _loadRecommendations();
+    _loadExchangeBooks();
+  }
+
+  Future<void> _loadRecommendations() async {
+    try {
+      setState(() {
+        isLoadingRecommendations = true;
+        recommendationsErrorMessage = null;
+      });
+
+      final recommendations =
+          await _recommendationsApiService.getRecommendations(limit: 3);
+
+      setState(() {
+        recommendedBooks = recommendations
+            .map((book) => {
+                  'author': book.author.name,
+                  'title': book.title,
+                  'description': book.description,
+                  'imageUrl': book.cover,
+                  'isFavorite': book.isFavorite,
+                  'price': book.price,
+                  'isFree': book.price == 0,
+                })
+            .toList();
+        isLoadingRecommendations = false;
+      });
+    } catch (e) {
+      setState(() {
+        recommendationsErrorMessage = e.toString();
+        isLoadingRecommendations = false;
+      });
+    }
+  }
+
+  Future<void> _loadExchangeBooks() async {
+    try {
+      setState(() {
+        isLoadingExchangeBooks = true;
+        exchangeBooksErrorMessage = null;
+      });
+
+      final exchangeBooksData =
+          await _exchangeBooksApiService.getExchangeBooks(limit: 3);
+
+      setState(() {
+        exchangeBooks = exchangeBooksData
+            .map((book) => {
+                  'id': book.id,
+                  'author': book.author.name,
+                  'title': book.title,
+                  'coverUrl': book.cover,
+                  'pricePoints': book.pricePoints,
+                  'isFavorite': book.isFavorite,
+                })
+            .toList();
+        isLoadingExchangeBooks = false;
+      });
+    } catch (e) {
+      setState(() {
+        exchangeBooksErrorMessage = e.toString();
+        isLoadingExchangeBooks = false;
+      });
+    }
+  }
+
+  Widget _buildSectionHeader(String title, int count, VoidCallback onViewMore) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -75,9 +114,7 @@ class WithoutCategoryDetailsPage extends StatelessWidget {
           ),
         ),
         TextButton(
-          onPressed: () {
-            print('شاهد المزيد: $title');
-          },
+          onPressed: onViewMore,
           child: Text(
             'شاهد المزيد',
             style: AppTexts.contentRegular.copyWith(
@@ -90,8 +127,6 @@ class WithoutCategoryDetailsPage extends StatelessWidget {
     );
   }
 
-  WithoutCategoryDetailsPage({Key? key}) : super(key: key);
-
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -103,24 +138,157 @@ class WithoutCategoryDetailsPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildSectionHeader('كتب مرشحة لك', recommendedBooks.length),
+              _buildSectionHeader('كتب مرشحة لك', recommendedBooks.length, () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AllRecommendedBooksScreen(),
+                  ),
+                );
+              }),
               const SizedBox(height: 12),
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: recommendedBooks.map((book) {
-                    return Container(
-                      width: 280,
-                      margin: EdgeInsets.only(right: 12),
-                      child: BookCardWidget(
-                        author: book['author'] as String,
+              if (isLoadingRecommendations)
+                const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(32.0),
+                    child: CircularProgressIndicator(),
+                  ),
+                )
+              else if (recommendationsErrorMessage != null)
+                Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      children: [
+                        Text(
+                          'حدث خطأ في تحميل الكتب المقترحة',
+                          style: AppTexts.contentRegular.copyWith(
+                            color: AppColors.neutral900,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        TextButton(
+                          onPressed: _loadRecommendations,
+                          child: Text(
+                            'إعادة المحاولة',
+                            style: AppTexts.contentRegular.copyWith(
+                              color: AppColors.primary600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              else if (recommendedBooks.isEmpty)
+                Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(32.0),
+                    child: Text(
+                      'لا توجد كتب مقترحة حالياً',
+                      style: AppTexts.contentRegular.copyWith(
+                        color: AppColors.neutral600,
+                      ),
+                    ),
+                  ),
+                )
+              else
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: recommendedBooks.map((book) {
+                      return Container(
+                        width: 280,
+                        margin: EdgeInsets.only(right: 12),
+                        child: BookCardWidget(
+                          author: book['author'] as String,
+                          title: book['title'] as String,
+                          description: book['description'] as String,
+                          imageUrl: book['imageUrl'] as String,
+                          is_favorite: book['isFavorite'] as bool,
+                          price: book['price'] as int?,
+                          pricePoints: book['pricePoints'] as int?,
+                          isFree: book['isFree'] as bool,
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => AudioBookScreen(),
+                              ),
+                            );
+                          },
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              const SizedBox(height: 24),
+              _buildSectionHeader('استبدل نقاطك', exchangeBooks.length, () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AllExchangeBooksScreen(),
+                  ),
+                );
+              }),
+              const SizedBox(height: 12),
+              if (isLoadingExchangeBooks)
+                const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(32.0),
+                    child: CircularProgressIndicator(),
+                  ),
+                )
+              else if (exchangeBooksErrorMessage != null)
+                Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      children: [
+                        Text(
+                          'حدث خطأ في تحميل كتب التبديل',
+                          style: AppTexts.contentRegular.copyWith(
+                            color: AppColors.neutral900,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        TextButton(
+                          onPressed: _loadExchangeBooks,
+                          child: Text(
+                            'إعادة المحاولة',
+                            style: AppTexts.contentRegular.copyWith(
+                              color: AppColors.primary600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              else if (exchangeBooks.isEmpty)
+                Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(32.0),
+                    child: Text(
+                      'لا توجد كتب للتبديل حالياً',
+                      style: AppTexts.contentRegular.copyWith(
+                        color: AppColors.neutral600,
+                      ),
+                    ),
+                  ),
+                )
+              else
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: exchangeBooks.map((book) {
+                      return ExchangeBookCard(
+                        id: book['id'] as String,
                         title: book['title'] as String,
-                        description: book['description'] as String,
-                        imageUrl: book['imageUrl'] as String,
-                        is_favorite: book['isFavorite'] as bool,
-                        price: book['price'] as int?,
-                        pricePoints: book['pricePoints'] as int?,
-                        isFree: book['isFree'] as bool,
+                        author: book['author'] as String,
+                        coverUrl: book['coverUrl'] as String,
+                        pricePoints: book['pricePoints'] as int,
+                        isFavorite: book['isFavorite'] as bool,
                         onTap: () {
                           Navigator.push(
                             context,
@@ -129,44 +297,17 @@ class WithoutCategoryDetailsPage extends StatelessWidget {
                             ),
                           );
                         },
-                      ),
-                    );
-                  }).toList(),
+                        onFavoriteTap: () {
+                          print('Favorite tapped for: ${book['title']}');
+                        },
+                      );
+                    }).toList(),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 24),
-              _buildSectionHeader('استبدل نقاطك', exchangeBooks.length),
-              const SizedBox(height: 12),
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: exchangeBooks.map((book) {
-                    return ExchangeBookCard(
-                      id: book['id'] as String,
-                      title: book['title'] as String,
-                      author: book['author'] as String,
-                      coverUrl: book['coverUrl'] as String,
-                      pricePoints: book['pricePoints'] as int,
-                      isFavorite: book['isFavorite'] as bool,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => AudioBookScreen(),
-                          ),
-                        );
-                      },
-                      onFavoriteTap: () {
-                        print('Favorite tapped for: ${book['title']}');
-                      },
-                    );
-                  }).toList(),
-                ),
-              ),
             ],
           ),
         ),
       ],
     );
   }
-} 
+}
