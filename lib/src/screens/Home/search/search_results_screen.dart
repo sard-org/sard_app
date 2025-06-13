@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../../../style/Colors.dart';
 import '../../../../style/Fonts.dart';
@@ -19,6 +20,7 @@ class SearchResultsScreen extends StatefulWidget {
 class _SearchResultsScreenState extends State<SearchResultsScreen> {
   final SearchBooksApiService _apiService = SearchBooksApiService();
   final TextEditingController _searchController = TextEditingController();
+  Timer? _debounceTimer;
 
   List<SearchBook> searchResults = [];
   bool isLoading = true;
@@ -36,7 +38,18 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
   @override
   void dispose() {
     _searchController.dispose();
+    _debounceTimer?.cancel();
     super.dispose();
+  }
+
+  void _onSearchChanged(String query) {
+    // Cancel the previous timer if it exists
+    _debounceTimer?.cancel();
+
+    // Set a new timer for 500ms delay
+    _debounceTimer = Timer(const Duration(milliseconds: 500), () {
+      _performSearch(query);
+    });
   }
 
   Future<void> _performSearch(String query) async {
@@ -177,6 +190,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
                   style: AppTexts.contentEmphasis
                       .copyWith(color: AppColors.neutral1000),
                   textInputAction: TextInputAction.search,
+                  onChanged: _onSearchChanged,
                   onSubmitted: _performSearch,
                 ),
               ),
