@@ -2,9 +2,9 @@ class ErrorTranslator {
   /// Translates common English error messages to Arabic
   static String translateError(String errorMessage) {
     // Clean the error message by removing extra spaces and converting to lowercase
-    final cleanMessage = errorMessage.trim().toLowerCase();
-
-    // Map of common error messages in English to Arabic
+    final cleanMessage = errorMessage
+        .trim()
+        .toLowerCase(); // Map of common error messages in English to Arabic
     final Map<String, String> errorMap = {
       'user already exists': 'المستخدم موجود بالفعل',
       'email already exists': 'البريد الإلكتروني موجود بالفعل',
@@ -20,6 +20,8 @@ class ErrorTranslator {
       'invalid phone number': 'رقم الهاتف غير صحيح',
       'phone number already exists': 'رقم الهاتف موجود بالفعل',
       'account not verified': 'الحساب غير مفعل',
+      'please verify your email before logging in':
+          'يرجى تأكيد البريد الإلكتروني قبل تسجيل الدخول',
       'verification code expired': 'رمز التحقق منتهي الصلاحية',
       'invalid verification code': 'رمز التحقق غير صحيح',
       'too many requests': 'تم إرسال طلبات كثيرة، يرجى الانتظار',

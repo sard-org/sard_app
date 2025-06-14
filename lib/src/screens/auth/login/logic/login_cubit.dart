@@ -5,6 +5,7 @@ import 'login_state.dart';
 import 'package:dio/dio.dart';
 import 'dart:developer';
 import '../../../../utils/error_translator.dart';
+import '../../Create Account/otp/data/dio_otp_helper.dart';
 
 class AuthCubit extends Cubit<AuthState> {
   AuthCubit() : super(AuthInitial());
@@ -82,10 +83,24 @@ class AuthCubit extends Cubit<AuthState> {
     } on DioException catch (e) {
       log('DioException: ${e.type}, ${e.message}');
       if (e.response != null) {
-        log('Error response: ${e.response?.statusCode} - ${e.response?.data}'); // التعامل مع رموز الحالة المختلفة
+        log('Error response: ${e.response?.statusCode} - ${e.response?.data}');
+        // التعامل مع رموز الحالة المختلفة
         switch (e.response?.statusCode) {
           case 401:
-            emit(AuthError("البريد الإلكتروني أو كلمة المرور غير صحيحة"));
+            // Check if it's an email verification issue
+            final responseMessage = e.response?.data is Map
+                ? e.response?.data['message']?.toString()
+                : null;
+
+            if (responseMessage != null &&
+                responseMessage ==
+                    "Please verify your email before logging in") {
+              // Send validation email and redirect to verification
+              await _sendValidationEmail(email);
+              emit(EmailVerificationRequired(email));
+            } else {
+              emit(AuthError("البريد الإلكتروني أو كلمة المرور غير صحيحة"));
+            }
             break;
           case 403:
             // Check if it's an email verification issue
@@ -206,6 +221,19 @@ class AuthCubit extends Cubit<AuthState> {
       emit(AuthInitial());
     } catch (e) {
       emit(AuthError("حدث خطأ أثناء تسجيل الخروج"));
+    }
+  }
+
+// دالة إرسال بريد التحقق عند الحاجة للتحقق من البريد الإلكتروني
+  Future<void> _sendValidationEmail(String email) async {
+    try {
+      final dioClient = DioClient();
+      await dioClient.validateEmail(email: email);
+      log('Validation email sent successfully for: $email');
+    } catch (e) {
+      log('Failed to send validation email: $e');
+      // لا نريد إيقاف العملية إذا فشل إرسال البريد
+      // المستخدم سيذهب لشاشة التحقق ويمكنه إعادة المحاولة
     }
   }
 }
