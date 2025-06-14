@@ -145,6 +145,12 @@ class RegisterCubit extends Cubit<RegisterStates> {
       return;
     }
 
+    // التحقق من تجاوز الحد الأقصى للمحاولات قبل المحاولة
+    if (_otpAttempts >= 3) {
+      emit(MaxAttemptsReachedState());
+      return;
+    }
+
     // زيادة عدد المحاولات
     _otpAttempts++;
 
@@ -154,27 +160,35 @@ class RegisterCubit extends Cubit<RegisterStates> {
         code: otp,
       );
 
-      // Check for successful response (200 status with success status)
-      if (response.statusCode == 200 &&
-          response.data != null &&
-          response.data['status'] == 'success') {
-        // Reset attempts on success
-        _otpAttempts = 0;
-        emit(OtpVerificationSuccessState(
-          message: response.data['message'] ?? 'تم التحقق بنجاح',
-        ));
-        cancelOtpTimer();
-        return; // Exit early on success
-      } else {
-        // Handle error cases - both 400 status and 200 with non-success status
-        String errorMessage = 'رمز التحقق غير صحيح';
-        if (response.data != null && response.data['message'] != null) {
-          errorMessage = response.data['message'];
-        }
+      // Check for successful response - match the pattern from forgot password
+      if (response.statusCode != null &&
+          response.statusCode! >= 200 &&
+          response.statusCode! < 300) {
+        if (response.data is Map<String, dynamic>) {
+          // Check if the response indicates success (like forgot password flow)
+          bool isSuccess = response.data['success'] == true ||
+              response.data['status'] == 'success';
 
-        emit(OtpVerificationErrorState(
-            error: errorMessage, attemptsLeft: remainingAttempts));
+          if (isSuccess) {
+            // Reset attempts on success
+            _otpAttempts = 0;
+            emit(OtpVerificationSuccessState(
+              message: response.data['message'] ?? 'تم التحقق بنجاح',
+            ));
+            cancelOtpTimer();
+            return; // Exit early on success
+          }
+        }
       }
+
+      // Handle error cases - if we reach here, it means the verification failed
+      String errorMessage = 'رمز التحقق غير صحيح';
+      if (response.data != null && response.data['message'] != null) {
+        errorMessage = response.data['message'];
+      }
+
+      emit(OtpVerificationErrorState(
+          error: errorMessage, attemptsLeft: remainingAttempts));
     } on DioException catch (e) {
       String errorMsg = 'فشل في التحقق من الرمز';
       if (e.response != null && e.response?.data != null) {
