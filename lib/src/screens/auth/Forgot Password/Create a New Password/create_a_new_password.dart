@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../../main.dart';
 import '../../../../../style/BaseScreen.dart';
 import '../../../../../style/Colors.dart';
 import '../../../../../style/Fonts.dart';
@@ -11,7 +10,7 @@ import '../password_reset_states.dart';
 
 class CreateNewPassword extends StatefulWidget {
   final String email;
-  
+
   const CreateNewPassword({super.key, required this.email});
 
   @override
@@ -20,7 +19,8 @@ class CreateNewPassword extends StatefulWidget {
 
 class _CreateNewPasswordState extends State<CreateNewPassword> {
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
   bool _isPasswordVisible = false;
   bool _isConfirmPasswordVisible = false;
 
@@ -42,14 +42,25 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
       child: BlocConsumer<CreatePasswordCubit, PasswordResetState>(
         listener: (context, state) {
           if (state is CreatePasswordSuccess) {
+            // Show success message
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('تم تغيير كلمة المرور بنجاح'),
+                backgroundColor: Colors.green,
+              ),
+            );
+            // Navigate to login page
             Navigator.pushAndRemoveUntil(
               context,
-              MaterialPageRoute(builder: (context) => MainScreen()),
+              MaterialPageRoute(builder: (context) => LoginScreen()),
               (route) => false,
             );
           } else if (state is CreatePasswordError) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message)),
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
+              ),
             );
           }
         },
@@ -103,7 +114,8 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
                             'أدخل تأكيد كلمة المرور',
                             () {
                               setState(() {
-                                _isConfirmPasswordVisible = !_isConfirmPasswordVisible;
+                                _isConfirmPasswordVisible =
+                                    !_isConfirmPasswordVisible;
                               });
                             },
                           ),
@@ -114,7 +126,8 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0, vertical: 8.0),
                   child: Column(
                     children: [
                       SizedBox(
@@ -124,10 +137,12 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
                           onPressed: state is CreatePasswordLoading
                               ? null
                               : () {
-                                  context.read<CreatePasswordCubit>().createNewPassword(
-                                    _passwordController.text,
-                                    _confirmPasswordController.text,
-                                  );
+                                  context
+                                      .read<CreatePasswordCubit>()
+                                      .createNewPassword(
+                                        _passwordController.text,
+                                        _confirmPasswordController.text,
+                                      );
                                 },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.primary500,
@@ -139,7 +154,8 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
                               ? CircularProgressIndicator(color: Colors.white)
                               : Text(
                                   'إنشاء كلمة المرور',
-                                  style: AppTexts.contentEmphasis.copyWith(color: Colors.white),
+                                  style: AppTexts.contentEmphasis
+                                      .copyWith(color: Colors.white),
                                 ),
                         ),
                       ),
@@ -151,7 +167,8 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
                               onTap: () {
                                 Navigator.push(
                                   context,
-                                  MaterialPageRoute(builder: (context) => LoginScreen()),
+                                  MaterialPageRoute(
+                                      builder: (context) => LoginScreen()),
                                 );
                               },
                               child: Directionality(
@@ -170,7 +187,8 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
                               textDirection: TextDirection.rtl,
                               child: Text(
                                 "هل لديك حساب بالفعل؟",
-                                style: AppTexts.contentRegular.copyWith(color: AppColors.neutral900),
+                                style: AppTexts.contentRegular
+                                    .copyWith(color: AppColors.neutral900),
                               ),
                             ),
                           ],
@@ -187,7 +205,8 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
     );
   }
 
-  Widget _buildPasswordField(String label, TextEditingController controller, bool obscureText, String hint, VoidCallback toggleVisibility) {
+  Widget _buildPasswordField(String label, TextEditingController controller,
+      bool obscureText, String hint, VoidCallback toggleVisibility) {
     return Directionality(
       textDirection: TextDirection.ltr, // تحديد الاتجاه من اليمين لليسار
       child: Column(
@@ -208,7 +227,8 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
               ),
               filled: true,
               fillColor: Colors.white,
-              prefixIcon: GestureDetector( // العين على اليسار
+              prefixIcon: GestureDetector(
+                // العين على اليسار
                 onTap: toggleVisibility,
                 child: Icon(
                   obscureText ? Icons.visibility_off : Icons.visibility,
@@ -240,7 +260,8 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
             textDirection: TextDirection.rtl, // تأكيد الاتجاه هنا
             child: Text(
               "إنشاء كلمة مرور جديدة",
-              style: AppTexts.heading2Bold.copyWith(color: AppColors.neutral100),
+              style:
+                  AppTexts.heading2Bold.copyWith(color: AppColors.neutral100),
             ),
           ),
         ],

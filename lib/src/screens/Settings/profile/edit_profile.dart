@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:sard/src/screens/Settings/profile/profile_api_service.dart';
 import 'package:sard/src/screens/Settings/profile/profile_cubit.dart';
 import 'package:sard/src/screens/Settings/profile/profile_state.dart';
 import '../../../../style/BaseScreen.dart';
@@ -8,7 +7,6 @@ import '../../../../style/Colors.dart';
 import '../../../../style/Fonts.dart';
 import '../Change Password/change_password.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
@@ -21,7 +19,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
-  String? _emailError;
   String selectedGender = "ذكر";
   XFile? _pickedImage;
   String? _lastUserName;
@@ -52,8 +49,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       body: BlocListener<ProfileCubit, ProfileState>(
         listener: (context, state) {
           if (state is ProfileLoaded || state is ProfileUpdateSuccess) {
-            final user = state is ProfileLoaded ? state.user : (state as ProfileUpdateSuccess).user;
-            if (_lastUserName != user.name || _lastPhoneNumber != user.phone || selectedGender != (user.gender == 'male' ? 'ذكر' : 'أنثى')) {
+            final user = state is ProfileLoaded
+                ? state.user
+                : (state as ProfileUpdateSuccess).user;
+            if (_lastUserName != user.name ||
+                _lastPhoneNumber != user.phone ||
+                selectedGender != (user.gender == 'male' ? 'ذكر' : 'أنثى')) {
               _emailController.text = user.email;
               _nameController.text = user.name;
               _phoneController.text = user.phone ?? '';
@@ -79,7 +80,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     child: GestureDetector(
                       onTap: () => FocusScope.of(context).unfocus(),
                       child: SingleChildScrollView(
-                        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+                        keyboardDismissBehavior:
+                            ScrollViewKeyboardDismissBehavior.onDrag,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -96,15 +98,17 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                             height: 80,
                                             fit: BoxFit.cover,
                                           )
-                                        : (state is ProfileLoaded && state.user.imageUrl != null
+                                        : (state is ProfileLoaded &&
+                                                state.user.imageUrl != null
                                             ? Image.network(
                                                 state.user.imageUrl!,
                                                 width: 80,
                                                 height: 80,
                                                 fit: BoxFit.cover,
-                                                errorBuilder: (context, error, stackTrace) {
+                                                errorBuilder: (context, error,
+                                                    stackTrace) {
                                                   return Image.asset(
-                                                    'assets/img/2_Onb.png',
+                                                    'assets/img/Avatar.png',
                                                     width: 80,
                                                     height: 80,
                                                     fit: BoxFit.cover,
@@ -112,7 +116,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                                 },
                                               )
                                             : Image.asset(
-                                                'assets/img/2_Onb.png',
+                                                'assets/img/Avatar.png',
                                                 width: 80,
                                                 height: 80,
                                                 fit: BoxFit.cover,
@@ -127,10 +131,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                         decoration: BoxDecoration(
                                           color: Colors.green,
                                           shape: BoxShape.circle,
-                                          border: Border.all(color: Colors.white, width: 2),
+                                          border: Border.all(
+                                              color: Colors.white, width: 2),
                                         ),
                                         padding: EdgeInsets.all(4),
-                                        child: Icon(Icons.camera_alt, color: Colors.white, size: 20),
+                                        child: Icon(Icons.camera_alt,
+                                            color: Colors.white, size: 20),
                                       ),
                                     ),
                                   ),
@@ -158,7 +164,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                     hintStyle: AppTexts.contentRegular,
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(8),
-                                      borderSide: BorderSide(color: AppColors.neutral400),
+                                      borderSide: BorderSide(
+                                          color: AppColors.neutral400),
                                     ),
                                     filled: true,
                                     fillColor: Colors.white,
@@ -169,7 +176,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             ),
                             _buildEmailField(),
                             _buildPhoneField(),
-                            _buildDropdownField("النوع", ["ذكر", "أنثى"], selectedGender, (value) {
+                            _buildDropdownField(
+                                "النوع", ["ذكر", "أنثى"], selectedGender,
+                                (value) {
                               setState(() {
                                 selectedGender = value!;
                               });
@@ -199,7 +208,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Widget _buildAppBar(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.symmetric(vertical:32, horizontal: 18),
+      padding: EdgeInsets.symmetric(vertical: 32, horizontal: 18),
       decoration: BoxDecoration(
         color: AppColors.primary500,
         borderRadius: BorderRadius.only(
@@ -235,33 +244,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
-  Widget _buildTextField(String label, String hint, {IconData? icon}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        Text(label, style: AppTexts.contentRegular),
-        SizedBox(height: 8),
-        TextField(
-          controller: label == "الاسم" ? _nameController : null,
-          onChanged: label == "الاسم" ? (_) => setState(() {}) : null,
-          textAlign: TextAlign.right,
-          decoration: InputDecoration(
-            hintText: hint,
-            hintStyle: AppTexts.contentRegular,
-            prefixIcon: icon != null ? Icon(icon, color: AppColors.neutral400) : null,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: AppColors.neutral400),
-            ),
-            filled: true,
-            fillColor: Colors.white,
-          ),
-        ),
-        SizedBox(height: 12),
-      ],
-    );
-  }
-
   Widget _buildEmailField() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
@@ -272,6 +254,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           controller: _emailController,
           textAlign: TextAlign.right,
           keyboardType: TextInputType.emailAddress,
+          enabled: false, // Make email field non-editable
           decoration: InputDecoration(
             hintText: "ahmdhsamhmd2@gmail.com",
             hintStyle: AppTexts.contentRegular,
@@ -280,23 +263,45 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               borderSide: BorderSide(color: AppColors.neutral400),
             ),
             filled: true,
-            fillColor: Colors.white,
-          ),
-          onChanged: (value) {
-            setState(() {
-              _emailError = _isValidEmail(value) ? null : "تأكد من إدخال بريد إلكتروني صحيح";
-            });
-          },
-        ),
-        if (_emailError != null)
-          Padding(
-            padding: EdgeInsets.only(top: 4, right: 8),
-            child: Text(
-              _emailError!,
-              textAlign: TextAlign.right,
-              style: AppTexts.contentRegular.copyWith(color: Colors.red),
+            fillColor:
+                AppColors.neutral200, // Gray background to indicate disabled
+            disabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: AppColors.neutral300),
             ),
           ),
+        ),
+        Padding(
+          padding: EdgeInsets.only(top: 4, right: 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Text(
+                "لتغيير البريد الإلكتروني تواصل مع الدعم الفني",
+                textAlign: TextAlign.right,
+                style: AppTexts.contentRegular.copyWith(
+                  color: AppColors.primary500,
+                  fontSize: 12,
+                ),
+              ),
+              Text(
+                " • ",
+                style: AppTexts.contentRegular.copyWith(
+                  color: AppColors.neutral500,
+                  fontSize: 12,
+                ),
+              ),
+              Text(
+                "لا يمكن تغيير البريد الإلكتروني",
+                textAlign: TextAlign.right,
+                style: AppTexts.contentRegular.copyWith(
+                  color: AppColors.neutral500,
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
+        ),
         SizedBox(height: 12),
       ],
     );
@@ -329,7 +334,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
-  Widget _buildDropdownField(String label, List<String> options, String selectedValue, Function(String?) onChanged) {
+  Widget _buildDropdownField(String label, List<String> options,
+      String selectedValue, Function(String?) onChanged) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
@@ -367,15 +373,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   void _validateAndUpdate() {
-    if (!_isValidEmail(_emailController.text)) {
-      setState(() {
-        _emailError = "تأكد من إدخال بريد إلكتروني صحيح";
-      });
-      return;
-    } else {
-      _emailError = null;
-    }
-
     // تحويل النوع
     String genderApiValue = selectedGender == 'ذكر' ? 'male' : 'female';
 
@@ -389,10 +386,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
     // استدعاء التحديث
     context.read<ProfileCubit>().updateUserProfile(data);
-  }
-
-  bool _isValidEmail(String email) {
-    return RegExp(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$").hasMatch(email);
   }
 
   Future<void> _pickImage() async {

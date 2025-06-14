@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../../style/BaseScreen.dart';
 import '../../../../../style/Colors.dart';
 import '../../../../../style/Fonts.dart';
+import '../../../../utils/text_input_formatters.dart';
 import '../password_reset_cubits.dart';
 import '../password_reset_api_service.dart';
 import '../otp Forgot Password/otp_forget.dart';
@@ -21,7 +22,8 @@ class ForgotPasswordScreen extends StatelessWidget {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
-                builder: (context) => OtpVerificationCodeScreen(email: state.email),
+                builder: (context) =>
+                    OtpVerificationCodeScreen(email: state.email),
               ),
             );
           } else if (state is ForgetPasswordError) {
@@ -64,19 +66,22 @@ class ForgotPasswordScreen extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 32),
-                          Text("البريد الإلكتروني", style: AppTexts.contentRegular),
+                          Text("البريد الإلكتروني",
+                              style: AppTexts.contentRegular),
                           const SizedBox(height: 8),
                           Directionality(
                             textDirection: TextDirection.rtl,
                             child: TextField(
                               controller: _emailController,
                               keyboardType: TextInputType.emailAddress,
+                              inputFormatters: [LowercaseTextInputFormatter()],
                               decoration: InputDecoration(
                                 hintText: "أدخل بريدك الإلكتروني",
                                 hintStyle: AppTexts.contentRegular,
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(8),
-                                  borderSide: BorderSide(color: AppColors.neutral400),
+                                  borderSide:
+                                      BorderSide(color: AppColors.neutral400),
                                 ),
                                 filled: true,
                                 fillColor: Colors.white,
@@ -96,13 +101,17 @@ class ForgotPasswordScreen extends StatelessWidget {
                               if (_emailController.text.isEmpty) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
-                                    content: Text('الرجاء إدخال البريد الإلكتروني'),
+                                    content:
+                                        Text('الرجاء إدخال البريد الإلكتروني'),
                                     backgroundColor: Colors.red,
                                   ),
                                 );
                                 return;
                               }
-                              context.read<ForgetPasswordCubit>().sendResetEmail(_emailController.text);
+                              context
+                                  .read<ForgetPasswordCubit>()
+                                  .sendResetEmail(
+                                      _emailController.text.toLowerCase());
                             },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary500,
@@ -115,7 +124,8 @@ class ForgotPasswordScreen extends StatelessWidget {
                           ? const CircularProgressIndicator(color: Colors.white)
                           : Text(
                               "إرسال",
-                              style: AppTexts.contentEmphasis.copyWith(color: AppColors.neutral100),
+                              style: AppTexts.contentEmphasis
+                                  .copyWith(color: AppColors.neutral100),
                             ),
                     ),
                   ),
@@ -141,7 +151,8 @@ class ForgotPasswordScreen extends StatelessWidget {
           ),
         ),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.start, // زر الرجوع والعنوان على اليمين كما هو
+          mainAxisAlignment:
+              MainAxisAlignment.start, // زر الرجوع والعنوان على اليمين كما هو
           children: [
             GestureDetector(
               onTap: () => Navigator.pop(context), // العودة للصفحة السابقة
@@ -153,7 +164,8 @@ class ForgotPasswordScreen extends StatelessWidget {
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(Icons.arrow_back, color: AppColors.primary500), // السهم على اليمين كما هو
+                child: Icon(Icons.arrow_back,
+                    color: AppColors.primary500), // السهم على اليمين كما هو
               ),
             ),
             SizedBox(width: 12),

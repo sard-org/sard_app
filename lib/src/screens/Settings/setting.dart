@@ -82,9 +82,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               context,
                               "تعديل كلمة المرور",
                               "assets/img/password.png",
-                                  () => Navigator.push(
+                              () => Navigator.push(
                                 context,
-                                MaterialPageRoute(builder: (_) => ChangePassword()),
+                                MaterialPageRoute(
+                                    builder: (_) => ChangePassword()),
                               ),
                             ),
                             _buildDivider(),
@@ -92,13 +93,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               context,
                               "تسجيل الخروج",
                               "assets/img/Logout.png",
-                                  () async {
-                                final prefs = await SharedPreferences.getInstance();
+                              () async {
+                                final prefs =
+                                    await SharedPreferences.getInstance();
                                 await prefs.clear();
                                 Navigator.pushAndRemoveUntil(
                                   context,
-                                  MaterialPageRoute(builder: (_) => LoginScreen()),
-                                      (route) => false,
+                                  MaterialPageRoute(
+                                      builder: (_) => LoginScreen()),
+                                  (route) => false,
                                 );
                               },
                               isLogout: true,
@@ -132,23 +135,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ClipOval(
             child: state is ProfileLoaded && state.user.imageUrl != null
                 ? Image.network(
-              state.user.imageUrl!,
-              width: 50,
-              height: 50,
-              fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Image.asset(
-                'assets/img/2_Onb.png',
-                width: 50,
-                height: 50,
-                fit: BoxFit.cover,
-              ),
-            )
+                    state.user.imageUrl!,
+                    width: 50,
+                    height: 50,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Image.asset(
+                      'assets/img/Avatar.png', // Default avatar
+                      width: 50,
+                      height: 50,
+                      fit: BoxFit.cover,
+                    ),
+                  )
                 : Image.asset(
-              'assets/img/2_Onb.png',
-              width: 50,
-              height: 50,
-              fit: BoxFit.cover,
-            ),
+                    'assets/img/Avatar.png', // Default avatar
+                    width: 50,
+                    height: 50,
+                    fit: BoxFit.cover,
+                  ),
           ),
           SizedBox(width: 8),
           Column(
@@ -174,12 +177,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Widget _buildSettingsItem(
-      BuildContext context,
-      String title,
-      String iconPath,
-      VoidCallback onTap, {
-        bool isLogout = false,
-      }) {
+    BuildContext context,
+    String title,
+    String iconPath,
+    VoidCallback onTap, {
+    bool isLogout = false,
+  }) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: GestureDetector(
@@ -215,7 +218,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                 ),
               ),
-              Icon(Icons.arrow_forward_ios, size: 16, color: AppColors.neutral500),
+              Icon(Icons.arrow_forward_ios,
+                  size: 16, color: AppColors.neutral500),
             ],
           ),
         ),

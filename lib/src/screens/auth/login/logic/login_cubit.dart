@@ -8,7 +8,8 @@ import 'dart:developer';
 class AuthCubit extends Cubit<AuthState> {
   AuthCubit() : super(AuthInitial());
 
-  Future<void> login(String email, String password, {bool rememberMe = false}) async {
+  Future<void> login(String email, String password,
+      {bool rememberMe = false}) async {
     emit(AuthLoading());
     try {
       log('Attempting login with email: $email');
@@ -28,7 +29,7 @@ class AuthCubit extends Cubit<AuthState> {
         var data = response.data;
         if (data is Map<String, dynamic>) {
           String? token;
-          
+
           // استخراج التوكين من الاستجابة
           if (data.containsKey('token')) {
             // ده هستعمله في الابلكين كلو
@@ -38,15 +39,14 @@ class AuthCubit extends Cubit<AuthState> {
             final prefs = await SharedPreferences.getInstance();
             await prefs.setString('auth_token', token!);
             print(prefs.getString('auth_token'));
-
           } else if (data.containsKey('access_token')) {
             // token = data['access_token'];
-          // } else if (data.containsKey('data') && data['data'] is Map<String, dynamic>) {
-          //   if (data['data'].containsKey('token')) {
-          //     token = data['data']['token'];
-          //   } else if (data['data'].containsKey('access_token')) {
-          //     // token = data['data']['access_token'];
-          //   }
+            // } else if (data.containsKey('data') && data['data'] is Map<String, dynamic>) {
+            //   if (data['data'].containsKey('token')) {
+            //     token = data['data']['token'];
+            //   } else if (data['data'].containsKey('access_token')) {
+            //     // token = data['data']['access_token'];
+            //   }
           }
 
           if (token != null) {
@@ -67,10 +67,9 @@ class AuthCubit extends Cubit<AuthState> {
               await prefs.remove('saved_email');
             }
 
-
             // إضافة التوكين إلى DioHelper للاستخدام في الطلبات اللاحقة
             DioHelper.setToken(token);
-            
+
             emit(AuthSuccess(data));
             return;
           }
@@ -79,24 +78,31 @@ class AuthCubit extends Cubit<AuthState> {
         return;
       }
       emit(AuthSuccess('Success'));
-
     } on DioException catch (e) {
       log('DioException: ${e.type}, ${e.message}');
       if (e.response != null) {
-        log('Error response: ${e.response?.statusCode} - ${e.response?.data}');
-
-        // التعامل مع رموز الحالة المختلفة
+        log('Error response: ${e.response?.statusCode} - ${e.response?.data}'); // التعامل مع رموز الحالة المختلفة
         switch (e.response?.statusCode) {
           case 401:
             emit(AuthError("البريد الإلكتروني أو كلمة المرور غير صحيحة"));
             break;
           case 403:
-            emit(AuthError("ليس لديك صلاحية للوصول"));
+            // Check if it's an email verification issue
+            final responseMessage = e.response?.data is Map
+                ? e.response?.data['message']?.toString()
+                : null;
+            if (responseMessage != null &&
+                responseMessage.toLowerCase().contains('verify')) {
+              emit(EmailVerificationRequired(email));
+            } else {
+              emit(AuthError("ليس لديك صلاحية للوصول"));
+            }
             break;
           case 422:
-          // أخطاء التحقق
+            // أخطاء التحقق
             try {
-              if (e.response?.data is Map && e.response?.data['errors'] != null) {
+              if (e.response?.data is Map &&
+                  e.response?.data['errors'] != null) {
                 String errorMessage = "يرجى التحقق من البيانات المدخلة:";
                 Map<String, dynamic> errors = e.response?.data['errors'];
                 errors.forEach((key, value) {
@@ -119,7 +125,8 @@ class AuthCubit extends Cubit<AuthState> {
             emit(AuthError("حدث خطأ: ${e.response?.statusCode}"));
         }
       } else {
-        emit(AuthError("تعذر الاتصال بالخادم، يرجى التحقق من اتصالك بالإنترنت"));
+        emit(
+            AuthError("تعذر الاتصال بالخادم، يرجى التحقق من اتصالك بالإنترنت"));
       }
     } catch (e) {
       log('Unexpected error: $e');
@@ -136,7 +143,7 @@ class AuthCubit extends Cubit<AuthState> {
       if (token != null && token.isNotEmpty) {
         // إضافة التوكين إلى DioHelper
         DioHelper.setToken(token);
-        
+
         try {
           Response response = await DioHelper.getData(
             url: 'auth/user',

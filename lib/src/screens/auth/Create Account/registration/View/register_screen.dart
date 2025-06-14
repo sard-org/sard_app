@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../../../style/BaseScreen.dart';
 import '../../../../../../style/Colors.dart';
 import '../../../../../../style/Fonts.dart';
+import '../../../../../utils/text_input_formatters.dart';
 import '../../../login/View/Login.dart';
 import '../../otp/View/otp.dart';
 
@@ -21,7 +22,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
   bool _obscurePassword = true;
 
   // إضافة controller للـ ScrollView لتجنب مشكلة الـ overflow عند فتح لوحة المفاتيح
@@ -44,10 +46,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
       child: BlocConsumer<RegisterCubit, RegisterStates>(
         listener: (context, state) {
           if (state is RegisterSuccessState) {
+            // Create a completely new RegisterCubit for OTP screen
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => VerificationCodeScreen(email: state.email),
+                builder: (_) => BlocProvider(
+                  create: (_) =>
+                      RegisterCubit()..setRegisteredEmail(state.email),
+                  child: VerificationCodeScreen(email: state.email),
+                ),
               ),
             );
           } else if (state is RegisterErrorState) {
@@ -106,8 +113,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               ),
                             ),
                             const SizedBox(height: 24),
-                            _buildTextField("الاسم الكامل", "أدخل اسمك", _nameController),
-                            _buildTextField("البريد الإلكتروني", "أدخل بريدك الإلكتروني", _emailController),
+                            _buildTextField(
+                                "الاسم الكامل", "أدخل اسمك", _nameController),
+                            _buildTextField("البريد الإلكتروني",
+                                "أدخل بريدك الإلكتروني", _emailController,
+                                isEmailField: true),
                             _buildTextField(
                               "كلمة المرور",
                               "أدخل كلمة المرور",
@@ -160,13 +170,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
           onPressed: state is RegisterLoadingState
               ? null
               : () {
-            BlocProvider.of<RegisterCubit>(context).registerUser(
-              name: _nameController.text,
-              email: _emailController.text,
-              password: _passwordController.text,
-              confirmPassword: _confirmPasswordController.text,
-            );
-          },
+                  BlocProvider.of<RegisterCubit>(context).registerUser(
+                    name: _nameController.text,
+                    email: _emailController.text.toLowerCase(),
+                    password: _passwordController.text,
+                    confirmPassword: _confirmPasswordController.text,
+                  );
+                },
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.primary500,
             minimumSize: const Size(double.infinity, 50),
@@ -178,9 +188,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
           child: state is RegisterLoadingState
               ? const CircularProgressIndicator(color: Colors.white)
               : Text(
-            "إنشاء حساب",
-            style: AppTexts.contentEmphasis.copyWith(color: AppColors.neutral100),
-          ),
+                  "إنشاء حساب",
+                  style: AppTexts.contentEmphasis
+                      .copyWith(color: AppColors.neutral100),
+                ),
         ),
       ),
     );
@@ -220,12 +231,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Widget _buildTextField(
-      String label,
-      String hint,
-      TextEditingController controller, {
-        bool obscureText = false,
-        VoidCallback? toggleVisibility,
-      }) {
+    String label,
+    String hint,
+    TextEditingController controller, {
+    bool obscureText = false,
+    VoidCallback? toggleVisibility,
+    bool isEmailField = false,
+  }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Column(
@@ -237,6 +249,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
             controller: controller,
             textAlign: TextAlign.right,
             obscureText: obscureText,
+            inputFormatters:
+                isEmailField ? [LowercaseTextInputFormatter()] : null,
             onTap: () {
               // التمرير لأسفل عند الضغط على الحقل لتجنب مشكلة الـ overflow
               Future.delayed(const Duration(milliseconds: 300), () {
@@ -266,15 +280,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
               filled: true,
               fillColor: Colors.white,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               prefixIcon: toggleVisibility != null
                   ? GestureDetector(
-                onTap: toggleVisibility,
-                child: Icon(
-                  obscureText ? Icons.visibility_off : Icons.visibility,
-                  color: AppColors.neutral400,
-                ),
-              )
+                      onTap: toggleVisibility,
+                      child: Icon(
+                        obscureText ? Icons.visibility_off : Icons.visibility,
+                        color: AppColors.neutral400,
+                      ),
+                    )
                   : null,
             ),
           ),

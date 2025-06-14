@@ -22,9 +22,17 @@ class RegisterCubit extends Cubit<RegisterStates> {
 
   // الحصول على الوقت المتبقي للرمز
   int get secondsRemaining => _secondsRemaining;
-
   // الحصول على عدد المحاولات المتبقية
   int get remainingAttempts => 3 - _otpAttempts;
+  // تعيين البريد الإلكتروني المسجل (للاستخدام عند الانتقال من شاشة أخرى)
+  void setRegisteredEmail(String email) {
+    _registeredEmail = email;
+  }
+
+  // إعادة تعيين محاولات OTP (للاستخدام عند بدء عملية جديدة)
+  void resetOtpAttempts() {
+    _otpAttempts = 0;
+  }
 
   // دالة تسجيل مستخدم جديد
   Future<void> registerUser({
@@ -51,12 +59,22 @@ class RegisterCubit extends Cubit<RegisterStates> {
       _registeredEmail = email; // حفظ البريد الإلكتروني للاستخدام في OTP
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        emit(RegisterSuccessState(
-          message: response.data['message'] ?? 'تم التسجيل بنجاح',
-          email: email,
-        ));
+        // The API returns user object directly without a message field when successful
+        if (response.data != null && response.data['id'] != null) {
+          emit(RegisterSuccessState(
+            message: 'تم التسجيل بنجاح',
+            email: email,
+          ));
+          // Note: Backend automatically sends OTP email upon registration
+          // Start timer for OTP screen
+          startOtpTimer();
+        } else {
+          emit(RegisterErrorState(
+              error: 'حدث خطأ أثناء التسجيل: بيانات الاستجابة غير صالحة'));
+        }
       } else {
-        emit(RegisterErrorState(error: response.data['message'] ?? 'حدث خطأ أثناء التسجيل'));
+        emit(RegisterErrorState(
+            error: response.data['message'] ?? 'حدث خطأ أثناء التسجيل'));
       }
     } on DioException catch (e) {
       String errorMsg = 'حدث خطأ أثناء التسجيل';
@@ -67,11 +85,12 @@ class RegisterCubit extends Cubit<RegisterStates> {
 
       emit(RegisterErrorState(error: errorMsg));
     } catch (e) {
-      emit(RegisterErrorState(error: 'حدث خطأ غير متوقع، الرجاء المحاولة مرة أخرى'));
+      emit(RegisterErrorState(
+          error: 'حدث خطأ غير متوقع، الرجاء المحاولة مرة أخرى'));
     }
   }
 
-  // دالة إرسال رمز التحقق OTP
+  // دالة إرسال رمز التحقق OTP (للاستخدام في إعادة الإرسال فقط)
   Future<void> sendOtp({required String email}) async {
     if (_isSendingOtp) return; // حماية من التكرار
     _isSendingOtp = true;
@@ -89,7 +108,8 @@ class RegisterCubit extends Cubit<RegisterStates> {
         ));
         startOtpTimer();
       } else {
-        emit(OtpSendErrorState(error: response.data['message'] ?? 'فشل في إرسال رمز التحقق'));
+        emit(OtpSendErrorState(
+            error: response.data['message'] ?? 'فشل في إرسال رمز التحقق'));
       }
     } on DioException catch (e) {
       String errorMsg = 'فشل في إرسال رمز التحقق';
@@ -98,7 +118,8 @@ class RegisterCubit extends Cubit<RegisterStates> {
       }
       emit(OtpSendErrorState(error: errorMsg));
     } catch (e) {
-      emit(OtpSendErrorState(error: 'حدث خطأ غير متوقع، الرجاء المحاولة مرة أخرى'));
+      emit(OtpSendErrorState(
+          error: 'حدث خطأ غير متوقع، الرجاء المحاولة مرة أخرى'));
     }
     _isSendingOtp = false;
   }
@@ -111,8 +132,7 @@ class RegisterCubit extends Cubit<RegisterStates> {
     if (_registeredEmail.isEmpty) {
       emit(OtpVerificationErrorState(
           error: 'خطأ: البريد الإلكتروني غير متوفر، الرجاء المحاولة مرة أخرى',
-          attemptsLeft: remainingAttempts
-      ));
+          attemptsLeft: remainingAttempts));
       return;
     }
 
@@ -125,34 +145,45 @@ class RegisterCubit extends Cubit<RegisterStates> {
         code: otp,
       );
 
-      if (response.statusCode == 200) {
+      // Check for successful response (200 status with success status)
+      if (response.statusCode == 200 &&
+          response.data != null &&
+          response.data['status'] == 'success') {
+        // Reset attempts on success
+        _otpAttempts = 0;
         emit(OtpVerificationSuccessState(
           message: response.data['message'] ?? 'تم التحقق بنجاح',
         ));
-        cancelOtpTimer(); // إلغاء المؤقت بعد نجاح التحقق
+        cancelOtpTimer();
+        return; // Exit early on success
       } else {
-        // إرسال عدد المحاولات المتبقية مع رسالة الخطأ
+        // Handle error cases - both 400 status and 200 with non-success status
+        String errorMessage = 'رمز التحقق غير صحيح';
+        if (response.data != null && response.data['message'] != null) {
+          errorMessage = response.data['message'];
+        }
+
         emit(OtpVerificationErrorState(
-            error: response.data['message'] ?? 'رمز التحقق غير صحيح',
-            attemptsLeft: remainingAttempts
-        ));
+            error: errorMessage, attemptsLeft: remainingAttempts));
       }
     } on DioException catch (e) {
       String errorMsg = 'فشل في التحقق من الرمز';
 
-      if (e.response != null) {
-        errorMsg = e.response?.data['message'] ?? errorMsg;
+      if (e.response != null && e.response?.data != null) {
+        // Handle 400 Bad Request with "Invalid code" message
+        if (e.response?.statusCode == 400) {
+          errorMsg = e.response?.data['message'] ?? 'رمز التحقق غير صحيح';
+        } else {
+          errorMsg = e.response?.data['message'] ?? errorMsg;
+        }
       }
 
       emit(OtpVerificationErrorState(
-          error: errorMsg,
-          attemptsLeft: remainingAttempts
-      ));
+          error: errorMsg, attemptsLeft: remainingAttempts));
     } catch (e) {
       emit(OtpVerificationErrorState(
           error: 'حدث خطأ غير متوقع، الرجاء المحاولة مرة أخرى',
-          attemptsLeft: remainingAttempts
-      ));
+          attemptsLeft: remainingAttempts));
     }
 
     // التحقق من تجاوز الحد الأقصى للمحاولات
@@ -160,6 +191,7 @@ class RegisterCubit extends Cubit<RegisterStates> {
       emit(MaxAttemptsReachedState());
       // إعادة إرسال رمز OTP جديد بعد تجاوز الحد
       Future.delayed(const Duration(seconds: 2), () {
+        resetOtpAttempts(); // إعادة تعيين المحاولات قبل الإرسال
         sendOtp(email: _registeredEmail);
       });
     }
@@ -186,9 +218,11 @@ class RegisterCubit extends Cubit<RegisterStates> {
   }
 
   // إعادة إرسال رمز التحقق
-  void resendOtp() {
+  Future<void> resendOtp() async {
     if (_secondsRemaining == 0 && _registeredEmail.isNotEmpty) {
-      sendOtp(email: _registeredEmail);
+      // إعادة تعيين المحاولات عند إعادة الإرسال
+      resetOtpAttempts();
+      await sendOtp(email: _registeredEmail);
     }
   }
 

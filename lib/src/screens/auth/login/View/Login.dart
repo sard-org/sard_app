@@ -6,7 +6,10 @@ import '../../../../../style/BaseScreen.dart';
 import '../../../../../style/Colors.dart';
 import '../../../../../style/Fonts.dart';
 import '../../../../cubit/global_favorite_cubit.dart';
+import '../../../../utils/text_input_formatters.dart';
 import '../../Create Account/registration/View/register_screen.dart';
+import '../../Create Account/registration/logic/register_cubit.dart';
+import '../../Create Account/otp/View/otp.dart';
 import '../../Forgot Password/Enter Email/enter_email.dart';
 
 import '../logic/login_cubit.dart';
@@ -87,6 +90,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     controller: _emailController,
                     obscureText: false,
                     keyboardType: TextInputType.emailAddress,
+                    isEmailField: true,
                   ),
                   _buildTextField(
                     label: 'كلمة المرور',
@@ -144,6 +148,18 @@ class _LoginScreenState extends State<LoginScreen> {
                             context,
                             MaterialPageRoute(
                                 builder: (context) => MainScreen()));
+                      } else if (state is EmailVerificationRequired) {
+                        // Navigate to OTP verification screen
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => BlocProvider(
+                              create: (_) => RegisterCubit()
+                                ..setRegisteredEmail(state.email),
+                              child: VerificationCodeScreen(email: state.email),
+                            ),
+                          ),
+                        );
                       } else if (state is AuthError) {
                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                           content: Text(state.message),
@@ -160,7 +176,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           onPressed: isLoading
                               ? null // Disable button when loading
                               : () {
-                                  final email = _emailController.text.trim();
+                                  final email = _emailController.text
+                                      .trim()
+                                      .toLowerCase();
                                   final password =
                                       _passwordController.text.trim();
 
@@ -266,6 +284,7 @@ class _LoginScreenState extends State<LoginScreen> {
     bool obscureText = false,
     VoidCallback? toggleVisibility,
     TextInputType? keyboardType,
+    bool isEmailField = false,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -276,6 +295,8 @@ class _LoginScreenState extends State<LoginScreen> {
           controller: controller,
           obscureText: obscureText,
           keyboardType: keyboardType,
+          inputFormatters:
+              isEmailField ? [LowercaseTextInputFormatter()] : null,
           decoration: InputDecoration(
             hintText: hint,
             hintStyle: AppTexts.contentRegular,

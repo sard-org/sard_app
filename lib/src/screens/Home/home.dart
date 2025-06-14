@@ -268,7 +268,15 @@ class HomeScreenState extends State<HomeScreen> {
                       children: [
                         CircleAvatar(
                           radius: 24,
-                          backgroundImage: NetworkImage(user.photo),
+                          backgroundImage: user.photo.isNotEmpty
+                              ? NetworkImage(user.photo)
+                              : AssetImage('assets/img/Avatar.png')
+                                  as ImageProvider,
+                          onBackgroundImageError: user.photo.isNotEmpty
+                              ? (exception, stackTrace) {
+                                  // Handle network image load error
+                                }
+                              : null,
                         ),
                         const SizedBox(width: 8),
                         RichText(
