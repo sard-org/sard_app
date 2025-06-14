@@ -35,7 +35,7 @@ class BookCardWidget extends StatelessWidget {
   Widget buildPriceTag() {
     if (isFree) {
       return Text(
-        'Free',
+        'مجانا',
         style: AppTexts.highlightAccent.copyWith(color: AppColors.primary1000),
       );
     } else if (price != null) {

@@ -66,7 +66,8 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: Icon(Icons.arrow_forward, color: AppColors.primary500),
+                        child: Icon(Icons.arrow_forward,
+                            color: AppColors.primary500),
                       ),
                     ),
                   ],
@@ -195,13 +196,14 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
           children: [
             Text(
               'احمد خالد توفيق',
-              style: AppTexts.highlightEmphasis.copyWith(color: AppColors.neutral500),
+              style: AppTexts.highlightEmphasis
+                  .copyWith(color: AppColors.neutral500),
               textAlign: TextAlign.right,
             ),
             SizedBox(width: 8),
             CircleAvatar(
               radius: 16,
-              backgroundImage: AssetImage('assets/img/author.png'),
+              backgroundImage: AssetImage('assets/img/avatar.png'),
             ),
           ],
         ),
@@ -231,16 +233,21 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
               onTap: () {},
               child: Text(
                 'إضافة تعليق',
-                style: AppTexts.contentBold.copyWith(color: AppColors.primary700 , decoration: TextDecoration.underline),
+                style: AppTexts.contentBold.copyWith(
+                    color: AppColors.primary700,
+                    decoration: TextDecoration.underline),
                 textAlign: TextAlign.right,
               ),
             ),
             SizedBox(width: 16),
             Row(
               children: [
-                Text('(54)', style: AppTexts.contentBold.copyWith(color: AppColors.neutral500)),
+                Text('(54)',
+                    style: AppTexts.contentBold
+                        .copyWith(color: AppColors.neutral500)),
                 SizedBox(width: 6),
-                ...List.generate(4, (index) => Icon(Icons.star, color: Colors.amber, size: 18)),
+                ...List.generate(4,
+                    (index) => Icon(Icons.star, color: Colors.amber, size: 18)),
                 Icon(Icons.star_border, color: Colors.amber, size: 18),
               ],
             ),
@@ -352,8 +359,11 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
                             borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                        icon: Icon(Icons.smart_toy_outlined, color: AppColors.primary200, size: 24),
-                        label: Text('تلخيص بواسطة الذكاء الاصطناعي', style: AppTexts.highlightAccent.copyWith(color: AppColors.primary200)),
+                        icon: Icon(Icons.smart_toy_outlined,
+                            color: AppColors.primary200, size: 24),
+                        label: Text('تلخيص بواسطة الذكاء الاصطناعي',
+                            style: AppTexts.highlightAccent
+                                .copyWith(color: AppColors.primary200)),
                         onPressed: _openAISummary,
                       ),
                     ),
@@ -362,8 +372,10 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
                     SliderTheme(
                       data: SliderThemeData(
                         trackHeight: 4,
-                        thumbShape: RoundSliderThumbShape(enabledThumbRadius: 8),
-                        overlayShape: RoundSliderOverlayShape(overlayRadius: 16),
+                        thumbShape:
+                            RoundSliderThumbShape(enabledThumbRadius: 8),
+                        overlayShape:
+                            RoundSliderOverlayShape(overlayRadius: 16),
                         activeTrackColor: AppColors.primary500,
                         inactiveTrackColor: Colors.grey.shade300,
                         thumbColor: AppColors.primary500,

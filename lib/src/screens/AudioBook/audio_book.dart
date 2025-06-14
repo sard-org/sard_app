@@ -2,8 +2,51 @@ import 'package:flutter/material.dart';
 import '../../../style/BaseScreen.dart';
 import '../../../style/Colors.dart';
 import '../../../style/Fonts.dart';
+import 'audio_book_api_service.dart';
+import 'audio_book_model.dart';
 
-class AudioBookScreen extends StatelessWidget {
+class AudioBookScreen extends StatefulWidget {
+  final String bookId;
+
+  const AudioBookScreen({Key? key, required this.bookId}) : super(key: key);
+
+  @override
+  State<AudioBookScreen> createState() => _AudioBookScreenState();
+}
+
+class _AudioBookScreenState extends State<AudioBookScreen> {
+  late AudioBookApiService _apiService;
+  AudioBookResponse? bookData;
+  bool isLoading = true;
+  String? errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _apiService = AudioBookApiService();
+    _loadBookData();
+  }
+
+  Future<void> _loadBookData() async {
+    try {
+      setState(() {
+        isLoading = true;
+        errorMessage = null;
+      });
+
+      final data = await _apiService.getAudioBook(widget.bookId);
+      setState(() {
+        bookData = data;
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        errorMessage = e.toString();
+        isLoading = false;
+      });
+    }
+  }
+
   Widget _buildAppBar(BuildContext context) {
     return Container(
       width: double.infinity,
@@ -43,119 +86,33 @@ class AudioBookScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSuggestedBooks() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        Align(
-          alignment: Alignment.centerRight,
-          child: Text('كتب مقترحة', style: AppTexts.heading2Bold),
-        ),
-        SizedBox(height: 12),
-        SizedBox(
-          height: 190,
-          child: Directionality(
-            textDirection: TextDirection.rtl,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: 10,
-              itemBuilder: (context, index) => GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => AudioBookScreen()),
-                  );
-                  print('Item $index tapped');
-                },
-                child: Container(
-                  width: 280,
-                  margin: EdgeInsets.only(right: index == 0 ? 0 : 12),
-                  padding: const EdgeInsets.all(12),
-                  decoration: ShapeDecoration(
-                    color: Color(0xFFFCFEF5),
-                    shape: RoundedRectangleBorder(
-                      side: BorderSide(width: 0.50, color: AppColors.primary900),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Container(
-                        width: 93,
-                        height: 125,
-                        decoration: ShapeDecoration(
-                          image: DecorationImage(
-                            image: AssetImage('assets/img/Book_1.png'),
-                            fit: BoxFit.fill,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            side: BorderSide(width: 2, color: Color(0xFF2B2B2B)),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                        ),
-                      ),
-                      SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              'د.أحمد حسين الرفاعي',
-                              style: AppTexts.captionRegular.copyWith(
-                                color: AppColors.neutral400,
-                              ),
-                              textAlign: TextAlign.right,
-                            ),
-                            SizedBox(height: 4),
-                            Text(
-                              'كيف تكون إنساناً قوياً قيادياً رائعاً محبوباً',
-                              style: AppTexts.highlightStandard.copyWith(
-                                color: AppColors.neutral1000,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              textAlign: TextAlign.right,
-                            ),
-                            SizedBox(height: 4),
-                            Text(
-                              'انشغلنا بقوة وعظمة الدول المتطورة تكنولوجياً...',
-                              style: AppTexts.contentRegular.copyWith(
-                                color: AppColors.neutral400,
-                              ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              textAlign: TextAlign.right,
-                            ),
-                          ],
-                        ),
-                      ),
-                      SizedBox(width: 12),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            '19.99 ر.س',
-                            style: AppTexts.highlightStandard.copyWith(
-                              color: AppColors.primary600,
-                            ),
-                            textAlign: TextAlign.left,
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _buildBottomBar(BuildContext context) {
+    if (bookData == null) return SizedBox.shrink();
+
+    // Determine button text and enabled state
+    String buttonText;
+    bool isEnabled = true;
+    Color buttonColor = AppColors.primary500;
+
+    if (bookData!.isFree) {
+      buttonText = 'احصل علية مجانا';
+    } else if (bookData!.price != null) {
+      buttonText = 'شراء الكتاب  |  ${bookData!.price} ج.م';
+    } else if (bookData!.pricePoints != null) {
+      if (bookData!.userPoints != null &&
+          bookData!.userPoints! < bookData!.pricePoints!) {
+        buttonText = 'ليس لديك نقاط كافية';
+        isEnabled = false;
+        buttonColor = Colors.grey;
+      } else {
+        buttonText = 'استبدال بالنقاط  |  ${bookData!.pricePoints} نقاط';
+      }
+    } else {
+      buttonText = 'غير متاح';
+      isEnabled = false;
+      buttonColor = Colors.grey;
+    }
+
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
@@ -175,14 +132,19 @@ class AudioBookScreen extends StatelessWidget {
             width: double.infinity,
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary500,
+                backgroundColor: buttonColor,
                 padding: EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              onPressed: () {},
-              child: Text('شراء الكتاب  |  396 ج.م', style: AppTexts.highlightAccent.copyWith(color: Colors.white)),
+              onPressed: isEnabled ? () {} : null,
+              child: Text(
+                buttonText,
+                style: AppTexts.highlightAccent.copyWith(
+                  color: isEnabled ? Colors.white : Colors.white70,
+                ),
+              ),
             ),
           ),
           SizedBox(height: 12),
@@ -190,14 +152,17 @@ class AudioBookScreen extends StatelessWidget {
             width: double.infinity,
             child: OutlinedButton.icon(
               style: OutlinedButton.styleFrom(
-                side: BorderSide(color: AppColors.primary200!),
+                side: BorderSide(color: AppColors.primary200),
                 padding: EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              icon: Icon(Icons.smart_toy_outlined, color: AppColors.primary200, size: 24),
-              label: Text('تلخيص بواسطة الذكاء الاصطناعي', style: AppTexts.highlightAccent.copyWith(color: AppColors.primary200)),
+              icon: Icon(Icons.smart_toy_outlined,
+                  color: AppColors.primary200, size: 24),
+              label: Text('تلخيص بواسطة الذكاء الاصطناعي',
+                  style: AppTexts.highlightAccent
+                      .copyWith(color: AppColors.primary200)),
               onPressed: () {},
             ),
           ),
@@ -211,120 +176,226 @@ class AudioBookScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       body: BaseScreen(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                _buildAppBar(context),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      SizedBox(height: 24),
-                      // Book Cover (centered)
-                      Center(
-                        child: Container(
-                          width: 220,
-                          height: 260,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black26,
-                                blurRadius: 8,
-                                offset: Offset(0, 4),
-                              ),
-                            ],
+        child: isLoading
+            ? Center(
+                child: CircularProgressIndicator(
+                  color: AppColors.primary500,
+                ),
+              )
+            : errorMessage != null
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.error_outline,
+                          size: 64,
+                          color: AppColors.primary600,
+                        ),
+                        SizedBox(height: 16),
+                        Text(
+                          'حدث خطأ في تحميل بيانات الكتاب',
+                          style: AppTexts.heading3Bold
+                              .copyWith(color: AppColors.neutral800),
+                        ),
+                        SizedBox(height: 8),
+                        Text(
+                          errorMessage!,
+                          style: AppTexts.contentRegular
+                              .copyWith(color: AppColors.neutral500),
+                          textAlign: TextAlign.center,
+                        ),
+                        SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: _loadBookData,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary500,
                           ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: Image.asset(
-                              'assets/img/Book_1.png', // Replace with your book cover
-                              fit: BoxFit.cover,
-                            ),
+                          child: Text(
+                            'إعادة المحاولة',
+                            style: AppTexts.highlightAccent
+                                .copyWith(color: Colors.white),
                           ),
                         ),
-                      ),
-                      SizedBox(height: 24),
-                      // Price and Author Row
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      ],
+                    ),
+                  )
+                : SingleChildScrollView(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 0, vertical: 0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          RichText(
-                            text: TextSpan(
+                          _buildAppBar(context),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 12),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
-                                TextSpan(
-                                  text: '396',
-                                  style: AppTexts.heading1Bold.copyWith(
-                                    color: Colors.green[800],
-                                    fontSize: 28,
+                                SizedBox(height: 24),
+                                // Book Cover (centered)
+                                Center(
+                                  child: Container(
+                                    width: 220,
+                                    height: 260,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(12),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black26,
+                                          blurRadius: 8,
+                                          offset: Offset(0, 4),
+                                        ),
+                                      ],
+                                    ),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(12),
+                                      child: Image.network(
+                                        bookData!.cover,
+                                        fit: BoxFit.cover,
+                                        errorBuilder:
+                                            (context, error, stackTrace) =>
+                                                Image.asset(
+                                          'assets/img/Book_1.png',
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                    ),
                                   ),
                                 ),
-                                TextSpan(
-                                  text: ' ج.م',
-                                  style: AppTexts.captionRegular.copyWith(
-                                    color: AppColors.neutral500,
-                                    fontSize: 18,
-                                  ),
+                                SizedBox(height: 24),
+                                // Author and Price Row
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    // Price display logic - LEFT SIDE
+                                    if (bookData!.isFree)
+                                      Text(
+                                        'مجانا',
+                                        style: AppTexts.heading1Bold.copyWith(
+                                          color: Colors.green[800],
+                                          fontSize: 28,
+                                        ),
+                                      )
+                                    else if (bookData!.price != null)
+                                      RichText(
+                                        text: TextSpan(
+                                          children: [
+                                            TextSpan(
+                                              text: '${bookData!.price}',
+                                              style: AppTexts.heading1Bold
+                                                  .copyWith(
+                                                color: Colors.green[800],
+                                                fontSize: 28,
+                                              ),
+                                            ),
+                                            TextSpan(
+                                              text: ' ج.م',
+                                              style: AppTexts.captionRegular
+                                                  .copyWith(
+                                                color: AppColors.neutral500,
+                                                fontSize: 18,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      )
+                                    else if (bookData!.pricePoints != null)
+                                      Row(
+                                        children: [
+                                          Image.asset(
+                                            'assets/img/coin.png',
+                                            width: 24,
+                                            height: 24,
+                                          ),
+                                          SizedBox(width: 4),
+                                          Text(
+                                            '${bookData!.pricePoints}',
+                                            style:
+                                                AppTexts.heading1Bold.copyWith(
+                                              color: Colors.green[800],
+                                              fontSize: 28,
+                                            ),
+                                          ),
+                                        ],
+                                      )
+                                    else
+                                      SizedBox.shrink(),
+                                    // Author info - RIGHT SIDE
+                                    Row(
+                                      children: [
+                                        Text(
+                                          bookData!.author.name,
+                                          style: AppTexts.highlightEmphasis
+                                              .copyWith(
+                                                  color: AppColors.neutral500),
+                                          textAlign: TextAlign.right,
+                                        ),
+                                        SizedBox(width: 8),
+                                        CircleAvatar(
+                                          radius: 18,
+                                          backgroundImage: NetworkImage(
+                                              bookData!.author.photo),
+                                          onBackgroundImageError:
+                                              (exception, stackTrace) {},
+                                          child: bookData!.author.photo.isEmpty
+                                              ? Icon(Icons.person)
+                                              : null,
+                                        ),
+                                      ],
+                                    ),
+                                  ],
                                 ),
+                                SizedBox(height: 16),
+                                // Book Title
+                                Text(
+                                  bookData!.title,
+                                  style: AppTexts.heading1Bold,
+                                  textAlign: TextAlign.right,
+                                ),
+                                SizedBox(height: 12),
+                                // Book Description
+                                Text(
+                                  bookData!.description.isNotEmpty
+                                      ? bookData!.description
+                                      : 'لا يوجد وصف متاح للكتاب',
+                                  style: AppTexts.contentRegular
+                                      .copyWith(color: AppColors.neutral500),
+                                  textAlign: TextAlign.right,
+                                ),
+                                SizedBox(height: 12),
+                                // Rating
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    Text('( ${bookData!.count.reviews} ) ',
+                                        style: AppTexts.contentBold.copyWith(
+                                            color: AppColors.neutral500)),
+                                    SizedBox(width: 6),
+                                    ...List.generate(
+                                        5,
+                                        (index) => Icon(
+                                              index < bookData!.rating.floor()
+                                                  ? Icons.star
+                                                  : Icons.star_border,
+                                              color: Colors.amber,
+                                              size: 22,
+                                            )),
+                                  ],
+                                ),
+                                SizedBox(height: 24),
+                                // Removed suggested books section
+                                SizedBox(height: 32),
                               ],
                             ),
                           ),
-                          Row(
-                            children: [
-                              Text(
-                                'احمد خالد توفيق',
-                                style: AppTexts.highlightEmphasis.copyWith(color: AppColors.neutral500),
-                                textAlign: TextAlign.right,
-                              ),
-                              SizedBox(width: 8),
-                              CircleAvatar(
-                                radius: 18,
-                                backgroundImage: AssetImage('assets/img/author.png'),
-                              ),
-                            ],
-                          ),
                         ],
                       ),
-                      SizedBox(height: 16),
-                      // Book Title
-                      Text(
-                        'ما وراء الطبيعة - اسطورة النداهة',
-                        style: AppTexts.heading1Bold,
-                        textAlign: TextAlign.right,
-                      ),
-                      SizedBox(height: 12),
-                      // Book Description
-                      Text(
-                        'وصل خطاب باسمي، تسلمه ( طلعت ) زوج أختي ... يكون أمراً إذا بال يمكنه هو التصرف في لم ير فائدة',
-                        style: AppTexts.contentRegular.copyWith(color: AppColors.neutral500),
-                        textAlign: TextAlign.right,
-                      ),
-                      SizedBox(height: 12),
-                      // Rating
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Text('( 54 ) ', style: AppTexts.contentBold.copyWith(color: AppColors.neutral500)),
-                          SizedBox(width: 6),
-                          ...List.generate(4, (index) => Icon(Icons.star, color: Colors.amber, size: 22)),
-                          Icon(Icons.star_border, color: Colors.amber, size: 22),
-                        ],
-                      ),
-                      SizedBox(height: 24),
-                      // Suggested Books
-                      _buildSuggestedBooks(),
-                      SizedBox(height: 32),
-                    ],
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ),
-        ),
       ),
       bottomNavigationBar: _buildBottomBar(context),
     );

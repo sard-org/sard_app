@@ -268,7 +268,8 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
                                           context,
                                           MaterialPageRoute(
                                             builder: (context) =>
-                                                AudioBookScreen(),
+                                                AudioBookScreen(
+                                                    bookId: book.id),
                                           ),
                                         );
                                       },

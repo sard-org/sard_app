@@ -9,6 +9,7 @@ import 'logic/favorite_state.dart';
 import 'package:sard/style/Colors.dart';
 import 'package:sard/style/Fonts.dart';
 import 'package:sard/style/BaseScreen.dart';
+import '../AudioBook/audio_book.dart';
 
 class FavoritesScreen extends StatefulWidget {
   const FavoritesScreen({super.key});
@@ -30,7 +31,8 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token') ?? ''; // التوكين الصحيح
     cubit = FavoriteCubit(
-      dioFav: DioFav(Dio()..options.baseUrl = 'https://api.mohamed-ramadan.me/api/'),
+      dioFav: DioFav(
+          Dio()..options.baseUrl = 'https://api.mohamed-ramadan.me/api/'),
       token: token,
     );
     cubit.getFavorites();
@@ -56,25 +58,40 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                     child: BlocBuilder<FavoriteCubit, FavoriteState>(
                       builder: (context, state) {
                         if (state is FavoriteLoadingState) {
-                          return const Center(child: CircularProgressIndicator());
+                          return const Center(
+                              child: CircularProgressIndicator());
                         } else if (state is FavoriteErrorState) {
-                          return Center(child: Text('حدث خطأ: ${state.message}'));
+                          return Center(
+                              child: Text('حدث خطأ: ${state.message}'));
                         } else if (state is FavoriteSuccessState) {
                           final books = state.favorites;
                           if (books.isEmpty) return _buildEmptyFavorites();
-
                           return ListView.builder(
                             itemCount: books.length,
                             itemBuilder: (context, index) {
                               final book = books[index];
-                              return BookItem(
-                                author: book["Author"]?["name"] ?? 'مؤلف غير معروف',
-                                title: book["title"] ?? 'عنوان غير معروف',
-                                description: book["description"] ?? '',
-                                price: "—",
-                                currency: "",
-                                imageUrl: book["cover"] ?? 'assets/img/Book_1.png',
-                                onFavoritePressed: () => cubit.removeFavorite(book['id']),
+                              return GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          AudioBookScreen(bookId: book['id']),
+                                    ),
+                                  );
+                                },
+                                child: BookItem(
+                                  author: book["Author"]?["name"] ??
+                                      'مؤلف غير معروف',
+                                  title: book["title"] ?? 'عنوان غير معروف',
+                                  description: book["description"] ?? '',
+                                  price: "—",
+                                  currency: "",
+                                  imageUrl:
+                                      book["cover"] ?? 'assets/img/Book_1.png',
+                                  onFavoritePressed: () =>
+                                      cubit.removeFavorite(book['id']),
+                                ),
                               );
                             },
                           );
@@ -92,7 +109,8 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
               left: 0,
               right: 0,
               child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
                 decoration: BoxDecoration(
                   color: AppColors.primary500,
                   borderRadius: const BorderRadius.only(
@@ -103,7 +121,8 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                 child: Center(
                   child: Text(
                     "المفضلات",
-                    style: AppTexts.heading2Bold.copyWith(color: AppColors.neutral100),
+                    style: AppTexts.heading2Bold
+                        .copyWith(color: AppColors.neutral100),
                   ),
                 ),
               ),
@@ -132,7 +151,8 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
           const SizedBox(height: 8),
           Text(
             "أضف بعض الكتب إلى المفضلة لتظهر هنا",
-            style: AppTexts.contentRegular.copyWith(color: AppColors.neutral500),
+            style:
+                AppTexts.contentRegular.copyWith(color: AppColors.neutral500),
             textAlign: TextAlign.center,
           ),
         ],
@@ -218,14 +238,17 @@ class _BookItemState extends State<BookItem> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(widget.author,
-                      style: AppTexts.captionRegular.copyWith(color: AppColors.neutral400)),
+                      style: AppTexts.captionRegular
+                          .copyWith(color: AppColors.neutral400)),
                   const SizedBox(height: 8),
                   Text(widget.title,
-                      style: AppTexts.highlightStandard.copyWith(color: AppColors.neutral1000)),
+                      style: AppTexts.highlightStandard
+                          .copyWith(color: AppColors.neutral1000)),
                   const SizedBox(height: 8),
                   Text(
                     widget.description,
-                    style: AppTexts.contentRegular.copyWith(color: AppColors.neutral400),
+                    style: AppTexts.contentRegular
+                        .copyWith(color: AppColors.neutral400),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -234,12 +257,14 @@ class _BookItemState extends State<BookItem> {
                     children: [
                       Text(
                         widget.price,
-                        style: AppTexts.highlightAccent.copyWith(color: AppColors.primary1000),
+                        style: AppTexts.highlightAccent
+                            .copyWith(color: AppColors.primary1000),
                       ),
                       const SizedBox(width: 2),
                       Text(
                         widget.currency,
-                        style: AppTexts.footnoteRegular11.copyWith(color: AppColors.primary1000),
+                        style: AppTexts.footnoteRegular11
+                            .copyWith(color: AppColors.primary1000),
                       ),
                     ],
                   ),
@@ -247,7 +272,8 @@ class _BookItemState extends State<BookItem> {
               ),
             ),
             IconButton(
-              icon: Icon(Icons.favorite, color: isFavorite ? Colors.red : AppColors.primary900),
+              icon: Icon(Icons.favorite,
+                  color: isFavorite ? Colors.red : AppColors.primary900),
               onPressed: toggleFavorite,
             ),
           ],

@@ -273,7 +273,8 @@ class _WithoutCategoryDetailsPageState
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => AudioBookScreen(),
+                                  builder: (context) => AudioBookScreen(
+                                      bookId: book['id'] as String),
                                 ),
                               );
                             },
@@ -359,7 +360,8 @@ class _WithoutCategoryDetailsPageState
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => AudioBookScreen(),
+                                builder: (context) => AudioBookScreen(
+                                    bookId: book['id'] as String),
                               ),
                             );
                           },

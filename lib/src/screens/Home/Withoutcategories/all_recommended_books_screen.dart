@@ -211,7 +211,8 @@ class _AllRecommendedBooksScreenState extends State<AllRecommendedBooksScreen> {
                                                 context,
                                                 MaterialPageRoute(
                                                   builder: (context) =>
-                                                      AudioBookScreen(),
+                                                      AudioBookScreen(
+                                                          bookId: book.id),
                                                 ),
                                               );
                                             },

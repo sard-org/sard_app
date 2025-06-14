@@ -211,7 +211,8 @@ class _AllExchangeBooksScreenState extends State<AllExchangeBooksScreen> {
                                               context,
                                               MaterialPageRoute(
                                                 builder: (context) =>
-                                                    AudioBookScreen(),
+                                                    AudioBookScreen(
+                                                        bookId: book.id),
                                               ),
                                             );
                                           },

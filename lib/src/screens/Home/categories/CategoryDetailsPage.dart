@@ -71,7 +71,8 @@ class CategoryDetailsPage extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => AudioBookScreen(),
+                        builder: (context) =>
+                            AudioBookScreen(bookId: bookData['id'] ?? ''),
                       ),
                     );
                   },
