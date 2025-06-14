@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sard/src/screens/auth/Create%20Account/registration/logic/register_state.dart';
 import '../../otp/data/dio_otp_helper.dart';
+import '../../../../../utils/error_translator.dart';
 
 class RegisterCubit extends Cubit<RegisterStates> {
   RegisterCubit() : super(RegisterInitialState());
@@ -80,7 +81,11 @@ class RegisterCubit extends Cubit<RegisterStates> {
       String errorMsg = 'حدث خطأ أثناء التسجيل';
 
       if (e.response != null) {
-        errorMsg = e.response?.data['message'] ?? errorMsg;
+        // Get the raw error message from server
+        String serverMessage = e.response?.data['message'] ?? errorMsg;
+        // Translate the error message to Arabic
+        errorMsg = ErrorTranslator.translateErrorWithContext(
+            serverMessage, e.response?.statusCode);
       }
 
       emit(RegisterErrorState(error: errorMsg));
@@ -114,7 +119,11 @@ class RegisterCubit extends Cubit<RegisterStates> {
     } on DioException catch (e) {
       String errorMsg = 'فشل في إرسال رمز التحقق';
       if (e.response != null) {
-        errorMsg = e.response?.data['message'] ?? errorMsg;
+        // Get the raw error message from server
+        String serverMessage = e.response?.data['message'] ?? errorMsg;
+        // Translate the error message to Arabic
+        errorMsg = ErrorTranslator.translateErrorWithContext(
+            serverMessage, e.response?.statusCode);
       }
       emit(OtpSendErrorState(error: errorMsg));
     } catch (e) {
@@ -168,13 +177,17 @@ class RegisterCubit extends Cubit<RegisterStates> {
       }
     } on DioException catch (e) {
       String errorMsg = 'فشل في التحقق من الرمز';
-
       if (e.response != null && e.response?.data != null) {
         // Handle 400 Bad Request with "Invalid code" message
         if (e.response?.statusCode == 400) {
-          errorMsg = e.response?.data['message'] ?? 'رمز التحقق غير صحيح';
+          String serverMessage =
+              e.response?.data['message'] ?? 'رمز التحقق غير صحيح';
+          errorMsg = ErrorTranslator.translateErrorWithContext(
+              serverMessage, e.response?.statusCode);
         } else {
-          errorMsg = e.response?.data['message'] ?? errorMsg;
+          String serverMessage = e.response?.data['message'] ?? errorMsg;
+          errorMsg = ErrorTranslator.translateErrorWithContext(
+              serverMessage, e.response?.statusCode);
         }
       }
 

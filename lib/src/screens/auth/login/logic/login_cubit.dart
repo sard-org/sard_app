@@ -4,6 +4,7 @@ import '../data/dio_login_helper.dart';
 import 'login_state.dart';
 import 'package:dio/dio.dart';
 import 'dart:developer';
+import '../../../../utils/error_translator.dart';
 
 class AuthCubit extends Cubit<AuthState> {
   AuthCubit() : super(AuthInitial());
@@ -122,7 +123,20 @@ class AuthCubit extends Cubit<AuthState> {
             }
             break;
           default:
-            emit(AuthError("حدث خطأ: ${e.response?.statusCode}"));
+            // Use error translator for general server error messages
+            String defaultMessage =
+                "حدث خطأ: ${e.response?.statusCode ?? 'غير معروف'}";
+            String serverMessage = defaultMessage;
+
+            if (e.response?.data is Map &&
+                e.response?.data['message'] != null) {
+              serverMessage =
+                  e.response?.data['message']?.toString() ?? defaultMessage;
+            }
+
+            String translatedError = ErrorTranslator.translateErrorWithContext(
+                serverMessage, e.response?.statusCode);
+            emit(AuthError(translatedError));
         }
       } else {
         emit(
