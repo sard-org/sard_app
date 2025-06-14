@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../style/Colors.dart';
 import '../../../../style/Fonts.dart';
+import '../../../cubit/global_favorite_cubit.dart';
 import '../../AudioBook/audio_book.dart';
 import '../widgets/BookCardWidget.dart';
 import 'Logic/categories_cubit.dart';
@@ -23,6 +24,16 @@ class CategoryDetailsPage extends StatelessWidget {
         if (state is CategoryBooksLoaded) {
           final books = state.books;
           print("this here");
+
+          // Update global favorite state with current book favorite status
+          final globalFavoriteCubit = context.read<GlobalFavoriteCubit>();
+          for (var bookData in books) {
+            final bookId = bookData['id']?.toString();
+            final isFavorite = bookData['is_favorite'] as bool? ?? false;
+            if (bookId != null) {
+              globalFavoriteCubit.updateFavoriteStatus(bookId, isFavorite);
+            }
+          }
 
           if (books.isEmpty) {
             return Center(
@@ -77,7 +88,9 @@ class CategoryDetailsPage extends StatelessWidget {
                     );
                   },
                   onFavoriteTap: () {
-                    // Handle favorite toggle
+                    final globalFavoriteCubit =
+                        context.read<GlobalFavoriteCubit>();
+                    globalFavoriteCubit.toggleFavorite(bookData['id'] ?? '');
                   },
                 ),
               );

@@ -85,7 +85,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                                       'مؤلف غير معروف',
                                   title: book["title"] ?? 'عنوان غير معروف',
                                   description: book["description"] ?? '',
-                                  price: "—",
+                                  price: "",
                                   currency: "",
                                   imageUrl:
                                       book["cover"] ?? 'assets/img/Book_1.png',

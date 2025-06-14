@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../cubit/global_favorite_cubit.dart';
 import '../../../../style/Colors.dart';
 import '../../../../style/Fonts.dart';
 import '../../AudioBook/audio_book.dart';
@@ -70,6 +72,14 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
       });
 
       final results = await _apiService.searchBooks(query);
+
+      // Update global favorite state with search results
+      if (mounted) {
+        final globalFavoriteCubit = context.read<GlobalFavoriteCubit>();
+        for (var book in results) {
+          globalFavoriteCubit.updateFavoriteStatus(book.id, book.isFavorite);
+        }
+      }
 
       setState(() {
         searchResults = results;
@@ -274,7 +284,10 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
                                         );
                                       },
                                       onFavoriteTap: () {
-                                        // Handle favorite toggle
+                                        final globalFavoriteCubit =
+                                            context.read<GlobalFavoriteCubit>();
+                                        globalFavoriteCubit
+                                            .toggleFavorite(book.id);
                                       },
                                     ),
                                   );
