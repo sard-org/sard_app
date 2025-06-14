@@ -36,7 +36,7 @@ class DioFav {
   Future<void> addToFavorite(String token, String bookId) async {
     await dio.post(
       '/favorite',
-      data: {"id": bookId},
+      data: {"bookId": bookId},
       options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
   }
@@ -44,7 +44,7 @@ class DioFav {
   Future<void> removeFromFavorite(String token, String bookId) async {
     await dio.delete(
       '/favorite',
-      data: {"id": bookId},
+      data: {"bookId": bookId},
       options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
   }

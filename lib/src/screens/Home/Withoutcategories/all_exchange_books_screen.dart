@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../cubit/global_favorite_cubit.dart';
 import '../../../../style/Colors.dart';
 import '../../../../style/Fonts.dart';
 import '../../../../style/BaseScreen.dart';
@@ -35,17 +37,41 @@ class _AllExchangeBooksScreenState extends State<AllExchangeBooksScreen> {
 
       // Get all books without limit
       final books = await _apiService.getExchangeBooks();
-
       setState(() {
         exchangeBooks = books;
         isLoading = false;
       });
+
+      // Update global favorite status
+      if (mounted) {
+        final booksData = books
+            .map((book) => {
+                  'id': book.id,
+                  'isFavorite': book.isFavorite,
+                })
+            .toList();
+        context
+            .read<GlobalFavoriteCubit>()
+            .updateFavoriteStatusFromBooks(booksData);
+      }
     } catch (e) {
       setState(() {
         errorMessage = e.toString();
         isLoading = false;
       });
     }
+  }
+
+  void _updateLocalFavoriteStatus(String bookId, bool isFavorite) {
+    setState(() {
+      for (int i = 0; i < exchangeBooks.length; i++) {
+        if (exchangeBooks[i].id == bookId) {
+          // Since we can't modify the ExchangeBook object directly, we need to replace it
+          // For now, we'll just trigger a rebuild which will use the global state
+          break;
+        }
+      }
+    });
   }
 
   Widget _buildEmptyState() {
@@ -118,103 +144,129 @@ class _AllExchangeBooksScreenState extends State<AllExchangeBooksScreen> {
   Widget build(BuildContext context) {
     return Directionality(
       textDirection: TextDirection.rtl,
-      child: Scaffold(
-        body: Stack(
-          children: [
-            BaseScreen(
-              child: Column(
-                children: [
-                  const SizedBox(height: 80),
-                  Expanded(
-                    child: isLoading
-                        ? const Center(
-                            child: CircularProgressIndicator(
-                              color: AppColors.primary700,
-                            ),
-                          )
-                        : errorMessage != null
-                            ? _buildErrorState()
-                            : exchangeBooks.isEmpty
-                                ? _buildEmptyState()
-                                : GridView.builder(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 16, vertical: 16),
-                                    gridDelegate:
-                                        const SliverGridDelegateWithFixedCrossAxisCount(
-                                      crossAxisCount: 2,
-                                      crossAxisSpacing: 12,
-                                      mainAxisSpacing: 16,
-                                      childAspectRatio: 0.6,
+      child: BlocListener<GlobalFavoriteCubit, GlobalFavoriteState>(
+        listener: (context, state) {
+          if (state is GlobalFavoriteError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('خطأ في تحديث المفضلات: ${state.message}'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          } else if (state is GlobalFavoriteUpdated) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.isFavorite
+                    ? 'تم إضافة الكتاب إلى المفضلات'
+                    : 'تم إزالة الكتاب من المفضلات'),
+                backgroundColor: Colors.green,
+              ),
+            );
+
+            // Update local state
+            _updateLocalFavoriteStatus(state.bookId, state.isFavorite);
+          }
+        },
+        child: Scaffold(
+          body: Stack(
+            children: [
+              BaseScreen(
+                child: Column(
+                  children: [
+                    const SizedBox(height: 80),
+                    Expanded(
+                      child: isLoading
+                          ? const Center(
+                              child: CircularProgressIndicator(
+                                color: AppColors.primary700,
+                              ),
+                            )
+                          : errorMessage != null
+                              ? _buildErrorState()
+                              : exchangeBooks.isEmpty
+                                  ? _buildEmptyState()
+                                  : GridView.builder(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 16, vertical: 16),
+                                      gridDelegate:
+                                          const SliverGridDelegateWithFixedCrossAxisCount(
+                                        crossAxisCount: 2,
+                                        crossAxisSpacing: 12,
+                                        mainAxisSpacing: 16,
+                                        childAspectRatio: 0.6,
+                                      ),
+                                      physics: const BouncingScrollPhysics(),
+                                      itemCount: exchangeBooks.length,
+                                      itemBuilder: (context, index) {
+                                        final book = exchangeBooks[index];
+                                        return ExchangeBookCard(
+                                          id: book.id,
+                                          title: book.title,
+                                          author: book.author.name,
+                                          coverUrl: book.cover,
+                                          pricePoints: book.pricePoints,
+                                          isFavorite: book.isFavorite,
+                                          onTap: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    AudioBookScreen(),
+                                              ),
+                                            );
+                                          },
+                                          onFavoriteTap: () {
+                                            final globalFavoriteCubit = context
+                                                .read<GlobalFavoriteCubit>();
+                                            globalFavoriteCubit
+                                                .toggleFavorite(book.id);
+                                          },
+                                        );
+                                      },
                                     ),
-                                    physics: const BouncingScrollPhysics(),
-                                    itemCount: exchangeBooks.length,
-                                    itemBuilder: (context, index) {
-                                      final book = exchangeBooks[index];
-                                      return ExchangeBookCard(
-                                        id: book.id,
-                                        title: book.title,
-                                        author: book.author.name,
-                                        coverUrl: book.cover,
-                                        pricePoints: book.pricePoints,
-                                        isFavorite: book.isFavorite,
-                                        onTap: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) =>
-                                                  AudioBookScreen(),
-                                            ),
-                                          );
-                                        },
-                                        onFavoriteTap: () {
-                                          print(
-                                              'Favorite tapped for: ${book.title}');
-                                        },
-                                      );
-                                    },
-                                  ),
-                  ),
-                ],
-              ),
-            ),
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
-                decoration: const BoxDecoration(
-                  color: AppColors.neutral100,
-                  borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(16),
-                    bottomRight: Radius.circular(16),
-                  ),
+                    ),
+                  ],
                 ),
-                child: SafeArea(
-                  child: Row(
-                    children: [
-                      IconButton(
-                        onPressed: () => Navigator.pop(context),
-                        icon: const Icon(
-                          Icons.arrow_back_ios,
-                          color: AppColors.neutral900,
+              ),
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
+                  decoration: const BoxDecoration(
+                    color: AppColors.neutral100,
+                    borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(16),
+                      bottomRight: Radius.circular(16),
+                    ),
+                  ),
+                  child: SafeArea(
+                    child: Row(
+                      children: [
+                        IconButton(
+                          onPressed: () => Navigator.pop(context),
+                          icon: const Icon(
+                            Icons.arrow_back_ios,
+                            color: AppColors.neutral900,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'استبدل نقاطك',
-                        style: AppTexts.heading1Bold.copyWith(
-                          color: AppColors.neutral900,
-                          fontSize: 20,
+                        const SizedBox(width: 8),
+                        Text(
+                          'استبدل نقاطك',
+                          style: AppTexts.heading1Bold.copyWith(
+                            color: AppColors.neutral900,
+                            fontSize: 20,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

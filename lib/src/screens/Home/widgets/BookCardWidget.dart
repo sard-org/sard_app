@@ -1,26 +1,30 @@
 import 'package:flutter/material.dart';
-
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../cubit/global_favorite_cubit.dart';
 import '../../../../style/Colors.dart';
 import '../../../../style/Fonts.dart';
 
-
 class BookCardWidget extends StatelessWidget {
+  final String id;
   final String author;
   final String title;
   final String description;
   final String imageUrl;
   final VoidCallback onTap;
+  final VoidCallback? onFavoriteTap;
   final bool is_favorite;
   final int? price;
   final int? pricePoints;
   final bool isFree;
 
   const BookCardWidget({
+    required this.id,
     required this.author,
     required this.title,
     required this.description,
     required this.imageUrl,
     required this.onTap,
+    this.onFavoriteTap,
     required this.is_favorite,
     this.price,
     this.pricePoints,
@@ -39,12 +43,14 @@ class BookCardWidget extends StatelessWidget {
         children: [
           Text(
             '$price',
-            style: AppTexts.highlightAccent.copyWith(color: AppColors.primary1000),
+            style:
+                AppTexts.highlightAccent.copyWith(color: AppColors.primary1000),
           ),
           const SizedBox(width: 2),
           Text(
             'ج.م',
-            style: AppTexts.footnoteRegular11.copyWith(color: AppColors.primary1000),
+            style: AppTexts.footnoteRegular11
+                .copyWith(color: AppColors.primary1000),
           ),
         ],
       );
@@ -60,7 +66,8 @@ class BookCardWidget extends StatelessWidget {
           children: [
             Text(
               '$pricePoints',
-              style: AppTexts.highlightAccent.copyWith(color: AppColors.primary800),
+              style: AppTexts.highlightAccent
+                  .copyWith(color: AppColors.primary800),
             ),
             const SizedBox(width: 4),
             Image.asset('assets/img/coin.png', width: 20, height: 20),
@@ -114,17 +121,20 @@ class BookCardWidget extends StatelessWidget {
                   children: [
                     Text(
                       author,
-                      style: AppTexts.captionRegular.copyWith(color: AppColors.neutral400),
+                      style: AppTexts.captionRegular
+                          .copyWith(color: AppColors.neutral400),
                     ),
                     const SizedBox(height: 8),
                     Text(
                       title,
-                      style: AppTexts.highlightStandard.copyWith(color: AppColors.neutral1000),
+                      style: AppTexts.highlightStandard
+                          .copyWith(color: AppColors.neutral1000),
                     ),
                     const SizedBox(height: 8),
                     Text(
                       description,
-                      style: AppTexts.contentRegular.copyWith(color: AppColors.neutral400),
+                      style: AppTexts.contentRegular
+                          .copyWith(color: AppColors.neutral400),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -133,12 +143,25 @@ class BookCardWidget extends StatelessWidget {
                   ],
                 ),
               ),
-              IconButton(
-                icon: Icon(
-                  is_favorite ? Icons.favorite : Icons.favorite_border,
-                  color: is_favorite ? Colors.red : AppColors.primary900,
-                ),
-                onPressed: onTap,
+              BlocBuilder<GlobalFavoriteCubit, GlobalFavoriteState>(
+                builder: (context, state) {
+                  final globalFavoriteCubit =
+                      context.read<GlobalFavoriteCubit>();
+                  final isCurrentlyFavorite =
+                      globalFavoriteCubit.isFavorite(id);
+
+                  return IconButton(
+                    icon: Icon(
+                      isCurrentlyFavorite
+                          ? Icons.favorite
+                          : Icons.favorite_border,
+                      color: isCurrentlyFavorite
+                          ? Colors.red
+                          : AppColors.primary900,
+                    ),
+                    onPressed: onFavoriteTap ?? () {},
+                  );
+                },
               ),
             ],
           ),
@@ -146,4 +169,4 @@ class BookCardWidget extends StatelessWidget {
       ),
     );
   }
-} 
+}

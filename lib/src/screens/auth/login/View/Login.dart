@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:sard/src/screens/Home/home.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../../main.dart';
 import '../../../../../style/BaseScreen.dart';
 import '../../../../../style/Colors.dart';
 import '../../../../../style/Fonts.dart';
+import '../../../../cubit/global_favorite_cubit.dart';
 import '../../Create Account/registration/View/register_screen.dart';
 import '../../Forgot Password/Enter Email/enter_email.dart';
 
@@ -68,12 +68,17 @@ class _LoginScreenState extends State<LoginScreen> {
                   SizedBox(height: MediaQuery.of(context).size.height * 0.06),
                   Align(
                     alignment: Alignment.center,
-                    child: Text("أهلاً بعودتك!", style: AppTexts.display1Bold, textAlign: TextAlign.right),
+                    child: Text("أهلاً بعودتك!",
+                        style: AppTexts.display1Bold,
+                        textAlign: TextAlign.right),
                   ),
                   const SizedBox(height: 8),
                   Align(
                     alignment: Alignment.center,
-                    child: Text("الرجاء إدخال بريدك الإلكتروني وكلمة المرور للوصول إلى حسابك.", style: AppTexts.highlightEmphasis, textAlign: TextAlign.center),
+                    child: Text(
+                        "الرجاء إدخال بريدك الإلكتروني وكلمة المرور للوصول إلى حسابك.",
+                        style: AppTexts.highlightEmphasis,
+                        textAlign: TextAlign.center),
                   ),
                   const SizedBox(height: 32),
                   _buildTextField(
@@ -115,9 +120,16 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         GestureDetector(
                           onTap: () {
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => ForgotPasswordScreen()));
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        ForgotPasswordScreen()));
                           },
-                          child: Text("نسيت كلمة المرور", style: AppTexts.contentRegular.copyWith(color: AppColors.primary500, decoration: TextDecoration.underline)),
+                          child: Text("نسيت كلمة المرور",
+                              style: AppTexts.contentRegular.copyWith(
+                                  color: AppColors.primary500,
+                                  decoration: TextDecoration.underline)),
                         ),
                       ],
                     ),
@@ -126,14 +138,17 @@ class _LoginScreenState extends State<LoginScreen> {
                   BlocConsumer<AuthCubit, AuthState>(
                     listener: (context, state) {
                       if (state is AuthSuccess) {
-                        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => MainScreen()));
+                        // Load favorite books after successful login
+                        context.read<GlobalFavoriteCubit>().loadFavorites();
+                        Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => MainScreen()));
                       } else if (state is AuthError) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(state.message),
-                              backgroundColor: Colors.red,
-                            )
-                        );
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          content: Text(state.message),
+                          backgroundColor: Colors.red,
+                        ));
                       }
                     },
                     builder: (context, state) {
@@ -143,60 +158,69 @@ class _LoginScreenState extends State<LoginScreen> {
                         width: double.infinity,
                         child: ElevatedButton(
                           onPressed: isLoading
-                              ? null  // Disable button when loading
+                              ? null // Disable button when loading
                               : () {
-                            final email = _emailController.text.trim();
-                            final password = _passwordController.text.trim();
+                                  final email = _emailController.text.trim();
+                                  final password =
+                                      _passwordController.text.trim();
 
-                            // Basic validation
-                            if (email.isEmpty) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text("الرجاء إدخال البريد الإلكتروني"))
-                              );
-                              return;
-                            }
+                                  // Basic validation
+                                  if (email.isEmpty) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                            content: Text(
+                                                "الرجاء إدخال البريد الإلكتروني")));
+                                    return;
+                                  }
 
-                            if (password.isEmpty) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text("الرجاء إدخال كلمة المرور"))
-                              );
-                              return;
-                            }
+                                  if (password.isEmpty) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                            content: Text(
+                                                "الرجاء إدخال كلمة المرور")));
+                                    return;
+                                  }
 
-                            // Validate email format
-                            final bool emailValid = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
-                            if (!emailValid) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text("الرجاء إدخال بريد إلكتروني صالح"))
-                              );
-                              return;
-                            }
+                                  // Validate email format
+                                  final bool emailValid = RegExp(
+                                          r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                                      .hasMatch(email);
+                                  if (!emailValid) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                            content: Text(
+                                                "الرجاء إدخال بريد إلكتروني صالح")));
+                                    return;
+                                  }
 
-                            BlocProvider.of<AuthCubit>(context).login(
-                                email,
-                                password,
-                                rememberMe: _rememberMe
-                            );
-                          },
+                                  BlocProvider.of<AuthCubit>(context).login(
+                                      email, password,
+                                      rememberMe: _rememberMe);
+                                },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.primary500,
-                            disabledBackgroundColor: AppColors.primary300, // Lighter color when disabled
+                            disabledBackgroundColor: AppColors
+                                .primary300, // Lighter color when disabled
                             minimumSize: const Size(double.infinity, 50),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 12, horizontal: 16),
                           ),
                           child: isLoading
                               ? SizedBox(
-                            height: 24,
-                            width: 24,
-                            child: CircularProgressIndicator(
-                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                              strokeWidth: 2.0,
-                            ),
-                          )
-                              : Text("تسجيل الدخول", style: AppTexts.contentEmphasis.copyWith(color: AppColors.neutral100)),
+                                  height: 24,
+                                  width: 24,
+                                  child: CircularProgressIndicator(
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.white),
+                                    strokeWidth: 2.0,
+                                  ),
+                                )
+                              : Text("تسجيل الدخول",
+                                  style: AppTexts.contentEmphasis
+                                      .copyWith(color: AppColors.neutral100)),
                         ),
                       );
                     },
@@ -206,13 +230,21 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: Wrap(
                       alignment: WrapAlignment.center,
                       children: [
-                        Text("ليس لديك حساب؟", style: AppTexts.contentRegular.copyWith(color: AppColors.neutral900)),
+                        Text("ليس لديك حساب؟",
+                            style: AppTexts.contentRegular
+                                .copyWith(color: AppColors.neutral900)),
                         const SizedBox(width: 4),
                         GestureDetector(
                           onTap: () {
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => RegisterScreen()));
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => RegisterScreen()));
                           },
-                          child: Text("إنشاء حساب", style: AppTexts.contentEmphasis.copyWith(color: AppColors.primary500, decoration: TextDecoration.underline)),
+                          child: Text("إنشاء حساب",
+                              style: AppTexts.contentEmphasis.copyWith(
+                                  color: AppColors.primary500,
+                                  decoration: TextDecoration.underline)),
                         ),
                       ],
                     ),
@@ -261,12 +293,15 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             filled: true,
             fillColor: Colors.white,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             suffixIcon: toggleVisibility != null
                 ? IconButton(
-              onPressed: toggleVisibility,
-              icon: Icon(obscureText ? Icons.visibility_off : Icons.visibility, color: AppColors.neutral400),
-            )
+                    onPressed: toggleVisibility,
+                    icon: Icon(
+                        obscureText ? Icons.visibility_off : Icons.visibility,
+                        color: AppColors.neutral400),
+                  )
                 : null,
           ),
         ),

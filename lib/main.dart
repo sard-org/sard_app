@@ -7,6 +7,7 @@ import 'package:sard/src/screens/auth/login/logic/login_cubit.dart';
 import 'package:sard/src/screens/books/our_books.dart';
 import 'package:sard/src/screens/favorite/Fav.dart';
 import 'package:sard/src/screens/settings/setting.dart';
+import 'package:sard/src/cubit/global_favorite_cubit.dart';
 import 'package:sard/style/Colors.dart';
 import 'package:sard/style/bloc_observar.dart';
 
@@ -25,10 +26,13 @@ class MyApp extends StatelessWidget {
           BlocProvider<AuthCubit>(
             create: (context) => AuthCubit(),
           ),
+          BlocProvider<GlobalFavoriteCubit>(
+            create: (context) => GlobalFavoriteCubit(),
+          ),
         ],
         child: MaterialApp(
           debugShowCheckedModeBanner: false,
-          home:   LoginScreen(), //  البداية من شاشة الـ .
+          home: LoginScreen(), //  البداية من شاشة الـ .
         ));
   }
 }

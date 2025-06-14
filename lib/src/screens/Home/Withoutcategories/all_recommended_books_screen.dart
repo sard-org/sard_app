@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../cubit/global_favorite_cubit.dart';
 import '../../../../style/Colors.dart';
 import '../../../../style/Fonts.dart';
 import '../../../../style/BaseScreen.dart';
@@ -36,17 +38,41 @@ class _AllRecommendedBooksScreenState extends State<AllRecommendedBooksScreen> {
 
       // Get all books without limit
       final recommendations = await _apiService.getRecommendations();
-
       setState(() {
         recommendedBooks = recommendations;
         isLoading = false;
       });
+
+      // Update global favorite status
+      if (mounted) {
+        final booksData = recommendations
+            .map((book) => {
+                  'id': book.id,
+                  'isFavorite': book.isFavorite,
+                })
+            .toList();
+        context
+            .read<GlobalFavoriteCubit>()
+            .updateFavoriteStatusFromBooks(booksData);
+      }
     } catch (e) {
       setState(() {
         errorMessage = e.toString();
         isLoading = false;
       });
     }
+  }
+
+  void _updateLocalFavoriteStatus(String bookId, bool isFavorite) {
+    setState(() {
+      for (int i = 0; i < recommendedBooks.length; i++) {
+        if (recommendedBooks[i].id == bookId) {
+          // Since we can't modify the RecommendedBook object directly, we trigger a rebuild
+          // The BlocBuilder in BookCardWidget will handle showing the correct state
+          break;
+        }
+      }
+    });
   }
 
   Widget _buildEmptyState() {
@@ -119,98 +145,130 @@ class _AllRecommendedBooksScreenState extends State<AllRecommendedBooksScreen> {
   Widget build(BuildContext context) {
     return Directionality(
       textDirection: TextDirection.rtl,
-      child: Scaffold(
-        body: Stack(
-          children: [
-            BaseScreen(
-              child: Column(
-                children: [
-                  const SizedBox(height: 80),
-                  Expanded(
-                    child: isLoading
-                        ? const Center(
-                            child: CircularProgressIndicator(
-                              color: AppColors.primary700,
-                            ),
-                          )
-                        : errorMessage != null
-                            ? _buildErrorState()
-                            : recommendedBooks.isEmpty
-                                ? _buildEmptyState()
-                                : ListView.builder(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 16, vertical: 16),
-                                    itemCount: recommendedBooks.length,
-                                    physics: const BouncingScrollPhysics(),
-                                    itemBuilder: (context, index) {
-                                      final book = recommendedBooks[index];
-                                      return Padding(
-                                        padding:
-                                            const EdgeInsets.only(bottom: 16),
-                                        child: BookCardWidget(
-                                          author: book.author.name,
-                                          title: book.title,
-                                          description: book.description,
-                                          imageUrl: book.cover,
-                                          is_favorite: book.isFavorite,
-                                          price: book.price,
-                                          pricePoints: null,
-                                          isFree: book.price == 0,
-                                          onTap: () {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                    AudioBookScreen(),
-                                              ),
-                                            );
-                                          },
-                                        ),
-                                      );
-                                    },
-                                  ),
-                  ),
-                ],
+      child: BlocListener<GlobalFavoriteCubit, GlobalFavoriteState>(
+        listener: (context, state) {
+          if (state is GlobalFavoriteError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('خطأ في تحديث المفضلات: ${state.message}'),
+                backgroundColor: Colors.red,
               ),
-            ),
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
-                decoration: const BoxDecoration(
-                  color: AppColors.neutral100,
-                  borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(16),
-                    bottomRight: Radius.circular(16),
-                  ),
-                ),
-                child: SafeArea(
-                  child: Row(
-                    children: [
-                      IconButton(
-                        onPressed: () => Navigator.pop(context),
-                        icon: const Icon(
-                          Icons.arrow_back_ios,
-                          color: AppColors.neutral900,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'الكتب المقترحة',
-                        style: AppTexts.heading1Bold.copyWith(
-                          color: AppColors.neutral900,
-                          fontSize: 20,
-                        ),
-                      ),
-                    ],
-                  ),
+            );
+          } else if (state is GlobalFavoriteUpdated) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.isFavorite
+                    ? 'تم إضافة الكتاب إلى المفضلات'
+                    : 'تم إزالة الكتاب من المفضلات'),
+                backgroundColor: Colors.green,
+              ),
+            );
+
+            // Update local state
+            _updateLocalFavoriteStatus(state.bookId, state.isFavorite);
+          }
+        },
+        child: Scaffold(
+          body: Stack(
+            children: [
+              BaseScreen(
+                child: Column(
+                  children: [
+                    const SizedBox(height: 80),
+                    Expanded(
+                      child: isLoading
+                          ? const Center(
+                              child: CircularProgressIndicator(
+                                color: AppColors.primary700,
+                              ),
+                            )
+                          : errorMessage != null
+                              ? _buildErrorState()
+                              : recommendedBooks.isEmpty
+                                  ? _buildEmptyState()
+                                  : ListView.builder(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 16, vertical: 16),
+                                      itemCount: recommendedBooks.length,
+                                      physics: const BouncingScrollPhysics(),
+                                      itemBuilder: (context, index) {
+                                        final book = recommendedBooks[index];
+                                        return Padding(
+                                          padding:
+                                              const EdgeInsets.only(bottom: 16),
+                                          child: BookCardWidget(
+                                            id: book.id,
+                                            author: book.author.name,
+                                            title: book.title,
+                                            description: book.description,
+                                            imageUrl: book.cover,
+                                            is_favorite: book.isFavorite,
+                                            price: book.price,
+                                            pricePoints: null,
+                                            isFree: book.price == 0,
+                                            onTap: () {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      AudioBookScreen(),
+                                                ),
+                                              );
+                                            },
+                                            onFavoriteTap: () {
+                                              final globalFavoriteCubit =
+                                                  context.read<
+                                                      GlobalFavoriteCubit>();
+                                              globalFavoriteCubit
+                                                  .toggleFavorite(book.id);
+                                            },
+                                          ),
+                                        );
+                                      },
+                                    ),
+                    ),
+                  ],
                 ),
               ),
-            ),
-          ],
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
+                  decoration: const BoxDecoration(
+                    color: AppColors.neutral100,
+                    borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(16),
+                      bottomRight: Radius.circular(16),
+                    ),
+                  ),
+                  child: SafeArea(
+                    child: Row(
+                      children: [
+                        IconButton(
+                          onPressed: () => Navigator.pop(context),
+                          icon: const Icon(
+                            Icons.arrow_back_ios,
+                            color: AppColors.neutral900,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'الكتب المقترحة',
+                          style: AppTexts.heading1Bold.copyWith(
+                            color: AppColors.neutral900,
+                            fontSize: 20,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

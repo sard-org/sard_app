@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../cubit/global_favorite_cubit.dart';
 import '../../../../style/Colors.dart';
 import '../../../../style/Fonts.dart';
 
@@ -56,24 +58,38 @@ class ExchangeBookCard extends StatelessWidget {
                 Positioned(
                   top: 8,
                   left: 8,
-                  child: GestureDetector(
-                    onTap: onFavoriteTap,
-                    child: CircleAvatar(
-                      backgroundColor: Colors.white,
-                      radius: 14,
-                      child: Icon(
-                        isFavorite ? Icons.favorite : Icons.favorite_border,
-                        size: 16,
-                        color: isFavorite ? Colors.red : AppColors.neutral600,
-                      ),
-                    ),
+                  child: BlocBuilder<GlobalFavoriteCubit, GlobalFavoriteState>(
+                    builder: (context, state) {
+                      final globalFavoriteCubit =
+                          context.read<GlobalFavoriteCubit>();
+                      final isCurrentlyFavorite =
+                          globalFavoriteCubit.isFavorite(id);
+
+                      return GestureDetector(
+                        onTap: onFavoriteTap,
+                        child: CircleAvatar(
+                          backgroundColor: Colors.white,
+                          radius: 14,
+                          child: Icon(
+                            isCurrentlyFavorite
+                                ? Icons.favorite
+                                : Icons.favorite_border,
+                            size: 16,
+                            color: isCurrentlyFavorite
+                                ? Colors.red
+                                : AppColors.neutral600,
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ),
                 Positioned(
                   top: 8,
                   right: 8,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
                       color: AppColors.primary700,
                       borderRadius: BorderRadius.circular(12),
@@ -128,4 +144,4 @@ class ExchangeBookCard extends StatelessWidget {
       ),
     );
   }
-} 
+}

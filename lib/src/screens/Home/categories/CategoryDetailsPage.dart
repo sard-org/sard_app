@@ -57,6 +57,7 @@ class CategoryDetailsPage extends StatelessWidget {
               return Padding(
                 padding: const EdgeInsets.only(bottom: 16),
                 child: BookCardWidget(
+                  id: bookData['id'] ?? '',
                   author: bookData['Author']?['name'] ?? '',
                   title: bookData['title'] ?? '',
                   description: bookData['description'] ?? '',
@@ -73,6 +74,9 @@ class CategoryDetailsPage extends StatelessWidget {
                         builder: (context) => AudioBookScreen(),
                       ),
                     );
+                  },
+                  onFavoriteTap: () {
+                    // Handle favorite toggle
                   },
                 ),
               );

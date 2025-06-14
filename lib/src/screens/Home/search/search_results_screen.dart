@@ -254,6 +254,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
                                   return Padding(
                                     padding: const EdgeInsets.only(bottom: 16),
                                     child: BookCardWidget(
+                                      id: book.id,
                                       author: book.author.name,
                                       title: book.title,
                                       description: book.description,
@@ -270,6 +271,9 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
                                                 AudioBookScreen(),
                                           ),
                                         );
+                                      },
+                                      onFavoriteTap: () {
+                                        // Handle favorite toggle
                                       },
                                     ),
                                   );
