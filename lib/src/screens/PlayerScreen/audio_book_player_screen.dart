@@ -2,8 +2,16 @@ import 'package:flutter/material.dart';
 import '../../../style/BaseScreen.dart';
 import '../../../style/Colors.dart';
 import '../../../style/Fonts.dart';
+import '../../services/book_service.dart';
 
 class AudioBookPlayer extends StatefulWidget {
+  final String? bookId;
+
+  const AudioBookPlayer({
+    Key? key,
+    this.bookId,
+  }) : super(key: key);
+
   @override
   _AudioBookPlayerState createState() => _AudioBookPlayerState();
 }
@@ -11,6 +19,21 @@ class AudioBookPlayer extends StatefulWidget {
 class _AudioBookPlayerState extends State<AudioBookPlayer> {
   double _sliderValue = 0.25; // For demonstration purposes
   bool _isPlaying = false;
+  bool _isLoadingSummary = false;
+  String? _summaryError;
+  String? _bookSummary;
+  final BookService _bookService = BookService();
+  StateSetter? _modalSetState; // Add this to store modal setState
+
+  // Get book ID from widget or use default
+  late final String bookId;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize book ID from widget parameter or use default
+    bookId = widget.bookId ?? "681f4204645636b8e863c261";
+  }
 
   void _togglePlayPause() {
     setState(() {
@@ -18,95 +41,207 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
     });
   }
 
-  void _openAISummary() {
+  void _openAISummary() async {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.75,
-        minChildSize: 0.5,
-        maxChildSize: 0.95,
-        expand: false,
-        builder: (context, scrollController) => Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(28),
-              topRight: Radius.circular(28),
+      builder: (context) => StatefulBuilder(builder: (context, setModalState) {
+        _modalSetState = setModalState; // Store the modal setState
+        return DraggableScrollableSheet(
+          initialChildSize: 0.5, // Reduced from 0.75 to 0.5 (50% of screen)
+          minChildSize: 0.3, // Reduced from 0.5 to 0.3 (30% minimum)
+          maxChildSize: 0.85, // Reduced from 0.95 to 0.85 (85% maximum)
+          expand: false,
+          builder: (context, scrollController) => Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(28),
+                topRight: Radius.circular(28),
+              ),
             ),
-          ),
-          child: SafeArea(
-            child: Column(
-              children: [
-                SizedBox(height: 12),
-                Container(
-                  width: 40,
-                  height: 5,
-                  margin: EdgeInsets.only(bottom: 12),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(3),
-                  ),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    SizedBox(width: 44),
-                    Text(
-                      "ملخص الكتاب",
-                      style: AppTexts.heading2Bold,
-                    ),
-                    GestureDetector(
-                      onTap: () => Navigator.pop(context),
-                      child: Container(
-                        width: 44,
-                        height: 44,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Icon(Icons.arrow_forward,
-                            color: AppColors.primary500),
-                      ),
-                    ),
-                  ],
-                ),
-                Expanded(
-                  child: SingleChildScrollView(
-                    controller: scrollController,
-                    child: Directionality(
-                      textDirection: TextDirection.rtl,
-                      child: Text(
-                        '''وصل خطاب باسمي، تسلمه ( طلعت ) زوج أختي ... ولم ير فائدة ما من اطلاعي عليه لأنني قد انفصلت عن العالم تماما... لهذا نسيه تمام في جيب جلبابه ... ثم انه في إحدى الليالي فكر في أن يتلوه بجانب فراشي لعل شيئاً فيه يثير انتباهي أو يكون أمراً ذا بال يمكنه هو التصرف في لم ير فائدة ما من اطه ... نسيه تمام في جيب جلبابه ... ثم انه في إحدى الليالي فكر في أن يتلوه بجانب فراشي لعل شيئاً فيه يثير انتباهي أو يكون أمراً ذا بال يمكنه هو التصرف في لم ير فائدة ما من اطه ... نسيه تمام في جيب جلبابه ... ثم انه في إحدى الليالي فكر في أن يتلوه بجانب فرا وصل خطاب باسمي، تسلمه ( طلعت ) زوج أختي ... ولم ير فائدة ما من اطلاعي عليه لأنني قد انفصلت عن العالم تماما... لهذا نسيه تمام في جيب جلبابه ... ثم انه وصل خطاب باسمي، تسلمه ( طلعت ) زوج أختي ... ولم ير فائدة ما من اطلاعي عليه لأنني قد انفصلت عن العالم تماما... لهذا نسيه تمام في جيب جلبابه ... ثم انه في إحدى الليالي فكر في أن يتلوه بجانب فراشي لعل شيئاً فيه يثير انتباهي أو يكون أمراً ذا بال يمكنه هو التصرف في لم ير فائدة ما من اطه ... نسيه تمام في جيب جلبابه ... ثم انه في إحدى الليالي فكر في أن يتلوه بجانب فراشي لعل شيئاً فيه يثير انتباهي أو يكون أمراً ذا بال يمكنه هو التصرف في لم ير فائدة ما من اطه ... نسيه تمام في جيب جلبابه ... ثم انه في إحدى الليالي فكر في أن يتلوه بجانب فرا وصل خطاب باسمي، تسلمه ( طلعت ) زوج أختي ... ولم ير فائدة ما من اطلاعي عليه لأنني قد انفصلت عن العالم تماما... لهذا نسيه تمام في جيب جلبابه ... ثم انه''',
-                        style: AppTexts.contentRegular.copyWith(height: 1.8),
-                        textAlign: TextAlign.right,
-                      ),
-                    ),
-                  ),
-                ),
-                GestureDetector(
-                  onTap: () {},
-                  child: Container(
-                    width: 60,
-                    height: 60,
+            child: SafeArea(
+              child: Column(
+                children: [
+                  SizedBox(height: 12),
+                  Container(
+                    width: 40,
+                    height: 5,
+                    margin: EdgeInsets.only(bottom: 12),
                     decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: AppColors.primary500,
-                    ),
-                    child: Icon(
-                      Icons.volume_up_outlined,
-                      size: 30,
-                      color: Colors.white,
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(3),
                     ),
                   ),
-                ),
-              ],
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      SizedBox(width: 44),
+                      Text(
+                        "ملخص الكتاب",
+                        style: AppTexts.heading2Bold,
+                      ),
+                      GestureDetector(
+                        onTap: () => Navigator.pop(context),
+                        child: Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(Icons.arrow_forward,
+                              color: AppColors.primary500),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Expanded(
+                    child:
+                        _buildSummaryContent(scrollController, setModalState),
+                  ),
+                  if (!_isLoadingSummary && _summaryError == null)
+                    Padding(
+                      padding: EdgeInsets.only(bottom: 16), // Add bottom margin
+                      child: GestureDetector(
+                        onTap: () {
+                          // Handle text-to-speech functionality here
+                        },
+                        child: Container(
+                          width: 60,
+                          height: 60,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: AppColors.primary500,
+                          ),
+                          child: Icon(
+                            Icons.volume_up_outlined,
+                            size: 30,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
             ),
           ),
+        );
+      }),
+    );
+
+    // Fetch summary if not already loaded
+    if (_bookSummary == null && !_isLoadingSummary) {
+      _fetchBookSummary();
+    }
+  }
+
+  Widget _buildSummaryContent(
+      ScrollController scrollController, StateSetter setModalState) {
+    if (_isLoadingSummary) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary500),
+            ),
+            SizedBox(height: 16),
+            Text(
+              'جاري تحميل الملخص...',
+              style: AppTexts.contentRegular.copyWith(
+                color: AppColors.neutral500,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (_summaryError != null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.error_outline,
+              size: 64,
+              color: Colors.red.shade400,
+            ),
+            SizedBox(height: 16),
+            Text(
+              _summaryError!,
+              style: AppTexts.contentRegular.copyWith(
+                color: Colors.red.shade600,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                setModalState(() {
+                  _summaryError = null;
+                });
+                _fetchBookSummary();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary500,
+                foregroundColor: Colors.white,
+              ),
+              child: Text('إعادة المحاولة'),
+            ),
+          ],
+        ),
+      );
+    }
+    return SingleChildScrollView(
+      controller: scrollController,
+      padding: EdgeInsets.fromLTRB(
+          16, 0, 16, 20), // Add bottom padding for better spacing
+      child: Directionality(
+        textDirection: TextDirection.rtl,
+        child: Text(
+          _bookSummary ?? 'لا يوجد ملخص متاح',
+          style: AppTexts.contentRegular.copyWith(height: 1.8),
+          textAlign: TextAlign.right,
         ),
       ),
     );
+  }
+
+  Future<void> _fetchBookSummary() async {
+    // Update both main widget and modal
+    setState(() {
+      _isLoadingSummary = true;
+      _summaryError = null;
+    });
+    // Also update modal if it's open
+    _modalSetState?.call(() {
+      _isLoadingSummary = true;
+      _summaryError = null;
+    });
+
+    try {
+      final summary = await _bookService.getBookSummary(bookId);
+      setState(() {
+        _bookSummary = summary;
+        _isLoadingSummary = false;
+      });
+      _modalSetState?.call(() {
+        _bookSummary = summary;
+        _isLoadingSummary = false;
+      });
+    } catch (e) {
+      setState(() {
+        _summaryError = e.toString().replaceAll('Exception: ', '');
+        _isLoadingSummary = false;
+      });
+      _modalSetState?.call(() {
+        _summaryError = e.toString().replaceAll('Exception: ', '');
+        _isLoadingSummary = false;
+      });
+    }
   }
 
   Widget _buildAppBar(BuildContext context) {
@@ -272,7 +407,7 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: Colors.white,
-          border: Border.all(color: AppColors.neutral400!, width: 1),
+          border: Border.all(color: AppColors.neutral400, width: 1),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.1),
@@ -353,7 +488,7 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
                       width: double.infinity,
                       child: OutlinedButton.icon(
                         style: OutlinedButton.styleFrom(
-                          side: BorderSide(color: AppColors.primary200!),
+                          side: BorderSide(color: AppColors.primary200),
                           padding: EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
