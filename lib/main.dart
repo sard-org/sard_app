@@ -44,13 +44,15 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0; // ✅ تعيين `HomeScreen` كأول شاشة افتراضية
+  final GlobalKey<HomeScreenState> _homeScreenKey =
+      GlobalKey<HomeScreenState>();
 
-  final List<Widget> _screens = [
-    HomeScreen(), // ✅ الرئيسية أولًا
-    BookListScreen(), // كتبي
-    FavoritesScreen(), // المفضلات
-    SettingsScreen(), // الإعدادات
-  ];
+  List<Widget> get _screens => [
+        HomeScreen(key: _homeScreenKey), // ✅ الرئيسية أولًا
+        BookListScreen(), // كتبي
+        FavoritesScreen(), // المفضلات
+        SettingsScreen(), // الإعدادات
+      ];
 
   List<String> iconPaths = [
     "assets/img/icons/home.png",
@@ -77,6 +79,10 @@ class _MainScreenState extends State<MainScreen> {
           currentIndex: _currentIndex,
           onTap: (index) {
             setState(() {
+              if (index == 0) {
+                // Reset category selection when home is tapped
+                _homeScreenKey.currentState?.resetCategorySelection();
+              }
               _currentIndex = index;
             });
           },

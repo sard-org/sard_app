@@ -62,7 +62,8 @@ class CategoryItem extends StatelessWidget {
 }
 
 class CategorySection extends StatefulWidget {
-  const CategorySection({super.key});
+  final VoidCallback? onResetRequested;
+  const CategorySection({super.key, this.onResetRequested});
 
   @override
   State<CategorySection> createState() => _CategorySectionState();
@@ -70,6 +71,14 @@ class CategorySection extends StatefulWidget {
 
 class _CategorySectionState extends State<CategorySection> {
   int selectedIndex = -1;
+
+  void resetSelection() {
+    if (mounted) {
+      setState(() {
+        selectedIndex = -1;
+      });
+    }
+  }
 
   @override
   void initState() {
@@ -181,10 +190,21 @@ class _CategorySectionState extends State<CategorySection> {
   }
 }
 
-class HomeScreen extends StatelessWidget {
-  final dio = Dio()..options.baseUrl = 'https://api.mohamed-ramadan.me/api/';
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
 
-  HomeScreen({super.key});
+  @override
+  State<HomeScreen> createState() => HomeScreenState();
+}
+
+class HomeScreenState extends State<HomeScreen> {
+  final dio = Dio()..options.baseUrl = 'https://api.mohamed-ramadan.me/api/';
+  final GlobalKey<_CategorySectionState> _categorySectionKey =
+      GlobalKey<_CategorySectionState>();
+
+  void resetCategorySelection() {
+    _categorySectionKey.currentState?.resetSelection();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -348,7 +368,7 @@ class HomeScreen extends StatelessWidget {
                     const SizedBox(height: 12),
                     Expanded(
                       child: SingleChildScrollView(
-                        child: CategorySection(),
+                        child: CategorySection(key: _categorySectionKey),
                       ),
                     ),
                   ],
