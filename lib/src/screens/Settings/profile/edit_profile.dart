@@ -273,24 +273,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         ),
         Padding(
           padding: EdgeInsets.only(top: 4, right: 8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(
-                "لتغيير البريد الإلكتروني تواصل مع الدعم الفني",
-                textAlign: TextAlign.right,
-                style: AppTexts.contentRegular.copyWith(
-                  color: AppColors.primary500,
-                  fontSize: 12,
-                ),
-              ),
-              Text(
-                " • ",
-                style: AppTexts.contentRegular.copyWith(
-                  color: AppColors.neutral500,
-                  fontSize: 12,
-                ),
-              ),
               Text(
                 "لا يمكن تغيير البريد الإلكتروني",
                 textAlign: TextAlign.right,
@@ -298,6 +283,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   color: AppColors.neutral500,
                   fontSize: 12,
                 ),
+              ),
+              Text(
+                "لتغيير البريد الإلكتروني تواصل مع الدعم الفني",
+                textAlign: TextAlign.right,
+                style: AppTexts.contentRegular.copyWith(
+                  color: AppColors.primary500,
+                  fontSize: 12,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
             ],
           ),

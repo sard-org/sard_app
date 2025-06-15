@@ -100,7 +100,7 @@ class BookCardWidget extends StatelessWidget {
             children: [
               Container(
                 width: 93,
-                height: 125,
+                height: 155,
                 decoration: ShapeDecoration(
                   image: DecorationImage(
                     image: imageUrl.startsWith('http')

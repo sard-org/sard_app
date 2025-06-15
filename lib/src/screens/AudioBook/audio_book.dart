@@ -477,228 +477,221 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: BaseScreen(
-        child: isLoading
-            ? Center(
-                child: CircularProgressIndicator(
-                  color: AppColors.primary500,
-                ),
-              )
-            : errorMessage != null
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.error_outline,
-                          size: 64,
-                          color: AppColors.primary600,
+      body: isLoading
+          ? Center(
+              child: CircularProgressIndicator(
+                color: AppColors.primary500,
+              ),
+            )
+          : errorMessage != null
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.error_outline,
+                        size: 64,
+                        color: AppColors.primary600,
+                      ),
+                      SizedBox(height: 16),
+                      Text(
+                        'حدث خطأ في تحميل بيانات الكتاب',
+                        style: AppTexts.heading3Bold
+                            .copyWith(color: AppColors.neutral800),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        errorMessage!,
+                        style: AppTexts.contentRegular
+                            .copyWith(color: AppColors.neutral500),
+                        textAlign: TextAlign.center,
+                      ),
+                      SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: _loadBookData,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary500,
                         ),
-                        SizedBox(height: 16),
-                        Text(
-                          'حدث خطأ في تحميل بيانات الكتاب',
-                          style: AppTexts.heading3Bold
-                              .copyWith(color: AppColors.neutral800),
+                        child: Text(
+                          'إعادة المحاولة',
+                          style: AppTexts.highlightAccent
+                              .copyWith(color: Colors.white),
                         ),
-                        SizedBox(height: 8),
-                        Text(
-                          errorMessage!,
-                          style: AppTexts.contentRegular
-                              .copyWith(color: AppColors.neutral500),
-                          textAlign: TextAlign.center,
-                        ),
-                        SizedBox(height: 16),
-                        ElevatedButton(
-                          onPressed: _loadBookData,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary500,
-                          ),
-                          child: Text(
-                            'إعادة المحاولة',
-                            style: AppTexts.highlightAccent
-                                .copyWith(color: Colors.white),
-                          ),
-                        ),
-                      ],
-                    ),
-                  )
-                : SingleChildScrollView(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 0, vertical: 0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          _buildAppBar(context),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 12),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                SizedBox(height: 24),
-                                // Book Cover (centered)
-                                Center(
-                                  child: Container(
-                                    width: 220,
-                                    height: 260,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(12),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black26,
-                                          blurRadius: 8,
-                                          offset: Offset(0, 4),
-                                        ),
-                                      ],
-                                    ),
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(12),
-                                      child: Image.network(
-                                        bookData!.cover,
+                      ),
+                    ],
+                  ),
+                )
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    _buildAppBar(context),
+                    Expanded(
+                      child: BaseScreen(
+                        child: SingleChildScrollView(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              SizedBox(height: 24),
+                              // Book Cover (centered)
+                              Center(
+                                child: Container(
+                                  width: 220,
+                                  height: 260,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(12),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black26,
+                                        blurRadius: 8,
+                                        offset: Offset(0, 4),
+                                      ),
+                                    ],
+                                  ),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(12),
+                                    child: Image.network(
+                                      bookData!.cover,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (context, error, stackTrace) =>
+                                          Image.asset(
+                                        'assets/img/Book_1.png',
                                         fit: BoxFit.cover,
-                                        errorBuilder:
-                                            (context, error, stackTrace) =>
-                                                Image.asset(
-                                          'assets/img/Book_1.png',
-                                          fit: BoxFit.cover,
-                                        ),
                                       ),
                                     ),
                                   ),
                                 ),
-                                SizedBox(height: 24),
-                                // Author and Price Row
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    // Price display logic - LEFT SIDE
-                                    if (bookData!.isFree)
-                                      Text(
-                                        'مجانا',
-                                        style: AppTexts.heading1Bold.copyWith(
-                                          color: Colors.green[800],
-                                          fontSize: 28,
-                                        ),
-                                      )
-                                    else if (bookData!.price != null)
-                                      RichText(
-                                        text: TextSpan(
-                                          children: [
-                                            TextSpan(
-                                              text: '${bookData!.price}',
-                                              style: AppTexts.heading1Bold
-                                                  .copyWith(
-                                                color: Colors.green[800],
-                                                fontSize: 28,
-                                              ),
-                                            ),
-                                            TextSpan(
-                                              text: ' ج.م',
-                                              style: AppTexts.captionRegular
-                                                  .copyWith(
-                                                color: AppColors.neutral500,
-                                                fontSize: 18,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      )
-                                    else if (bookData!.pricePoints != null)
-                                      Row(
+                              ),
+                              SizedBox(height: 24),
+                              // Author and Price Row
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  // Price display logic - LEFT SIDE
+                                  if (bookData!.isFree)
+                                    Text(
+                                      'مجانا',
+                                      style: AppTexts.heading1Bold.copyWith(
+                                        color: Colors.green[800],
+                                        fontSize: 28,
+                                      ),
+                                    )
+                                  else if (bookData!.price != null)
+                                    RichText(
+                                      textDirection: TextDirection.rtl,
+                                      text: TextSpan(
                                         children: [
-                                          Image.asset(
-                                            'assets/img/coin.png',
-                                            width: 24,
-                                            height: 24,
+                                          TextSpan(
+                                          text: '${bookData!.price}',
+                                          style: AppTexts.heading1Bold
+                                              .copyWith(
+                                            color: Colors.green[800],
+                                            fontSize: 28,
                                           ),
-                                          SizedBox(width: 4),
-                                          Text(
-                                            '${bookData!.pricePoints}',
-                                            style:
-                                                AppTexts.heading1Bold.copyWith(
-                                              color: Colors.green[800],
-                                              fontSize: 28,
+                                        ),
+                                          TextSpan(
+                                            text: 'ج.م',
+                                            style: AppTexts.captionRegular
+                                                .copyWith(
+                                              color: AppColors.neutral500,
+                                              fontSize: 18,
                                             ),
                                           ),
                                         ],
-                                      )
-                                    else
-                                      SizedBox.shrink(),
-                                    // Author info - RIGHT SIDE
+                                      ),
+                                    )
+                                  else if (bookData!.pricePoints != null)
                                     Row(
                                       children: [
-                                        Text(
-                                          bookData!.author.name,
-                                          style: AppTexts.highlightEmphasis
-                                              .copyWith(
-                                                  color: AppColors.neutral500),
-                                          textAlign: TextAlign.right,
+                                        Image.asset(
+                                          'assets/img/coin.png',
+                                          width: 24,
+                                          height: 24,
                                         ),
-                                        SizedBox(width: 8),
-                                        CircleAvatar(
-                                          radius: 18,
-                                          backgroundImage: NetworkImage(
-                                              bookData!.author.photo),
-                                          onBackgroundImageError:
-                                              (exception, stackTrace) {},
-                                          child: bookData!.author.photo.isEmpty
-                                              ? Icon(Icons.person)
-                                              : null,
+                                        SizedBox(width: 4),
+                                        Text(
+                                          '${bookData!.pricePoints}',
+                                          style:
+                                              AppTexts.heading1Bold.copyWith(
+                                            color: Colors.green[800],
+                                            fontSize: 28,
+                                          ),
                                         ),
                                       ],
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: 16),
-                                // Book Title
-                                Text(
-                                  bookData!.title,
-                                  style: AppTexts.heading1Bold,
-                                  textAlign: TextAlign.right,
-                                ),
-                                SizedBox(height: 12),
-                                // Book Description
-                                Text(
-                                  bookData!.description.isNotEmpty
-                                      ? bookData!.description
-                                      : 'لا يوجد وصف متاح للكتاب',
-                                  style: AppTexts.contentRegular
-                                      .copyWith(color: AppColors.neutral500),
-                                  textAlign: TextAlign.right,
-                                ),
-                                SizedBox(height: 12),
-                                // Rating
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    Text('( ${bookData!.count.reviews} ) ',
-                                        style: AppTexts.contentBold.copyWith(
-                                            color: AppColors.neutral500)),
-                                    SizedBox(width: 6),
-                                    ...List.generate(
-                                        5,
-                                        (index) => Icon(
-                                              index < bookData!.rating.floor()
-                                                  ? Icons.star
-                                                  : Icons.star_border,
-                                              color: Colors.amber,
-                                              size: 22,
-                                            )),
-                                  ],
-                                ),
-                                SizedBox(height: 24),
-                                // Removed suggested books section
-                                SizedBox(height: 32),
-                              ],
-                            ),
+                                    )
+                                  else
+                                    SizedBox.shrink(),
+                                  // Author info - RIGHT SIDE
+                                  Row(
+                                    children: [
+                                      Text(
+                                        bookData!.author.name,
+                                        style: AppTexts.highlightEmphasis
+                                            .copyWith(
+                                                color: AppColors.neutral500),
+                                        textAlign: TextAlign.right,
+                                      ),
+                                      SizedBox(width: 8),
+                                      CircleAvatar(
+                                        radius: 18,
+                                        backgroundImage: NetworkImage(
+                                            bookData!.author.photo),
+                                        onBackgroundImageError:
+                                            (exception, stackTrace) {},
+                                        child: bookData!.author.photo.isEmpty
+                                            ? Icon(Icons.person)
+                                            : null,
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 16),
+                              // Book Title
+                              Text(
+                                bookData!.title,
+                                style: AppTexts.heading1Bold,
+                                textAlign: TextAlign.right,
+                              ),
+                              SizedBox(height: 12),
+                              // Book Description
+                              Text(
+                                bookData!.description.isNotEmpty
+                                    ? bookData!.description
+                                    : 'لا يوجد وصف متاح للكتاب',
+                                style: AppTexts.contentRegular
+                                    .copyWith(color: AppColors.neutral500),
+                                textAlign: TextAlign.right,
+                              ),
+                              SizedBox(height: 12),
+                              // Rating
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  Text('( ${bookData!.count.reviews} ) ',
+                                      style: AppTexts.contentBold.copyWith(
+                                          color: AppColors.neutral500)),
+                                  SizedBox(width: 6),
+                                  ...List.generate(
+                                      5,
+                                      (index) => Icon(
+                                            index < bookData!.rating.floor()
+                                                ? Icons.star
+                                                : Icons.star_border,
+                                            color: Colors.amber,
+                                            size: 22,
+                                          )),
+                                ],
+                              ),
+                              SizedBox(height: 24),
+                              // Removed suggested books section
+                              SizedBox(height: 32),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
                     ),
-                  ),
-      ),
+                  ],
+                ),
       bottomNavigationBar: _buildBottomBar(context),
     );
   }

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../style/Colors.dart';
 import '../../../../style/Fonts.dart';
-import '../onboarding/Oboarding.dart';
+import '../Onboarding/Onboarding Screen.dart';
 
 class SplashScreen extends StatefulWidget {
   @override
@@ -29,7 +29,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     Timer(Duration(seconds: 3), () {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => OnboardingScreen()),
+        MaterialPageRoute(builder: (context) => Onboarding()),
       );
     });
   }

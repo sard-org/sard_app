@@ -141,6 +141,44 @@ class _AllRecommendedBooksScreenState extends State<AllRecommendedBooksScreen> {
     );
   }
 
+  Widget _buildAppBar(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 32, horizontal: 16),
+      decoration: BoxDecoration(
+        color: AppColors.primary500,
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(12),
+          bottomRight: Radius.circular(12),
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: Container(
+              width: 50,
+              height: 50,
+              padding: EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(Icons.arrow_back, color: AppColors.primary500),
+            ),
+          ),
+          SizedBox(width: 12),
+          Text(
+            "كتب مرشحة لك",
+            style: AppTexts.heading2Bold.copyWith(
+              color: AppColors.neutral100,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Directionality(
@@ -235,38 +273,7 @@ class _AllRecommendedBooksScreenState extends State<AllRecommendedBooksScreen> {
                 top: 0,
                 left: 0,
                 right: 0,
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
-                  decoration: const BoxDecoration(
-                    color: AppColors.neutral100,
-                    borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.circular(16),
-                      bottomRight: Radius.circular(16),
-                    ),
-                  ),
-                  child: SafeArea(
-                    child: Row(
-                      children: [
-                        IconButton(
-                          onPressed: () => Navigator.pop(context),
-                          icon: const Icon(
-                            Icons.arrow_back_ios,
-                            color: AppColors.neutral900,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          'الكتب المقترحة',
-                          style: AppTexts.heading1Bold.copyWith(
-                            color: AppColors.neutral900,
-                            fontSize: 20,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+                child: _buildAppBar(context),
               ),
             ],
           ),
