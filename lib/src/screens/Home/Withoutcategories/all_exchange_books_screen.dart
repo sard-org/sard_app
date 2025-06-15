@@ -225,7 +225,7 @@ class _AllExchangeBooksScreenState extends State<AllExchangeBooksScreen> {
                                   ? _buildEmptyState()
                                   : GridView.builder(
                                       padding: const EdgeInsets.symmetric(
-                                          horizontal: 16, vertical: 16),
+                                          vertical: 16),
                                       gridDelegate:
                                           const SliverGridDelegateWithFixedCrossAxisCount(
                                         crossAxisCount: 2,

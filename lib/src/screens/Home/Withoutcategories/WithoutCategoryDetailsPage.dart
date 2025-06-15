@@ -49,7 +49,7 @@ class _WithoutCategoryDetailsPageState
       });
 
       final recommendations =
-          await _recommendationsApiService.getRecommendations(limit: 3);
+          await _recommendationsApiService.getRecommendations(limit: 4);
       setState(() {
         recommendedBooks = recommendations
             .map((book) => {
