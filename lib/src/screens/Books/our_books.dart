@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sard/style/Colors.dart';
 import 'package:sard/style/Fonts.dart';
 import 'package:sard/style/BaseScreen.dart';
-import '../PlayerScreen/audio_book_player_screen.dart';
 import 'logic/books_cubit.dart';
 import 'logic/books_state.dart';
 
@@ -47,12 +46,6 @@ class BookListScreen extends StatelessWidget {
                                 title: book.title,
                                 description: book.description,
                                 imageUrl: book.imageUrl,
-                                onTap: () => Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => AudioBookPlayer(),
-                                  ),
-                                ),
                               );
                             },
                           );
@@ -129,14 +122,12 @@ class BookItem extends StatelessWidget {
   final String title;
   final String description;
   final String imageUrl;
-  final VoidCallback onTap;
 
   const BookItem({
     required this.author,
     required this.title,
     required this.description,
     required this.imageUrl,
-    required this.onTap,
   });
 
   @override
@@ -144,7 +135,6 @@ class BookItem extends StatelessWidget {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: GestureDetector(
-        onTap: onTap,
         child: Container(
           margin: EdgeInsets.only(bottom: 12),
           padding: const EdgeInsets.all(12),

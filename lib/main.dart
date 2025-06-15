@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sard/src/screens/Home/home.dart';
-import 'package:sard/src/screens/Splash/Splash.dart';
-import 'package:sard/src/screens/auth/login/View/Login.dart';
+import 'package:sard/src/screens/PlayerScreen/audio_book_player_screen.dart';
 import 'package:sard/src/screens/auth/login/data/dio_login_helper.dart';
 import 'package:sard/src/screens/auth/login/logic/login_cubit.dart';
 import 'package:sard/src/screens/books/our_books.dart';
@@ -33,7 +32,7 @@ class MyApp extends StatelessWidget {
         ],
         child: MaterialApp(
           debugShowCheckedModeBanner: false,
-          home: SplashScreen(), //  البداية من شاشة الـ .
+          home: AudioBookPlayer(), //  البداية من شاشة الـ .
         ));
   }
 }

@@ -1,3 +1,4 @@
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import '../../../style/BaseScreen.dart';
 import '../../../style/Colors.dart';
@@ -26,9 +27,9 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
   final BookService _bookService = BookService();
   final TextToSpeechService _ttsService = TextToSpeechService();
   bool _isTTSLoading = false;
-  bool _webAudioSupported = true;
-  bool _showWebCompatibilityInfo = false;
   StateSetter? _modalSetState; // Add this to store modal setState
+  AudioPlayer? _audioPlayer;
+  String _audioUrl = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'; // رابط صوتي تجريبي
 
   // Get book ID from widget or use default
   late final String bookId;
@@ -37,33 +38,12 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
     super.initState();
     // Initialize book ID from widget parameter or use default
     bookId = widget.bookId ?? "681f4204645636b8e863c261";
-
-    // Test web audio support if on web platform
-    if (_ttsService.isWebPlatform) {
-      _testWebAudioCompatibility();
-    }
-  }
-
-  // Test web audio compatibility on initialization
-  void _testWebAudioCompatibility() async {
-    try {
-      _webAudioSupported = await _ttsService.testWebAudioSupport();
-      if (!_webAudioSupported) {
-        setState(() {
-          _showWebCompatibilityInfo = true;
-        });
-      }
-    } catch (e) {
-      print('Error testing web audio compatibility: $e');
-      setState(() {
-        _webAudioSupported = false;
-        _showWebCompatibilityInfo = true;
-      });
-    }
+    _audioPlayer = AudioPlayer();
   }
 
   @override
   void dispose() {
+    _audioPlayer?.dispose();
     _ttsService.dispose();
     super.dispose();
   }
@@ -137,44 +117,6 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
                   if (!_isLoadingSummary && _summaryError == null)
                     Column(
                       children: [
-                        // Show web compatibility info if needed
-                        if (_showWebCompatibilityInfo &&
-                            _ttsService.isWebPlatform)
-                          Container(
-                            margin: EdgeInsets.only(bottom: 12),
-                            padding: EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: Colors.orange[50],
-                              border: Border.all(color: Colors.orange),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(Icons.info_outline,
-                                    color: Colors.orange, size: 20),
-                                SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    'قد تواجه مشاكل في تشغيل الصوت على المتصفح. للحصول على تجربة أفضل، استخدم التطبيق على الهاتف.',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.orange[800],
-                                    ),
-                                  ),
-                                ),
-                                GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      _showWebCompatibilityInfo = false;
-                                    });
-                                  },
-                                  child: Icon(Icons.close,
-                                      color: Colors.orange, size: 16),
-                                ),
-                              ],
-                            ),
-                          ),
-
                         Padding(
                           padding:
                               EdgeInsets.only(bottom: 16), // Add bottom margin
@@ -676,6 +618,20 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
     }
   }
 
+  void _playSampleAudio() async {
+    if (_isPlaying) {
+      await _audioPlayer?.stop();
+      setState(() {
+        _isPlaying = false;
+      });
+    } else {
+      await _audioPlayer?.play(UrlSource(_audioUrl));
+      setState(() {
+        _isPlaying = true;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -779,6 +735,17 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
                       ],
                     ),
                     SizedBox(height: 16),
+                    Center(
+                      child: ElevatedButton.icon(
+                        icon: Icon(_isPlaying ? Icons.stop : Icons.play_arrow),
+                        label: Text(_isPlaying ? 'إيقاف الصوت التجريبي' : 'تشغيل صوت تجريبي'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          foregroundColor: Colors.white,
+                        ),
+                        onPressed: _playSampleAudio,
+                      ),
+                    ),
                   ],
                 ),
               ),
