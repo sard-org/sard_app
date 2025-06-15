@@ -159,22 +159,56 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
     );
   }
 
-  Widget _buildSearchHeader() {
+  Widget _buildAppBar(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
-      child: Column(
+      padding: EdgeInsets.symmetric(vertical: 32, horizontal: 16),
+      decoration: BoxDecoration(
+        color: AppColors.primary500,
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(12),
+          bottomRight: Radius.circular(12),
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              IconButton(
-                onPressed: () => Navigator.pop(context),
-                icon: const Icon(
-                  Icons.arrow_back_ios,
-                  color: AppColors.neutral900,
-                ),
+          GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: Container(
+              width: 50,
+              height: 50,
+              padding: EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
               ),
-              const SizedBox(width: 8),
-              Expanded(
+              child: Icon(Icons.arrow_back, color: AppColors.primary500),
+            ),
+          ),
+          SizedBox(width: 12),
+          Text(
+            "البحث",
+            style: AppTexts.heading2Bold.copyWith(
+              color: AppColors.neutral100,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: SafeArea(
+          child: Column(
+            children: [
+              _buildAppBar(context),
+              Padding(
+                padding: const EdgeInsets.all(16),
                 child: TextField(
                   controller: _searchController,
                   textDirection: TextDirection.rtl,
@@ -204,45 +238,30 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
                   onSubmitted: _performSearch,
                 ),
               ),
-            ],
-          ),
-          if (currentQuery.isNotEmpty && !isLoading) ...[
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Text(
-                  'نتائج البحث عن: ',
-                  style: AppTexts.contentRegular
-                      .copyWith(color: AppColors.neutral600),
+              if (currentQuery.isNotEmpty && !isLoading)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(
+                    children: [
+                      Text(
+                        'نتائج البحث عن: ',
+                        style: AppTexts.contentRegular
+                            .copyWith(color: AppColors.neutral600),
+                      ),
+                      Text(
+                        '"$currentQuery"',
+                        style: AppTexts.contentBold
+                            .copyWith(color: AppColors.primary600),
+                      ),
+                      const Spacer(),
+                      Text(
+                        '${searchResults.length} نتيجة',
+                        style: AppTexts.contentRegular
+                            .copyWith(color: AppColors.neutral600),
+                      ),
+                    ],
+                  ),
                 ),
-                Text(
-                  '"$currentQuery"',
-                  style: AppTexts.contentBold
-                      .copyWith(color: AppColors.primary600),
-                ),
-                const Spacer(),
-                Text(
-                  '${searchResults.length} نتيجة',
-                  style: AppTexts.contentRegular
-                      .copyWith(color: AppColors.neutral600),
-                ),
-              ],
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
-        body: SafeArea(
-          child: Column(
-            children: [
-              _buildSearchHeader(),
               Expanded(
                 child: isLoading
                     ? const Center(

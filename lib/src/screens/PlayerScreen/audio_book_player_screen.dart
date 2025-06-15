@@ -5,6 +5,8 @@ import '../../../style/Colors.dart';
 import '../../../style/Fonts.dart';
 import '../../services/book_service.dart';
 import '../../services/text_to_speech_service.dart';
+import '../AudioBook/audio_book_api_service.dart';
+import '../AudioBook/audio_book_model.dart';
 
 class AudioBookPlayer extends StatefulWidget {
   final String? bookId;
@@ -30,6 +32,10 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
   StateSetter? _modalSetState; // Add this to store modal setState
   AudioPlayer? _audioPlayer;
   String _audioUrl = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'; // رابط صوتي تجريبي
+  AudioBookApiService? _apiService;
+  AudioBookResponse? _bookData;
+  bool _isLoadingAudio = true;
+  String? _audioError;
 
   // Get book ID from widget or use default
   late final String bookId;
@@ -39,6 +45,8 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
     // Initialize book ID from widget parameter or use default
     bookId = widget.bookId ?? "681f4204645636b8e863c261";
     _audioPlayer = AudioPlayer();
+    _apiService = AudioBookApiService();
+    _fetchAudioUrl();
   }
 
   @override
@@ -618,7 +626,34 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
     }
   }
 
+  Future<void> _fetchAudioUrl() async {
+    setState(() {
+      _isLoadingAudio = true;
+      _audioError = null;
+    });
+    try {
+      final data = await _apiService!.getAudioBook(bookId);
+      setState(() {
+        _bookData = data;
+        // لو الـ backend بيرجع audio مباشرة في الـ response
+        _audioUrl = (data as dynamic).audio ?? _audioUrl;
+        _isLoadingAudio = false;
+      });
+    } catch (e) {
+      setState(() {
+        _audioError = e.toString();
+        _isLoadingAudio = false;
+      });
+    }
+  }
+
   void _playSampleAudio() async {
+    if (_isLoadingAudio || _audioError != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(_audioError ?? 'جاري تحميل الصوت...')),
+      );
+      return;
+    }
     if (_isPlaying) {
       await _audioPlayer?.stop();
       setState(() {
@@ -736,15 +771,19 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
                     ),
                     SizedBox(height: 16),
                     Center(
-                      child: ElevatedButton.icon(
-                        icon: Icon(_isPlaying ? Icons.stop : Icons.play_arrow),
-                        label: Text(_isPlaying ? 'إيقاف الصوت التجريبي' : 'تشغيل صوت تجريبي'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green,
-                          foregroundColor: Colors.white,
-                        ),
-                        onPressed: _playSampleAudio,
-                      ),
+                      child: _isLoadingAudio
+                          ? CircularProgressIndicator()
+                          : _audioError != null
+                              ? Text('خطأ في تحميل الصوت: $_audioError', style: TextStyle(color: Colors.red))
+                              : ElevatedButton.icon(
+                                  icon: Icon(_isPlaying ? Icons.stop : Icons.play_arrow),
+                                  label: Text(_isPlaying ? 'إيقاف الصوت' : 'تشغيل الصوت'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.green,
+                                    foregroundColor: Colors.white,
+                                  ),
+                                  onPressed: _playSampleAudio,
+                                ),
                     ),
                   ],
                 ),
