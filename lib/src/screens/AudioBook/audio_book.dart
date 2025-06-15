@@ -5,6 +5,7 @@ import '../../../style/Fonts.dart';
 import 'audio_book_api_service.dart';
 import 'audio_book_model.dart';
 import '../../services/book_service.dart';
+import '../../services/text_to_speech_service.dart';
 
 class AudioBookScreen extends StatefulWidget {
   final String bookId;
@@ -19,19 +20,25 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
   late AudioBookApiService _apiService;
   AudioBookResponse? bookData;
   bool isLoading = true;
-  String? errorMessage;
-  // Summary functionality
+  String? errorMessage; // Summary functionality
   final BookService _bookService = BookService();
+  final TextToSpeechService _ttsService = TextToSpeechService();
   bool _isLoadingSummary = false;
   String? _summaryError;
   String? _bookSummary;
+  bool _isTTSLoading = false;
   StateSetter? _modalSetState; // Add this to store modal setState
-
   @override
   void initState() {
     super.initState();
     _apiService = AudioBookApiService();
     _loadBookData();
+  }
+
+  @override
+  void dispose() {
+    _ttsService.dispose();
+    super.dispose();
   }
 
   Future<void> _loadBookData() async {
@@ -116,23 +123,34 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
                   ),
                   if (!_isLoadingSummary && _summaryError == null)
                     Padding(
-                      padding: EdgeInsets.only(bottom: 16), // Add bottom margin
+                      padding: EdgeInsets.only(bottom: 16),
                       child: GestureDetector(
-                        onTap: () {
-                          // Handle text-to-speech functionality here
-                        },
+                        onTap: () => _handleTextToSpeech(),
                         child: Container(
                           width: 60,
                           height: 60,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: AppColors.primary500,
+                            color: _isTTSLoading
+                                ? AppColors.primary300
+                                : AppColors.primary500,
                           ),
-                          child: Icon(
-                            Icons.volume_up_outlined,
-                            size: 30,
-                            color: Colors.white,
-                          ),
+                          child: _isTTSLoading
+                              ? SizedBox(
+                                  width: 30,
+                                  height: 30,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : Icon(
+                                  _ttsService.isPlaying
+                                      ? Icons.stop
+                                      : Icons.volume_up_outlined,
+                                  size: 30,
+                                  color: Colors.white,
+                                ),
                         ),
                       ),
                     ),
@@ -257,6 +275,78 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
     }
   }
 
+  Future<void> _handleTextToSpeech() async {
+    if (_bookSummary == null || _bookSummary!.isEmpty) {
+      // Show snackbar if no summary is available
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('لا يوجد ملخص متاح للتحويل إلى صوت'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    if (_ttsService.isPlaying) {
+      // Stop current audio if playing
+      await _ttsService.stopAudio();
+      setState(() {});
+      _modalSetState?.call(() {});
+      return;
+    }
+
+    try {
+      setState(() {
+        _isTTSLoading = true;
+      });
+      _modalSetState?.call(() {
+        _isTTSLoading = true;
+      });
+
+      await _ttsService.convertTextToSpeech(_bookSummary!);
+
+      setState(() {
+        _isTTSLoading = false;
+      });
+      _modalSetState?.call(() {
+        _isTTSLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isTTSLoading = false;
+      });
+      _modalSetState?.call(() {
+        _isTTSLoading = false;
+      });
+
+      // Show detailed error message
+      String errorMessage = e.toString().replaceAll('Exception: ', '');
+
+      // Add debugging information for URL issues
+      if (errorMessage.contains('رابط صوتي غير صالح') ||
+          errorMessage.contains('جميع الروابط الصوتية غير صالحة')) {
+        errorMessage +=
+            '\n\nيبدو أن هناك مشكلة في الروابط الصوتية المستلمة من الخادم. يرجى المحاولة مرة أخرى.';
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(errorMessage),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 5), // Show error longer
+          action: SnackBarAction(
+            label: 'إعادة المحاولة',
+            textColor: Colors.white,
+            onPressed: () => _handleTextToSpeech(),
+          ),
+        ),
+      );
+
+      // Log error for debugging
+      print('TTS Error: $e');
+    }
+  }
+
   Widget _buildAppBar(BuildContext context) {
     return Container(
       width: double.infinity,
@@ -305,7 +395,7 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
     Color buttonColor = AppColors.primary500;
 
     if (bookData!.isFree) {
-      buttonText = 'احصل علية مجانا';
+      buttonText = 'احصل عليه مجانا';
     } else if (bookData!.price != null) {
       buttonText = 'شراء الكتاب  |  ${bookData!.price} ج.م';
     } else if (bookData!.pricePoints != null) {

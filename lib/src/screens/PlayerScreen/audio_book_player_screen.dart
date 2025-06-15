@@ -3,6 +3,7 @@ import '../../../style/BaseScreen.dart';
 import '../../../style/Colors.dart';
 import '../../../style/Fonts.dart';
 import '../../services/book_service.dart';
+import '../../services/text_to_speech_service.dart';
 
 class AudioBookPlayer extends StatefulWidget {
   final String? bookId;
@@ -23,16 +24,48 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
   String? _summaryError;
   String? _bookSummary;
   final BookService _bookService = BookService();
+  final TextToSpeechService _ttsService = TextToSpeechService();
+  bool _isTTSLoading = false;
+  bool _webAudioSupported = true;
+  bool _showWebCompatibilityInfo = false;
   StateSetter? _modalSetState; // Add this to store modal setState
 
   // Get book ID from widget or use default
   late final String bookId;
-
   @override
   void initState() {
     super.initState();
     // Initialize book ID from widget parameter or use default
     bookId = widget.bookId ?? "681f4204645636b8e863c261";
+
+    // Test web audio support if on web platform
+    if (_ttsService.isWebPlatform) {
+      _testWebAudioCompatibility();
+    }
+  }
+
+  // Test web audio compatibility on initialization
+  void _testWebAudioCompatibility() async {
+    try {
+      _webAudioSupported = await _ttsService.testWebAudioSupport();
+      if (!_webAudioSupported) {
+        setState(() {
+          _showWebCompatibilityInfo = true;
+        });
+      }
+    } catch (e) {
+      print('Error testing web audio compatibility: $e');
+      setState(() {
+        _webAudioSupported = false;
+        _showWebCompatibilityInfo = true;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _ttsService.dispose();
+    super.dispose();
   }
 
   void _togglePlayPause() {
@@ -102,26 +135,80 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
                         _buildSummaryContent(scrollController, setModalState),
                   ),
                   if (!_isLoadingSummary && _summaryError == null)
-                    Padding(
-                      padding: EdgeInsets.only(bottom: 16), // Add bottom margin
-                      child: GestureDetector(
-                        onTap: () {
-                          // Handle text-to-speech functionality here
-                        },
-                        child: Container(
-                          width: 60,
-                          height: 60,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: AppColors.primary500,
+                    Column(
+                      children: [
+                        // Show web compatibility info if needed
+                        if (_showWebCompatibilityInfo &&
+                            _ttsService.isWebPlatform)
+                          Container(
+                            margin: EdgeInsets.only(bottom: 12),
+                            padding: EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.orange[50],
+                              border: Border.all(color: Colors.orange),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(Icons.info_outline,
+                                    color: Colors.orange, size: 20),
+                                SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    'قد تواجه مشاكل في تشغيل الصوت على المتصفح. للحصول على تجربة أفضل، استخدم التطبيق على الهاتف.',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.orange[800],
+                                    ),
+                                  ),
+                                ),
+                                GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      _showWebCompatibilityInfo = false;
+                                    });
+                                  },
+                                  child: Icon(Icons.close,
+                                      color: Colors.orange, size: 16),
+                                ),
+                              ],
+                            ),
                           ),
-                          child: Icon(
-                            Icons.volume_up_outlined,
-                            size: 30,
-                            color: Colors.white,
+
+                        Padding(
+                          padding:
+                              EdgeInsets.only(bottom: 16), // Add bottom margin
+                          child: GestureDetector(
+                            onTap: () => _handleTextToSpeech(),
+                            child: Container(
+                              width: 60,
+                              height: 60,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: _isTTSLoading
+                                    ? AppColors.primary300
+                                    : AppColors.primary500,
+                              ),
+                              child: _isTTSLoading
+                                  ? SizedBox(
+                                      width: 30,
+                                      height: 30,
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : Icon(
+                                      _ttsService.isPlaying
+                                          ? Icons.stop
+                                          : Icons.volume_up_outlined,
+                                      size: 30,
+                                      color: Colors.white,
+                                    ),
+                            ),
                           ),
                         ),
-                      ),
+                      ],
                     ),
                 ],
               ),
@@ -453,6 +540,140 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
         ),
       ),
     );
+  }
+
+  Future<void> _handleTextToSpeech() async {
+    if (_bookSummary == null || _bookSummary!.isEmpty) {
+      // Show snackbar if no summary is available
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('لا يوجد ملخص متاح للتحويل إلى صوت'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    if (_ttsService.isPlaying) {
+      // Stop current audio if playing
+      await _ttsService.stopAudio();
+      setState(() {});
+      _modalSetState?.call(() {});
+      return;
+    }
+
+    try {
+      setState(() {
+        _isTTSLoading = true;
+      });
+      _modalSetState?.call(() {
+        _isTTSLoading = true;
+      });
+
+      await _ttsService.convertTextToSpeech(_bookSummary!);
+
+      setState(() {
+        _isTTSLoading = false;
+      });
+      _modalSetState?.call(() {
+        _isTTSLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isTTSLoading = false;
+      });
+      _modalSetState?.call(() {
+        _isTTSLoading = false;
+      });
+
+      // Parse error message and provide helpful solutions
+      String errorMessage = e.toString().replaceAll('Exception: ', '');
+      String solutionText = '';
+
+      // Check for specific error types and provide targeted solutions
+      if (errorMessage.contains('CORS') ||
+          errorMessage.contains('XMLHttpRequest') ||
+          errorMessage.contains('قيود الأمان') ||
+          errorMessage.contains('المتصفح')) {
+        solutionText = '''
+💡 نصائح لحل المشكلة:
+• استخدم التطبيق على الهاتف المحمول
+• جرب متصفح مختلف (Chrome أو Firefox)
+• تأكد من السماح بتشغيل الصوت في المتصفح
+• تحقق من اتصال الإنترنت
+        ''';
+      } else if (errorMessage.contains('انتهت مهلة')) {
+        solutionText = '''
+💡 يبدو أن هناك مشكلة في الاتصال:
+• تحقق من اتصال الإنترنت
+• أعد المحاولة بعد قليل
+• تأكد من استقرار الشبكة
+        ''';
+      } else if (errorMessage.contains('رابط صوتي غير صالح')) {
+        solutionText = '''
+💡 مشكلة في الروابط الصوتية:
+• أعد المحاولة 
+• تحقق من تحديث التطبيق
+• تواصل مع الدعم الفني إذا استمرت المشكلة
+        ''';
+      }
+
+      // Show error dialog instead of snackbar for better user experience
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Row(
+              children: [
+                Icon(Icons.error_outline, color: Colors.red),
+                SizedBox(width: 8),
+                Text('خطأ في تشغيل الصوت'),
+              ],
+            ),
+            content: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'تفاصيل الخطأ:',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 8),
+                  Text(errorMessage),
+                  if (solutionText.isNotEmpty) ...[
+                    SizedBox(height: 16),
+                    Text(
+                      solutionText,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text('إغلاق'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  _handleTextToSpeech(); // Retry
+                },
+                child: Text('إعادة المحاولة'),
+              ),
+            ],
+          );
+        },
+      );
+
+      // Log error for debugging
+      print('TTS Error: $e');
+    }
   }
 
   @override
