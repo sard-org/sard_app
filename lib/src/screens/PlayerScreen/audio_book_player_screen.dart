@@ -4,7 +4,6 @@ import '../../../style/BaseScreen.dart';
 import '../../../style/Colors.dart';
 import '../../../style/Fonts.dart';
 import '../../services/book_service.dart';
-import '../../services/text_to_speech_service.dart';
 import '../AudioBook/audio_book_api_service.dart';
 import '../AudioBook/audio_book_model.dart';
 
@@ -27,7 +26,6 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
   String? _summaryError;
   String? _bookSummary;
   final BookService _bookService = BookService();
-  final TextToSpeechService _ttsService = TextToSpeechService();
   bool _isTTSLoading = false;
   StateSetter? _modalSetState; // Add this to store modal setState
   AudioPlayer? _audioPlayer;
@@ -49,12 +47,6 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
     _fetchAudioUrl();
   }
 
-  @override
-  void dispose() {
-    _audioPlayer?.dispose();
-    _ttsService.dispose();
-    super.dispose();
-  }
 
   void _togglePlayPause() {
     setState(() {
@@ -149,9 +141,7 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
                                       ),
                                     )
                                   : Icon(
-                                      _ttsService.isPlaying
-                                          ? Icons.stop
-                                          : Icons.volume_up_outlined,
+                                      Icons.volume_up_outlined,
                                       size: 30,
                                       color: Colors.white,
                                     ),
@@ -504,13 +494,6 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
       return;
     }
 
-    if (_ttsService.isPlaying) {
-      // Stop current audio if playing
-      await _ttsService.stopAudio();
-      setState(() {});
-      _modalSetState?.call(() {});
-      return;
-    }
 
     try {
       setState(() {
@@ -520,7 +503,6 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
         _isTTSLoading = true;
       });
 
-      await _ttsService.convertTextToSpeech(_bookSummary!);
 
       setState(() {
         _isTTSLoading = false;
