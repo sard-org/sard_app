@@ -5,6 +5,7 @@ import '../../../style/Fonts.dart';
 import 'audio_book_api_service.dart';
 import 'audio_book_model.dart';
 import '../../services/book_service.dart';
+import '../../services/text_to_speech_service.dart';
 
 class AudioBookScreen extends StatefulWidget {
   final String bookId;
@@ -22,6 +23,7 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
   bool isLoading = true;
   String? errorMessage; // Summary functionality
   final BookService _bookService = BookService();
+  final TextToSpeechService _ttsService = TextToSpeechService();
   bool _isLoadingSummary = false;
   String? _summaryError;
   String? _bookSummary;
@@ -35,6 +37,10 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
   }
 
   @override
+  void dispose() {
+    _ttsService.dispose();
+    super.dispose();
+  }
 
   Future<void> _loadBookData() async {
     try {
@@ -140,7 +146,9 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
                                   ),
                                 )
                               : Icon(
-                                  Icons.volume_up_outlined,
+                                  _ttsService.isPlaying
+                                      ? Icons.stop
+                                      : Icons.volume_up_outlined,
                                   size: 30,
                                   color: Colors.white,
                                 ),
@@ -280,6 +288,13 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
       return;
     }
 
+    if (_ttsService.isPlaying) {
+      // Stop current audio if playing
+      await _ttsService.stopAudio();
+      setState(() {});
+      _modalSetState?.call(() {});
+      return;
+    }
 
     try {
       setState(() {
@@ -289,6 +304,7 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
         _isTTSLoading = true;
       });
 
+      await _ttsService.convertTextToSpeech(_bookSummary!);
 
       setState(() {
         _isTTSLoading = false;
