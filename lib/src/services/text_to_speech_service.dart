@@ -46,15 +46,11 @@ class TextToSpeechService {
 
   Future<void> convertTextToSpeech(String text) async {
     try {
-      // Reset state
       _audioUrls.clear();
       _currentIndex = 0;
       _isPlaying = false;
-
-      // Stop any currently playing audio
       await stopAudio();
 
-      // Validate input text
       if (text.trim().isEmpty) {
         throw Exception('النص المدخل فارغ');
       }
@@ -79,27 +75,23 @@ class TextToSpeechService {
         final data = response.data;
         if (data != null && data['url'] != null && data['url'] is List) {
           final urlList = data['url'] as List;
-          if (urlList.isEmpty) {
-            throw Exception('لم يتم إنشاء أي ملفات صوتية');
-          }
+          if (urlList.isEmpty) throw Exception('لم يتم إنشاء أي ملفات صوتية');
+
           _audioUrls = urlList
               .map((item) => {
-                    'shortText': item['shortText']?.toString() ?? '',
-                    'url': item['url']?.toString() ?? '',
-                  })
+            'shortText': item['shortText']?.toString() ?? '',
+            'url': item['url']?.toString() ?? '',
+          })
               .where((item) => item['url']!.isNotEmpty)
               .toList();
 
-          if (_audioUrls.isEmpty) {
-            throw Exception('لا توجد ملفات صوتية صالحة');
-          }
+          if (_audioUrls.isEmpty) throw Exception('لا توجد ملفات صوتية صالحة');
 
           print('TTS URLs received:');
           for (int i = 0; i < _audioUrls.length; i++) {
             print('[$i] ${_audioUrls[i]['url']}');
           }
 
-          // Start playing the first audio
           await _playFirstValidAudio();
         } else {
           throw Exception('تنسيق الاستجابة غير صحيح');
@@ -128,27 +120,21 @@ class TextToSpeechService {
       }
       throw Exception(errorMessage);
     } catch (e) {
-      if (e is Exception && e.toString().startsWith('Exception: ')) {
-        rethrow;
-      }
+      if (e is Exception && e.toString().startsWith('Exception: ')) rethrow;
       throw Exception('خطأ غير متوقع: $e');
     }
   }
 
   Future<void> _playAudio(String url) async {
     try {
-      print('Attempting to play audio from: $url');
+      if (!_isValidUrl(url)) throw Exception('رابط صوتي غير صالح: $url');
+
+      print('Playing audio (mobile/native) from: $url');
       _isPlaying = true;
 
-      if (!_isValidUrl(url)) {
-        throw Exception('رابط صوتي غير صالح: $url');
-      }
-
-      print('Playing audio on non-web platform');
       await _audioPlayer.setPlayerMode(PlayerMode.lowLatency);
       final source = UrlSource(url);
       await _audioPlayer.play(source);
-      print('Audio playback command sent successfully');
 
       await Future.delayed(Duration(milliseconds: 500));
       final state = await _audioPlayer.getCurrentPosition();
@@ -160,27 +146,23 @@ class TextToSpeechService {
     }
   }
 
-  Future<void> _playAudioWeb(String url) async {
-    if (!kIsWeb) return;
-
+  Future<void> _playAudioWeb() async {
     try {
-      print('Playing audio on web using FlutterTTS');
-      
       final text = _audioUrls[_currentIndex]['shortText'] ?? '';
-      
+
       if (text.isEmpty) {
-        throw Exception('No text available for TTS');
+        throw Exception('لا يوجد نص متاح للقراءة');
       }
 
-      // Configure TTS for Arabic
+      print('Using flutter_tts on Web for: $text');
+
       await _flutterTts.setLanguage('ar-SA');
       await _flutterTts.setSpeechRate(0.5);
       await _flutterTts.setVolume(1.0);
       await _flutterTts.setPitch(1.0);
 
-      // Speak the text
+      _isPlaying = true;
       await _flutterTts.speak(text);
-      
     } catch (e) {
       print('Error in web audio playback: $e');
       _isPlaying = false;
@@ -189,18 +171,25 @@ class TextToSpeechService {
   }
 
   Future<void> _playFirstValidAudio() async {
-    if (_audioUrls.isEmpty) {
-      throw Exception('لا توجد ملفات صوتية متاحة');
-    }
+    if (_audioUrls.isEmpty) throw Exception('لا توجد ملفات صوتية متاحة');
 
     _currentIndex = 0;
-    await _playAudio(_audioUrls[0]['url']!);
+
+    if (kIsWeb) {
+      await _playAudioWeb();
+    } else {
+      await _playAudio(_audioUrls[0]['url']!);
+    }
   }
 
   Future<void> _playNext() async {
     if (_currentIndex < _audioUrls.length - 1) {
       _currentIndex++;
-      await _playAudio(_audioUrls[_currentIndex]['url']!);
+      if (kIsWeb) {
+        await _playAudioWeb();
+      } else {
+        await _playAudio(_audioUrls[_currentIndex]['url']!);
+      }
     } else {
       _isPlaying = false;
       print('Reached end of audio list');
@@ -209,19 +198,31 @@ class TextToSpeechService {
 
   Future<void> stopAudio() async {
     _isPlaying = false;
-    await _audioPlayer.stop();
+    if (kIsWeb) {
+      await _flutterTts.stop();
+    } else {
+      await _audioPlayer.stop();
+    }
   }
 
   Future<void> pauseAudio() async {
-    await _audioPlayer.pause();
+    if (kIsWeb) {
+      await _flutterTts.stop(); // pause غير مدعوم
+    } else {
+      await _audioPlayer.pause();
+    }
   }
 
   Future<void> resumeAudio() async {
-    await _audioPlayer.resume();
+    if (!kIsWeb) {
+      await _audioPlayer.resume();
+    }
   }
 
   bool _isValidUrl(String url) {
-    return url.isNotEmpty && (url.startsWith('http://') || url.startsWith('https://'));
+    return url.isNotEmpty &&
+        (url.endsWith('.mp3')) &&
+        (url.startsWith('http://') || url.startsWith('https://'));
   }
 
   double get progress => _audioUrls.isEmpty ? 0.0 : (_currentIndex + 1) / _audioUrls.length;

@@ -145,9 +145,25 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             ),
                             SizedBox(height: 8),
                             Center(
-                              child: Text(
-                                _nameController.text,
-                                style: AppTexts.heading2Bold,
+                              child: BlocBuilder<ProfileCubit, ProfileState>(
+                                builder: (context, state) {
+                                  if (state is ProfileLoaded) {
+                                    return Text(
+                                      state.user.name,
+                                      style: AppTexts.heading2Bold,
+                                    );
+                                  }
+                                  if (state is ProfileUpdateSuccess) {
+                                    return Text(
+                                      state.user.name,
+                                      style: AppTexts.heading2Bold,
+                                    );
+                                  }
+                                  return Text(
+                                    "",
+                                    style: AppTexts.heading2Bold,
+                                  );
+                                },
                               ),
                             ),
                             Column(
