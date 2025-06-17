@@ -226,7 +226,7 @@ class _AllRecommendedBooksScreenState extends State<AllRecommendedBooksScreen> {
                                   ? _buildEmptyState()
                                   : ListView.builder(
                                       padding: const EdgeInsets.symmetric(
-                                          horizontal: 16, vertical: 16),
+                                          vertical: 16),
                                       itemCount: recommendedBooks.length,
                                       physics: const BouncingScrollPhysics(),
                                       itemBuilder: (context, index) {
