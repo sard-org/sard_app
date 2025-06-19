@@ -2,6 +2,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'profile_api_service.dart';
 import 'profile_state.dart';
+import 'dart:io';
+import 'dart:typed_data';
 
 class ProfileCubit extends Cubit<ProfileState> {
   final ProfileApiService _profileApiService;
@@ -19,11 +21,21 @@ class ProfileCubit extends Cubit<ProfileState> {
     }
   }
 
-  // Update user profile
-  Future<void> updateUserProfile(Map<String, dynamic> userData) async {
+  // Update user profile with optional image
+  Future<void> updateUserProfile(
+    Map<String, dynamic> userData, {
+    File? imageFile,
+    Uint8List? imageBytes,
+    String? imageName,
+  }) async {
     try {
       emit(ProfileUpdateLoading());
-      final updatedUser = await _profileApiService.updateUserProfile(userData);
+      final updatedUser = await _profileApiService.updateUserProfile(
+        userData,
+        imageFile: imageFile,
+        imageBytes: imageBytes,
+        imageName: imageName,
+      );
       emit(ProfileUpdateSuccess(updatedUser));
       // Refresh profile data after successful update
       await getUserProfile();

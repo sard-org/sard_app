@@ -9,6 +9,8 @@ import '../Change Password/change_password.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 
 class EditProfileScreen extends StatefulWidget {
   @override
@@ -21,6 +23,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final TextEditingController _nameController = TextEditingController();
   String selectedGender = "ذكر";
   XFile? _pickedImage;
+  Uint8List? _imageBytes; // For web compatibility
   String? _lastUserName;
   String? _lastPhoneNumber;
 
@@ -68,6 +71,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text('تم تحديث البيانات بنجاح')),
             );
+            // تنظيف الصورة المحددة بعد النجاح
+            setState(() {
+              _pickedImage = null;
+              _imageBytes = null;
+            });
           }
         },
         child: BlocBuilder<ProfileCubit, ProfileState>(
@@ -91,36 +99,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                 alignment: Alignment.center,
                                 children: [
                                   ClipOval(
-                                    child: _pickedImage != null
-                                        ? Image.file(
-                                            File(_pickedImage!.path),
-                                            width: 80,
-                                            height: 80,
-                                            fit: BoxFit.cover,
-                                          )
-                                        : (state is ProfileLoaded &&
-                                                state.user.imageUrl != null
-                                            ? Image.network(
-                                                state.user.imageUrl!,
-                                                width: 80,
-                                                height: 80,
-                                                fit: BoxFit.cover,
-                                                errorBuilder: (context, error,
-                                                    stackTrace) {
-                                                  return Image.asset(
-                                                    'assets/img/Avatar.png',
-                                                    width: 80,
-                                                    height: 80,
-                                                    fit: BoxFit.cover,
-                                                  );
-                                                },
-                                              )
-                                            : Image.asset(
-                                                'assets/img/Avatar.png',
-                                                width: 80,
-                                                height: 80,
-                                                fit: BoxFit.cover,
-                                              )),
+                                    child: _buildImageWidget(state),
                                   ),
                                   Positioned(
                                     bottom: 0,
@@ -166,6 +145,33 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                 },
                               ),
                             ),
+                            if (_pickedImage != null)
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: Container(
+                                  margin: EdgeInsets.only(top: 8),
+                                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                  decoration: BoxDecoration(
+                                    color: Colors.green.shade100,
+                                    borderRadius: BorderRadius.circular(20),
+                                    border: Border.all(color: Colors.green.shade300),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        "لقدقدمت باضافة  صوره جديده",
+                                        style: AppTexts.contentRegular.copyWith(
+                                          color: Colors.green.shade700,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                      SizedBox(width: 4),
+                                      Icon(Icons.check_circle, size: 16, color: Colors.green.shade700),
+                                    ],
+                                  ),
+                                ),
+                              ),
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
@@ -395,8 +401,82 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       // أضف أي بيانات أخرى حسب الحاجة
     };
 
-    // استدعاء التحديث
-    context.read<ProfileCubit>().updateUserProfile(data);
+    // تحويل الصورة إلى File إذا تم اختيارها (للموبايل فقط)
+    File? imageFile;
+    if (_pickedImage != null && !kIsWeb) {
+      imageFile = File(_pickedImage!.path);
+    }
+
+    // استدعاء التحديث مع الصورة
+    if (kIsWeb && _imageBytes != null) {
+      // For web, use bytes
+      context.read<ProfileCubit>().updateUserProfile(
+        data,
+        imageBytes: _imageBytes,
+        imageName: _pickedImage?.name ?? 'profile_image.jpg',
+      );
+    } else {
+      // For mobile or no image
+      context.read<ProfileCubit>().updateUserProfile(data, imageFile: imageFile);
+    }
+  }
+
+  Widget _buildImageWidget(ProfileState state) {
+    // If new image is picked
+    if (_pickedImage != null) {
+      if (kIsWeb) {
+        // For web, use Image.memory with bytes
+        if (_imageBytes != null) {
+          return Image.memory(
+            _imageBytes!,
+            width: 80,
+            height: 80,
+            fit: BoxFit.cover,
+          );
+        } else {
+          return Image.asset(
+            'assets/img/Avatar.png',
+            width: 80,
+            height: 80,
+            fit: BoxFit.cover,
+          );
+        }
+      } else {
+        // For mobile, use Image.file
+        return Image.file(
+          File(_pickedImage!.path),
+          width: 80,
+          height: 80,
+          fit: BoxFit.cover,
+        );
+      }
+    }
+    
+    // If no new image, show existing profile image or default
+    if (state is ProfileLoaded && state.user.imageUrl != null) {
+      return Image.network(
+        state.user.imageUrl!,
+        width: 80,
+        height: 80,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return Image.asset(
+            'assets/img/Avatar.png',
+            width: 80,
+            height: 80,
+            fit: BoxFit.cover,
+          );
+        },
+      );
+    }
+    
+    // Default avatar
+    return Image.asset(
+      'assets/img/Avatar.png',
+      width: 80,
+      height: 80,
+      fit: BoxFit.cover,
+    );
   }
 
   Future<void> _pickImage() async {
@@ -406,6 +486,49 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       setState(() {
         _pickedImage = image;
       });
+      
+      // For web, also load the bytes
+      if (kIsWeb) {
+        final bytes = await image.readAsBytes();
+        setState(() {
+          _imageBytes = bytes;
+        });
+      }
     }
+  }
+}
+
+class UpdateButton extends StatelessWidget {
+  final String title;
+  final VoidCallback onPressed;
+
+  const UpdateButton({
+    Key? key,
+    required this.title,
+    required this.onPressed,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      margin: EdgeInsets.symmetric(horizontal: 16),
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.primary500,
+          padding: EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+        child: Text(
+          title,
+          style: AppTexts.heading3Bold.copyWith(
+            color: Colors.white,
+          ),
+        ),
+      ),
+    );
   }
 }

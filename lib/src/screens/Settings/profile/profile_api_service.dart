@@ -1,5 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:sard/src/models/user_model.dart';
+import 'dart:io';
+import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 
 class ProfileApiService {
   final Dio _dio;
@@ -31,13 +34,49 @@ class ProfileApiService {
     }
   }
 
-  // Update user profile data
-  Future<UserModel> updateUserProfile(Map<String, dynamic> userData) async {
+  // Update user profile data with optional image
+  Future<UserModel> updateUserProfile(
+    Map<String, dynamic> userData, {
+    File? imageFile,
+    Uint8List? imageBytes,
+    String? imageName,
+  }) async {
     try {
+      FormData formData = FormData();
+      
+      // Add text fields
+      userData.forEach((key, value) {
+        if (value != null) {
+          formData.fields.add(MapEntry(key, value.toString()));
+        }
+      });
+      
+      // Add image file if provided
+      if (imageFile != null && !kIsWeb) {
+        String fileName = imageFile.path.split('/').last;
+        formData.files.add(MapEntry(
+          'photo',
+          await MultipartFile.fromFile(imageFile.path, filename: fileName),
+        ));
+      } else if (imageBytes != null && kIsWeb) {
+        // For web, use bytes
+        String fileName = imageName ?? 'profile_image.jpg';
+        formData.files.add(MapEntry(
+          'photo',
+          MultipartFile.fromBytes(imageBytes, filename: fileName),
+        ));
+      }
+
       final response = await _dio.patch(
         'users/me',
-        data: userData,
+        data: formData,
+        options: Options(
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        ),
       );
+      
       if (response.statusCode == 200) {
         return UserModel.fromJson(response.data);
       }
