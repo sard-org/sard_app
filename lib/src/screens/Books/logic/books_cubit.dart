@@ -26,7 +26,11 @@ class BooksCubit extends Cubit<BooksState> {
 
         final books = booksJson
             .where((json) => json is Map<String, dynamic> && json['book'] != null)
-            .map((json) => Book.fromJson(json['book'] as Map<String, dynamic>))
+            .map((json) {
+              final book = Book.fromJson(json['book'] as Map<String, dynamic>);
+              final orderId = json['id']?.toString() ?? '';
+              return book.copyWith(orderId: orderId);
+            })
             .toList();
         emit(BooksLoaded(books));
       } else {

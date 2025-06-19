@@ -38,14 +38,24 @@ class MyApp extends StatelessWidget {
 }
 
 class MainScreen extends StatefulWidget {
+  final int initialIndex;
+  
+  const MainScreen({Key? key, this.initialIndex = 0}) : super(key: key);
+  
   @override
   _MainScreenState createState() => _MainScreenState();
 }
 
 class _MainScreenState extends State<MainScreen> {
-  int _currentIndex = 0; // ✅ تعيين `HomeScreen` كأول شاشة افتراضية
+  late int _currentIndex;
   final GlobalKey<HomeScreenState> _homeScreenKey =
       GlobalKey<HomeScreenState>();
+
+  @override
+  void initState() {
+    super.initState();
+    _currentIndex = widget.initialIndex; // Use the provided initial index
+  }
 
   List<Widget> get _screens => [
         HomeScreen(key: _homeScreenKey), // ✅ الرئيسية أولًا

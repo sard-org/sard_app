@@ -5,6 +5,7 @@ import 'package:sard/style/Fonts.dart';
 import 'package:sard/style/BaseScreen.dart';
 import 'logic/books_cubit.dart';
 import 'logic/books_state.dart';
+import '../PlayerScreen/audio_book_player_screen.dart';
 
 class BookListScreen extends StatelessWidget {
   Widget _buildEmptyBooks() {
@@ -65,6 +66,20 @@ class BookListScreen extends StatelessWidget {
                                 title: book.title,
                                 description: book.description,
                                 imageUrl: book.imageUrl,
+                                orderId: book.orderId,
+                                bookId: book.id,
+                                onTap: () {
+                                  // الانتقال إلى AudioBookPlayer مع orderId
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => AudioBookPlayer(
+                                        bookId: book.id,
+                                        orderId: book.orderId,
+                                      ),
+                                    ),
+                                  );
+                                },
                               );
                             },
                           );
@@ -141,12 +156,18 @@ class BookItem extends StatelessWidget {
   final String title;
   final String description;
   final String imageUrl;
+  final String orderId;
+  final String bookId;
+  final VoidCallback? onTap;
 
   const BookItem({
     required this.author,
     required this.title,
     required this.description,
     required this.imageUrl,
+    required this.orderId,
+    required this.bookId,
+    this.onTap,
   });
 
   @override
@@ -154,6 +175,7 @@ class BookItem extends StatelessWidget {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: GestureDetector(
+        onTap: onTap,
         child: Container(
           margin: EdgeInsets.only(bottom: 12),
           padding: const EdgeInsets.all(12),

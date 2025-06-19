@@ -1,19 +1,22 @@
-import 'package:audioplayers/audioplayers.dart';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../../style/BaseScreen.dart';
 import '../../../style/Colors.dart';
 import '../../../style/Fonts.dart';
 import '../../services/book_service.dart';
 import '../../services/text_to_speech_service.dart';
+import '../../services/audio_book_service.dart';
 import '../AudioBook/audio_book_api_service.dart';
 import '../AudioBook/audio_book_model.dart';
 
 class AudioBookPlayer extends StatefulWidget {
   final String? bookId;
+  final String? orderId;
 
   const AudioBookPlayer({
     Key? key,
     this.bookId,
+    this.orderId,
   }) : super(key: key);
 
   @override
@@ -21,46 +24,115 @@ class AudioBookPlayer extends StatefulWidget {
 }
 
 class _AudioBookPlayerState extends State<AudioBookPlayer> {
-  double _sliderValue = 0.25; // For demonstration purposes
-  bool _isPlaying = false;
   bool _isLoadingSummary = false;
   String? _summaryError;
   String? _bookSummary;
   final BookService _bookService = BookService();
   final TextToSpeechService _ttsService = TextToSpeechService();
+  final AudioBookService _audioBookService = AudioBookService();
   bool _isTTSLoading = false;
   StateSetter? _modalSetState; // Add this to store modal setState
-  AudioPlayer? _audioPlayer;
-  String _audioUrl =
-      'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'; // رابط صوتي تجريبي
   AudioBookApiService? _apiService;
-  AudioBookResponse? _bookData;
+  AudioBookContentResponse? _bookData;
   bool _isLoadingAudio = true;
   String? _audioError;
+  bool _isPlaying = false;
+  Timer? _playbackTimer;
 
-  // Get book ID from widget or use default
-  late final String bookId;
+  // Get book ID and order ID from widget
+  late final String? bookId;
+  late final String? orderId;
   @override
   void initState() {
     super.initState();
-    // Initialize book ID from widget parameter or use default
-    bookId = widget.bookId ?? "681f4204645636b8e863c261";
-    _audioPlayer = AudioPlayer();
+    // Initialize book ID and order ID from widget parameters
+    bookId = widget.bookId;
+    orderId = widget.orderId;
     _apiService = AudioBookApiService();
-    _fetchAudioUrl();
+    _loadAudioBook();
+    _startPlaybackTimer();
   }
 
   @override
   void dispose() {
-    _audioPlayer?.dispose();
+    _playbackTimer?.cancel();
+    _audioBookService.dispose();
     _ttsService.dispose();
     super.dispose();
   }
 
-  void _togglePlayPause() {
-    setState(() {
-      _isPlaying = !_isPlaying;
+  void _startPlaybackTimer() {
+    _playbackTimer = Timer.periodic(Duration(milliseconds: 500), (timer) {
+      if (mounted) {
+        final currentlyPlaying = _audioBookService.isPlaying;
+        if (_isPlaying != currentlyPlaying) {
+          setState(() {
+            _isPlaying = currentlyPlaying;
+          });
+        }
+      }
     });
+  }
+
+  Future<void> _loadAudioBook() async {
+    if (orderId == null) {
+      setState(() {
+        _audioError = 'معرف الطلب غير متوفر';
+        _isLoadingAudio = false;
+      });
+      return;
+    }
+
+    setState(() {
+      _isLoadingAudio = true;
+      _audioError = null;
+    });
+
+    try {
+      final bookContent = await _audioBookService.loadBookByOrderId(orderId!);
+      setState(() {
+        _bookData = bookContent;
+        _isLoadingAudio = false;
+      });
+      print('Audio book loaded successfully: ${bookContent.title}');
+    } catch (e) {
+      setState(() {
+        _audioError = e.toString();
+        _isLoadingAudio = false;
+      });
+      print('Error loading audio book: $e');
+    }
+  }
+
+  void _togglePlayPause() async {
+    if (_audioBookService.isLoading) return;
+
+    try {
+      if (_audioBookService.isPlaying) {
+        await _audioBookService.pauseAudio();
+        _isPlaying = false;
+      } else {
+        if (_audioBookService.currentBook == null) {
+          // Load the book first if not loaded
+          await _loadAudioBook();
+        }
+        await _audioBookService.playAudioBook();
+        _isPlaying = true;
+      }
+      setState(() {}); // Update UI
+    } catch (e) {
+      _isPlaying = false;
+      setState(() {});
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Directionality(
+            textDirection: TextDirection.rtl,
+            child: Text('خطأ في تشغيل الصوت: $e'),
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   void _openAISummary() async {
@@ -240,7 +312,7 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
       child: Directionality(
         textDirection: TextDirection.rtl,
         child: Text(
-          _bookSummary ?? 'لا يوجد ملخص متاح',
+          _bookSummary ?? '',
           style: AppTexts.contentRegular.copyWith(height: 1.8),
           textAlign: TextAlign.right,
         ),
@@ -261,7 +333,14 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
     });
 
     try {
-      final summary = await _bookService.getBookSummary(bookId);
+      // Use book description as summary if available
+      String summary;
+      if (_bookData?.description != null && _bookData!.description.isNotEmpty) {
+        summary = _bookData!.description;
+      } else {
+        summary = '';
+      }
+      
       setState(() {
         _bookSummary = summary;
         _isLoadingSummary = false;
@@ -283,16 +362,14 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
   }
 
   Widget _buildAppBar(BuildContext context) {
-    String bookTitle = "ما وراء الطبيعة - اسطورة النداهة";
-    double screenWidth = MediaQuery.of(context).size.width;
-    // تقدير تقريبي: كل 15 بكسل = حرف واحد (يمكنك تعديل الرقم حسب الخط)
-    int maxChars = (screenWidth / 15).floor();
-    String displayTitle = bookTitle.length > maxChars
-        ? bookTitle.substring(0, maxChars) + "..."
-        : bookTitle;
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.symmetric(vertical: 32, horizontal: 18),
+      padding: EdgeInsets.only(
+        top: MediaQuery.of(context).padding.top + 16,
+        bottom: 24,
+        left: 16,
+        right: 16,
+      ),
       decoration: BoxDecoration(
         color: AppColors.primary500,
         borderRadius: BorderRadius.only(
@@ -301,26 +378,25 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
         ),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
         children: [
           Expanded(
             child: Text(
-              displayTitle,
+              _bookData?.title ?? "",
               style: AppTexts.heading2Bold.copyWith(
                 color: AppColors.neutral100,
               ),
               overflow: TextOverflow.ellipsis,
               maxLines: 1,
+              textAlign: TextAlign.right,
               textDirection: TextDirection.rtl,
             ),
           ),
-          SizedBox(width: 12),
+          SizedBox(width: 16),
           GestureDetector(
             onTap: () => Navigator.pop(context),
             child: Container(
-              width: 50,
-              height: 50,
-              padding: EdgeInsets.all(12),
+              width: 44,
+              height: 44,
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(8),
@@ -350,10 +426,19 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(12),
-          child: Image.asset(
-            'assets/img/Book_1.png',
-            fit: BoxFit.cover,
-          ),
+          child: _bookData?.cover != null
+              ? Image.network(
+                  _bookData!.cover,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => Image.asset(
+                    'assets/img/Book_1.png',
+                    fit: BoxFit.cover,
+                  ),
+                )
+              : Image.asset(
+                  'assets/img/Book_1.png',
+                  fit: BoxFit.cover,
+                ),
         ),
       ),
     );
@@ -363,40 +448,59 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        // Author name with circle avatar
+        // Author name
         Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             Text(
-              'احمد خالد توفيق',
+              _bookData?.author.name ?? '',
               style: AppTexts.highlightEmphasis
                   .copyWith(color: AppColors.neutral500),
               textAlign: TextAlign.right,
-            ),
-            SizedBox(width: 8),
-            CircleAvatar(
-              radius: 16,
-              backgroundImage: AssetImage('assets/img/avatar.png'),
             ),
           ],
         ),
         SizedBox(height: 12),
         // Book title
         Text(
-          'ما وراء الطبيعة - اسطورة النداهة',
+          _bookData?.title ?? '',
           style: AppTexts.heading2Bold,
           textAlign: TextAlign.right,
         ),
         SizedBox(height: 8),
         // Book description
         Text(
-          'وصل خطاب باسمي، تسلمه ( طلعت ) زوج أختي ... يكون أمراً ذا بال يمكنه هو التصرف في لم ير فائدة',
+          _bookData?.description ?? '',
           style: AppTexts.contentRegular.copyWith(color: AppColors.neutral500),
           textAlign: TextAlign.right,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
         ),
         SizedBox(height: 8),
+        // Book categories if available
+        if (_bookData != null && _bookData!.bookCategory.isNotEmpty)
+          Padding(
+            padding: EdgeInsets.only(bottom: 8),
+            child: Wrap(
+              alignment: WrapAlignment.end,
+              children: _bookData!.bookCategory.map((bookCat) {
+                return Container(
+                  margin: EdgeInsets.only(left: 4, bottom: 4),
+                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary100,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    bookCat.category.name,
+                    style: AppTexts.captionBold.copyWith(
+                      color: AppColors.primary700,
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
         // Rating and Add Comment button
         Row(
           mainAxisAlignment: MainAxisAlignment.end,
@@ -415,13 +519,20 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
             SizedBox(width: 16),
             Row(
               children: [
-                Text('(54)',
+                Text('(${_bookData?.count.reviews ?? 0})',
                     style: AppTexts.contentBold
                         .copyWith(color: AppColors.neutral500)),
                 SizedBox(width: 6),
-                ...List.generate(4,
-                    (index) => Icon(Icons.star, color: Colors.amber, size: 18)),
-                Icon(Icons.star_border, color: Colors.amber, size: 18),
+                ...List.generate(
+                  5,
+                  (index) => Icon(
+                    index < (_bookData?.rating ?? 0).floor()
+                        ? Icons.star
+                        : Icons.star_border,
+                    color: Colors.amber,
+                    size: 18,
+                  ),
+                ),
               ],
             ),
             // زر إضافة تعليق
@@ -431,67 +542,9 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
     );
   }
 
-  Widget _buildCircleButton({
-    required IconData icon,
-    required VoidCallback onTap,
-    String? text,
-    bool textBelow = false,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 50,
-        height: 50,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: Colors.white,
-          border: Border.all(color: AppColors.neutral400, width: 1),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 4,
-              offset: Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Icon(icon, size: 24, color: AppColors.primary900),
-            if (text != null && textBelow)
-              Positioned(
-                bottom: 4,
-                child: Text(
-                  text,
-                  style: AppTexts.captionBold.copyWith(
-                    color: AppColors.neutral500,
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
 
-  Widget _buildPlayButton() {
-    return GestureDetector(
-      onTap: _handleTextToSpeech,
-      child: Container(
-        width: 80,
-        height: 80,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: AppColors.primary500,
-        ),
-        child: Icon(
-          _isPlaying ? Icons.pause : Icons.play_arrow,
-          size: 40,
-          color: Colors.white,
-        ),
-      ),
-    );
-  }
+
+
 
   Future<void> _handleTextToSpeech() async {
     if (_bookSummary == null || _bookSummary!.isEmpty) {
@@ -508,7 +561,6 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
     if (_ttsService.isPlaying) {
       // Stop current audio if playing
       await _ttsService.pauseAudio();
-      _isPlaying = false;
       setState(() {});
       _modalSetState?.call(() {});
       return;
@@ -628,72 +680,132 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
     }
   }
 
-  Future<void> _fetchAudioUrl() async {
-    setState(() {
-      _isLoadingAudio = true;
-      _audioError = null;
-    });
-    try {
-      final data = await _apiService!.getAudioBook(bookId);
-      setState(() {
-        _bookData = data;
-        // لو الـ backend بيرجع audio مباشرة في الـ response
-        _audioUrl = (data as dynamic).audio ?? _audioUrl;
-        _isLoadingAudio = false;
-      });
-    } catch (e) {
-      setState(() {
-        _audioError = e.toString();
-        _isLoadingAudio = false;
-      });
-    }
-  }
+
 
   void _playSampleAudio() async {
     if (_isLoadingAudio || _audioError != null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(_audioError ?? 'جاري تحميل الصوت...')),
+        SnackBar(
+          content: Directionality(
+            textDirection: TextDirection.rtl,
+            child: Text(_audioError ?? 'جاري تحميل الصوت...'),
+          ),
+        ),
       );
       return;
     }
-    if (_isPlaying) {
-      await _audioPlayer?.stop();
-      setState(() {
-        _isPlaying = false;
-      });
-    } else {
-      await _audioPlayer?.play(UrlSource(_audioUrl));
-      setState(() {
-        _isPlaying = true;
-      });
+    
+    try {
+      if (_audioBookService.isPlaying) {
+        await _audioBookService.stopAudio();
+      } else {
+        await _audioBookService.playAudioBook();
+      }
+      setState(() {});
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Directionality(
+            textDirection: TextDirection.rtl,
+            child: Text('خطأ في تشغيل الصوت: $e'),
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
+  }
+
+  Widget _buildPlayButton() {
+    return GestureDetector(
+      onTap: _togglePlayPause,
+      child: Container(
+        width: 70,
+        height: 70,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: AppColors.primary500,
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primary500.withOpacity(0.3),
+              blurRadius: 12,
+              offset: Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Icon(
+          (_audioBookService.isPlaying || _isPlaying) ? Icons.pause : Icons.play_arrow,
+          size: 35,
+          color: Colors.white,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCircleButton({
+    required IconData icon,
+    required VoidCallback onTap,
+    String? text,
+    bool textBelow = false,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 50,
+        height: 50,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.white,
+          border: Border.all(color: AppColors.neutral400, width: 1),
+        ),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Icon(icon, size: 24, color: AppColors.neutral700),
+            if (text != null && textBelow)
+              Positioned(
+                bottom: 4,
+                child: Text(
+                  text,
+                  style: TextStyle(
+                    fontSize: 8,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.neutral700,
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: BaseScreen(
-        child: SafeArea(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildAppBar(context),
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      SizedBox(height: 24),
-                      _buildBookCover(),
-                      SizedBox(height: 24),
-                      _buildBookInfo(),
-                      SizedBox(height: 32),
-                    ],
+      body: Column(
+        children: [
+          _buildAppBar(context),
+          Expanded(
+            child: BaseScreen(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          SizedBox(height: 24),
+                          _buildBookCover(),
+                          SizedBox(height: 24),
+                          _buildBookInfo(),
+                          SizedBox(height: 32),
+                        ],
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              Container(
+                  Container(
                 color: Colors.white,
                 child: Column(
                   children: [
@@ -730,22 +842,26 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
                         thumbColor: AppColors.primary500,
                       ),
                       child: Slider(
-                        value: _sliderValue,
+                        value: _audioBookService.progress,
                         onChanged: (value) {
-                          setState(() {
-                            _sliderValue = value;
-                          });
+                          // TODO: Implement seek functionality
                         },
                       ),
                     ),
-                    // Time markers
+                    // Progress indicators
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('34:23', style: AppTexts.captionBold),
-                          Text('01:23:2', style: AppTexts.captionBold),
+                          Text(
+                            (_audioBookService.isPlaying || _isPlaying) ? 'يتم التشغيل...' : 'متوقف',
+                            style: AppTexts.captionBold,
+                          ),
+                          Text(
+                            '${(_bookData?.duration ?? 0) ~/ 60} دقيقة',
+                            style: AppTexts.captionBold,
+                          ),
                         ],
                       ),
                     ),
@@ -755,49 +871,72 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         _buildCircleButton(
-                          icon: Icons.replay_10_outlined,
-                          onTap: () {},
-                          text: '10',
-                          textBelow: true,
+                          icon: Icons.replay_10,
+                          onTap: () {
+                            // TODO: Implement 10 second rewind
+                            print('Rewind 10 seconds');
+                          },
                         ),
                         SizedBox(width: 32),
                         _buildPlayButton(),
                         SizedBox(width: 32),
                         _buildCircleButton(
-                          icon: Icons.forward_10_outlined,
-                          onTap: () {},
-                          text: '10',
-                          textBelow: true,
+                          icon: Icons.forward_10,
+                          onTap: () {
+                            // TODO: Implement 10 second forward
+                            print('Forward 10 seconds');
+                          },
                         ),
                       ],
                     ),
                     SizedBox(height: 16),
                     Center(
                       child: _isLoadingAudio
-                          ? CircularProgressIndicator()
-                          : _audioError != null
-                              ? Text('خطأ في تحميل الصوت: $_audioError',
-                                  style: TextStyle(color: Colors.red))
-                              : ElevatedButton.icon(
-                                  icon: Icon(_isPlaying
-                                      ? Icons.stop
-                                      : Icons.play_arrow),
-                                  label: Text(_isPlaying
-                                      ? 'إيقاف الصوت'
-                                      : 'تشغيل الصوت'),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.green,
-                                    foregroundColor: Colors.white,
-                                  ),
-                                  onPressed: _playSampleAudio,
+                          ? Column(
+                              children: [
+                                CircularProgressIndicator(
+                                  color: AppColors.primary500,
                                 ),
+                                SizedBox(height: 8),
+                                Text(
+                                  'جاري تحميل الكتاب الصوتي...',
+                                  style: AppTexts.contentRegular.copyWith(
+                                    color: AppColors.neutral500,
+                                  ),
+                                ),
+                              ],
+                            )
+                          : _audioError != null
+                              ? Column(
+                                  children: [
+                                    Icon(
+                                      Icons.error_outline,
+                                      size: 32,
+                                      color: Colors.red,
+                                    ),
+                                    SizedBox(height: 8),
+                                    Text(
+                                      'خطأ في تحميل الصوت: $_audioError',
+                                      style: TextStyle(color: Colors.red),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                    SizedBox(height: 8),
+                                    ElevatedButton(
+                                      onPressed: _loadAudioBook,
+                                      child: Text('إعادة المحاولة'),
+                                    ),
+                                  ],
+                                )
+                              : SizedBox.shrink(),
                     ),
                   ],
                 ),
               ),
-            ],
+                ],
+              ),
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
