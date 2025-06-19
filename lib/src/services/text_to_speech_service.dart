@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import '../screens/Books/data/dio_client.dart';
 
@@ -49,13 +50,14 @@ class TextToSpeechService {
       _audioUrls.clear();
       _currentIndex = 0;
       _isPlaying = false;
-      await stopAudio();
+      await pauseAudio();
 
       if (text.trim().isEmpty) {
         throw Exception('النص المدخل فارغ');
       }
 
-      print('Converting text to speech: ${text.substring(0, text.length > 50 ? 50 : text.length)}...');
+      print(
+          'Converting text to speech: ${text.substring(0, text.length > 50 ? 50 : text.length)}...');
 
       final response = await _dio.post(
         'https://api.mohamed-ramadan.me/api/books/text-to-speech',
@@ -79,9 +81,9 @@ class TextToSpeechService {
 
           _audioUrls = urlList
               .map((item) => {
-            'shortText': item['shortText']?.toString() ?? '',
-            'url': item['url']?.toString() ?? '',
-          })
+                    'shortText': item['shortText']?.toString() ?? '',
+                    'url': item['url']?.toString() ?? '',
+                  })
               .where((item) => item['url']!.isNotEmpty)
               .toList();
 
@@ -97,7 +99,8 @@ class TextToSpeechService {
           throw Exception('تنسيق الاستجابة غير صحيح');
         }
       } else {
-        throw Exception('فشل في تحويل النص إلى صوت: خطأ في الخادم (${response.statusCode})');
+        throw Exception(
+            'فشل في تحويل النص إلى صوت: خطأ في الخادم (${response.statusCode})');
       }
     } on DioException catch (e) {
       String errorMessage;
@@ -116,7 +119,8 @@ class TextToSpeechService {
       } else if (e.type == DioExceptionType.connectionError) {
         errorMessage = 'خطأ في الاتصال: يرجى التحقق من اتصال الإنترنت';
       } else {
-        errorMessage = 'فشل في تحويل النص إلى صوت: ${e.message ?? 'خطأ غير معروف'}';
+        errorMessage =
+            'فشل في تحويل النص إلى صوت: ${e.message ?? 'خطأ غير معروف'}';
       }
       throw Exception(errorMessage);
     } catch (e) {
@@ -129,14 +133,35 @@ class TextToSpeechService {
     try {
       if (!_isValidUrl(url)) throw Exception('رابط صوتي غير صالح: $url');
 
-      print('Playing audio (mobile/native) from: $url');
+      print('Playing audio (cached) from: $url');
       _isPlaying = true;
 
-      await _audioPlayer.setPlayerMode(PlayerMode.lowLatency);
-      final source = UrlSource(url);
-      await _audioPlayer.play(source);
+      const cacheKey = 'ttsCache';
+      final cacheManager = CacheManager(
+        Config(
+          cacheKey,
+          stalePeriod: const Duration(hours: 1), // Keep for 1 hour
+          repo: JsonCacheInfoRepository(databaseName: cacheKey),
+          fileService: HttpFileService(),
+        ),
+      );
 
-      await Future.delayed(Duration(milliseconds: 500));
+      // Download and cache the file with proper User-Agent
+      final file = await cacheManager.getSingleFile(
+        url,
+        headers: {
+          'User-Agent':
+              'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
+                  '(KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        },
+      );
+
+      // Set player mode and play the cached file
+      await _audioPlayer.setPlayerMode(PlayerMode.mediaPlayer);
+      await _audioPlayer.setSourceDeviceFile(file.path);
+      await _audioPlayer.resume();
+
+      await Future.delayed(const Duration(milliseconds: 500));
       final state = await _audioPlayer.getCurrentPosition();
       print('Current position after 500ms: $state');
     } catch (e) {
@@ -221,11 +246,12 @@ class TextToSpeechService {
 
   bool _isValidUrl(String url) {
     return url.isNotEmpty &&
-        (url.endsWith('.mp3')) &&
+        // (url.endsWith('.mp3')) &&
         (url.startsWith('http://') || url.startsWith('https://'));
   }
 
-  double get progress => _audioUrls.isEmpty ? 0.0 : (_currentIndex + 1) / _audioUrls.length;
+  double get progress =>
+      _audioUrls.isEmpty ? 0.0 : (_currentIndex + 1) / _audioUrls.length;
 
   bool get isPlaying => _isPlaying;
 

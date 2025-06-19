@@ -1,3 +1,5 @@
 {
-  "FSharp.suggestGitignore": false
+  "FSharp.suggestGitignore": false,
+    "dart.flutterSdkPath": "C:\\Users\\dedoa\\.puro\\envs\\stable\\flutter",
+    "dart.sdkPath": "C:\\Users\\dedoa\\.puro\\envs\\stable\\flutter\\bin\\cache\\dart-sdk"
 }

@@ -31,7 +31,8 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
   bool _isTTSLoading = false;
   StateSetter? _modalSetState; // Add this to store modal setState
   AudioPlayer? _audioPlayer;
-  String _audioUrl = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'; // رابط صوتي تجريبي
+  String _audioUrl =
+      'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'; // رابط صوتي تجريبي
   AudioBookApiService? _apiService;
   AudioBookResponse? _bookData;
   bool _isLoadingAudio = true;
@@ -475,7 +476,7 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
 
   Widget _buildPlayButton() {
     return GestureDetector(
-      onTap: _togglePlayPause,
+      onTap: _handleTextToSpeech,
       child: Container(
         width: 80,
         height: 80,
@@ -506,7 +507,8 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
 
     if (_ttsService.isPlaying) {
       // Stop current audio if playing
-      await _ttsService.stopAudio();
+      await _ttsService.pauseAudio();
+      _isPlaying = false;
       setState(() {});
       _modalSetState?.call(() {});
       return;
@@ -774,10 +776,15 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
                       child: _isLoadingAudio
                           ? CircularProgressIndicator()
                           : _audioError != null
-                              ? Text('خطأ في تحميل الصوت: $_audioError', style: TextStyle(color: Colors.red))
+                              ? Text('خطأ في تحميل الصوت: $_audioError',
+                                  style: TextStyle(color: Colors.red))
                               : ElevatedButton.icon(
-                                  icon: Icon(_isPlaying ? Icons.stop : Icons.play_arrow),
-                                  label: Text(_isPlaying ? 'إيقاف الصوت' : 'تشغيل الصوت'),
+                                  icon: Icon(_isPlaying
+                                      ? Icons.stop
+                                      : Icons.play_arrow),
+                                  label: Text(_isPlaying
+                                      ? 'إيقاف الصوت'
+                                      : 'تشغيل الصوت'),
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.green,
                                     foregroundColor: Colors.white,

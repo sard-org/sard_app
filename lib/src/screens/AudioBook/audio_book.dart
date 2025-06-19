@@ -16,7 +16,6 @@ class AudioBookScreen extends StatefulWidget {
   State<AudioBookScreen> createState() => _AudioBookScreenState();
 }
 
-
 class _AudioBookScreenState extends State<AudioBookScreen> {
   late AudioBookApiService _apiService;
   AudioBookResponse? bookData;
@@ -290,7 +289,7 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
 
     if (_ttsService.isPlaying) {
       // Stop current audio if playing
-      await _ttsService.stopAudio();
+      await _ttsService.pauseAudio();
       setState(() {});
       _modalSetState?.call(() {});
       return;
@@ -553,8 +552,9 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
                                     child: Image.network(
                                       bookData!.cover,
                                       fit: BoxFit.cover,
-                                      errorBuilder: (context, error, stackTrace) =>
-                                          Image.asset(
+                                      errorBuilder:
+                                          (context, error, stackTrace) =>
+                                              Image.asset(
                                         'assets/img/Book_1.png',
                                         fit: BoxFit.cover,
                                       ),
@@ -565,7 +565,8 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
                               SizedBox(height: 24),
                               // Author and Price Row
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   // Price display logic - LEFT SIDE
                                   if (bookData!.isFree)
@@ -582,13 +583,13 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
                                       text: TextSpan(
                                         children: [
                                           TextSpan(
-                                          text: '${bookData!.price}',
-                                          style: AppTexts.heading1Bold
-                                              .copyWith(
-                                            color: Colors.green[800],
-                                            fontSize: 28,
+                                            text: '${bookData!.price}',
+                                            style:
+                                                AppTexts.heading1Bold.copyWith(
+                                              color: Colors.green[800],
+                                              fontSize: 28,
+                                            ),
                                           ),
-                                        ),
                                           TextSpan(
                                             text: 'ج.م',
                                             style: AppTexts.captionRegular
@@ -611,8 +612,7 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
                                         SizedBox(width: 4),
                                         Text(
                                           '${bookData!.pricePoints}',
-                                          style:
-                                              AppTexts.heading1Bold.copyWith(
+                                          style: AppTexts.heading1Bold.copyWith(
                                             color: Colors.green[800],
                                             fontSize: 28,
                                           ),

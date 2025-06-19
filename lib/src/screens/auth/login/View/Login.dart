@@ -49,6 +49,9 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   @override
+
+  ///
+  ///
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
@@ -140,14 +143,28 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 24),
                   BlocConsumer<AuthCubit, AuthState>(
-                    listener: (context, state) {
+                    listener: (context, state) async {
                       if (state is AuthSuccess) {
-                        // Load favorite books after successful login
+                        final prefs = await SharedPreferences.getInstance();
+
+                        // Save login state and optionally email
+                        await prefs.setBool('is_logged_in', true);
+
+                        if (_rememberMe) {
+                          await prefs.setBool('remember_me', true);
+                          await prefs.setString(
+                              'saved_email', _emailController.text.trim());
+                        } else {
+                          await prefs.remove('remember_me');
+                          await prefs.remove('saved_email');
+                        }
+
+                        // Load data and navigate
                         context.read<GlobalFavoriteCubit>().loadFavorites();
                         Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => MainScreen()));
+                          context,
+                          MaterialPageRoute(builder: (context) => MainScreen()),
+                        );
                       } else if (state is EmailVerificationRequired) {
                         // Navigate to OTP verification screen
                         Navigator.push(
