@@ -330,7 +330,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           keyboardType: TextInputType.number,
           inputFormatters: [FilteringTextInputFormatter.digitsOnly],
           decoration: InputDecoration(
-            hintText: "01023359621",
+            hintText: "قم بادخال رقم هاتفك",
             hintStyle: AppTexts.contentRegular,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
