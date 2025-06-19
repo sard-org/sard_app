@@ -6,6 +6,8 @@ import 'audio_book_api_service.dart';
 import 'audio_book_model.dart';
 import '../../services/book_service.dart';
 import '../../services/text_to_speech_service.dart';
+import '../PlayerScreen/audio_book_player_screen.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class AudioBookScreen extends StatefulWidget {
   final String bookId;
@@ -20,6 +22,8 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
   late AudioBookApiService _apiService;
   AudioBookResponse? bookData;
   bool isLoading = true;
+  bool isOrdering = false;
+  bool isBookOwned = false;
   String? errorMessage; // Summary functionality
   final BookService _bookService = BookService();
   final TextToSpeechService _ttsService = TextToSpeechService();
@@ -347,6 +351,79 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
     }
   }
 
+  Future<void> _handleBookOrder() async {
+    try {
+      setState(() {
+        isOrdering = true;
+      });
+
+      final response = await _apiService.orderBook(widget.bookId);
+      
+      if (response.paymentUrl != null) {
+        final Uri url = Uri.parse(response.paymentUrl!);
+        try {
+          await launchUrl(
+            url,
+            mode: LaunchMode.externalApplication,
+            webViewConfiguration: const WebViewConfiguration(
+              enableJavaScript: true,
+              enableDomStorage: true,
+            ),
+          );
+        } catch (e) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Directionality(
+                  textDirection: TextDirection.rtl,
+                  child: Text('حدث خطأ في فتح صفحة الدفع'),
+                ),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        }
+      } else {
+        // Show success message and update button
+        if (mounted) {
+          setState(() {
+            isBookOwned = true;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Directionality(
+                textDirection: TextDirection.rtl,
+                child: Text('تم إضافة الكتاب إلى مكتبتك بنجاح'),
+              ),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          isBookOwned = true;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Directionality(
+              textDirection: TextDirection.rtl,
+              child: Text("الكتاب في مكتبتك بالفعل"),
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          isOrdering = false;
+        });
+      }
+    }
+  }
+
   Widget _buildAppBar(BuildContext context) {
     return Container(
       width: double.infinity,
@@ -387,19 +464,40 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
   }
 
   Widget _buildBottomBar(BuildContext context) {
-    if (bookData == null) return SizedBox.shrink();
+    // Return empty container if bookData is null
+    if (bookData == null) {
+      return const SizedBox.shrink();
+    }
 
-    // Determine button text and enabled state
-    String buttonText;
-    bool isEnabled = true;
+    String buttonText = '';
     Color buttonColor = AppColors.primary500;
+    bool isEnabled = true;
 
-    if (bookData!.isFree) {
+    void handleButtonPress() {
+      if (isBookOwned) {
+        // Navigate to audio player
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => AudioBookPlayer(
+
+
+            ),
+          ),
+        );
+      } else {
+        _handleBookOrder();
+      }
+    }
+
+    if (isBookOwned) {
+      buttonText = 'ابدأ الاستماع الآن';
+    } else if (bookData?.isFree ?? false) {
       buttonText = 'احصل عليه مجانا';
-    } else if (bookData!.price != null) {
+    } else if (bookData?.price != null) {
       buttonText = 'شراء الكتاب  |  ${bookData!.price} ج.م';
-    } else if (bookData!.pricePoints != null) {
-      if (bookData!.userPoints != null &&
+    } else if (bookData?.pricePoints != null) {
+      if (bookData?.userPoints != null &&
           bookData!.userPoints! < bookData!.pricePoints!) {
         buttonText = 'ليس لديك نقاط كافية';
         isEnabled = false;
@@ -438,13 +536,22 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              onPressed: isEnabled ? () {} : null,
-              child: Text(
-                buttonText,
-                style: AppTexts.highlightAccent.copyWith(
-                  color: isEnabled ? Colors.white : Colors.white70,
-                ),
-              ),
+              onPressed: isEnabled && !isOrdering ? handleButtonPress : null,
+              child: isOrdering
+                  ? SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
+                    )
+                  : Text(
+                      buttonText,
+                      style: AppTexts.highlightAccent.copyWith(
+                        color: isEnabled ? Colors.white : Colors.white70,
+                      ),
+                    ),
             ),
           ),
           SizedBox(height: 12),

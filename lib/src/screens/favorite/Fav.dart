@@ -19,116 +19,215 @@ class FavoritesScreen extends StatefulWidget {
 }
 
 class _FavoritesScreenState extends State<FavoritesScreen> {
-  late FavoriteCubit cubit;
+  FavoriteCubit? cubit;
+  bool isInitializing = true;
 
   @override
   void initState() {
     super.initState();
-    initCubit();
+    _initCubit();
   }
 
-  Future<void> initCubit() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('auth_token') ?? ''; // التوكين الصحيح
-    cubit = FavoriteCubit(
-      dioFav: DioFav(
-          Dio()..options.baseUrl = 'https://api.mohamed-ramadan.me/api/'),
-      token: token,
-    );
-    cubit.getFavorites();
-    setState(() {});
+  Future<void> _initCubit() async {
+    try {
+      setState(() {
+        isInitializing = true;
+      });
+
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('auth_token') ?? '';
+      
+      if (token.isEmpty) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Directionality(
+                textDirection: TextDirection.rtl,
+                child: Text('يرجى تسجيل الدخول أولاً'),
+              ),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        return;
+      }
+
+      final favCubit = FavoriteCubit(
+        dioFav: DioFav(),
+        token: token,
+      );
+      
+      if (mounted) {
+        setState(() {
+          cubit = favCubit;
+          isInitializing = false;
+        });
+        cubit?.getFavorites();
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          isInitializing = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Directionality(
+              textDirection: TextDirection.rtl,
+              child: Text('حدث خطأ في تحميل المفضلات'),
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    cubit?.close();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (!this.mounted || cubit == null) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    if (!mounted) {
+      return const SizedBox.shrink();
     }
 
-    return BlocProvider.value(
-      value: cubit,
-      child: Scaffold(
-        body: Stack(
-          children: [
-            BaseScreen(
-              child: Column(
-                children: [
-                  const SizedBox(height: 80),
-                  Expanded(
-                    child: BlocBuilder<FavoriteCubit, FavoriteState>(
-                      builder: (context, state) {
-                        if (state is FavoriteLoadingState) {
-                          return const Center(
-                              child: CircularProgressIndicator());
-                        } else if (state is FavoriteErrorState) {
-                          return Center(
-                              child: Text('حدث خطأ: ${state.message}'));
-                        } else if (state is FavoriteSuccessState) {
-                          final books = state.favorites;
-                          if (books.isEmpty) return _buildEmptyFavorites();
-                          return ListView.builder(
-                            itemCount: books.length,
-                            itemBuilder: (context, index) {
-                              final book = books[index];
-                              return GestureDetector(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          AudioBookScreen(bookId: book['id']),
+    return Scaffold(
+      body: Stack(
+        children: [
+          if (isInitializing || cubit == null)
+            Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary500),
+              ),
+            )
+          else
+            BlocProvider.value(
+              value: cubit!,
+              child: BaseScreen(
+                child: Column(
+                  children: [
+                    const SizedBox(height: 80),
+                    Expanded(
+                      child: BlocBuilder<FavoriteCubit, FavoriteState>(
+                        builder: (context, state) {
+                          if (state is FavoriteLoadingState) {
+                            return const Center(
+                              child: CircularProgressIndicator(
+                                valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary500),
+                              ),
+                            );
+                          } else if (state is FavoriteErrorState) {
+                            return Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.error_outline,
+                                    size: 64,
+                                    color: AppColors.primary600,
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    'حدث خطأ في تحميل المفضلات',
+                                    style: AppTexts.heading3Bold.copyWith(
+                                      color: AppColors.neutral800,
                                     ),
-                                  );
-                                },
-                                child: BookItem(
-                                  author: book["Author"]?["name"] ??
-                                      'مؤلف غير معروف',
-                                  title: book["title"] ?? 'عنوان غير معروف',
-                                  description: book["description"] ?? '',
-                                  price: "",
-                                  currency: "",
-                                  imageUrl:
-                                      book["cover"] ?? 'assets/img/Book_1.png',
-                                  onFavoritePressed: () =>
-                                      cubit.removeFavorite(book['id']),
-                                ),
-                              );
-                            },
-                          );
-                        } else {
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    state.message,
+                                    style: AppTexts.contentRegular.copyWith(
+                                      color: AppColors.neutral500,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  const SizedBox(height: 24),
+                                  ElevatedButton(
+                                    onPressed: () => cubit?.getFavorites(),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: AppColors.primary500,
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 24,
+                                        vertical: 12,
+                                      ),
+                                    ),
+                                    child: Text(
+                                      'إعادة المحاولة',
+                                      style: AppTexts.highlightAccent.copyWith(
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          } else if (state is FavoriteSuccessState) {
+                            final books = state.favorites;
+                            if (books.isEmpty) return _buildEmptyFavorites();
+                            return ListView.builder(
+                              itemCount: books.length,
+                              itemBuilder: (context, index) {
+                                final book = books[index];
+                                final String? bookId = book['id']?.toString();
+                                if (bookId == null) return const SizedBox.shrink();
+
+                                return GestureDetector(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => AudioBookScreen(
+                                          bookId: bookId,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  child: BookItem(
+                                    author: book["Author"]?["name"]?.toString() ?? 'مؤلف غير معروف',
+                                    title: book["title"]?.toString() ?? 'عنوان غير معروف',
+                                    description: book["description"]?.toString() ?? '',
+                                    price: "",
+                                    currency: "",
+                                    imageUrl: book["cover"]?.toString() ?? 'assets/img/Book_1.png',
+                                    onFavoritePressed: () => cubit?.removeFavorite(bookId),
+                                  ),
+                                );
+                              },
+                            );
+                          }
                           return const SizedBox.shrink();
-                        }
-                      },
+                        },
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ),
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
-                decoration: BoxDecoration(
-                  color: AppColors.primary500,
-                  borderRadius: const BorderRadius.only(
-                    bottomLeft: Radius.circular(12),
-                    bottomRight: Radius.circular(12),
-                  ),
-                ),
-                child: Center(
-                  child: Text(
-                    "المفضلات",
-                    style: AppTexts.heading2Bold
-                        .copyWith(color: AppColors.neutral100),
-                  ),
+                  ],
                 ),
               ),
             ),
-          ],
-        ),
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
+              decoration: BoxDecoration(
+                color: AppColors.primary500,
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(12),
+                  bottomRight: Radius.circular(12),
+                ),
+              ),
+              child: Center(
+                child: Text(
+                  "المفضلات",
+                  style: AppTexts.heading2Bold.copyWith(color: AppColors.neutral100),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -150,7 +249,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            "أضف بعض الكتب إلى المفضلة لتظهر هنا",
+            " أضف كتبًا إلى المفضلة لتكون دائمًا في متناولك",
             style:
                 AppTexts.contentRegular.copyWith(color: AppColors.neutral500),
             textAlign: TextAlign.center,

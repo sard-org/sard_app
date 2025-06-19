@@ -108,3 +108,99 @@ class BookCount {
     );
   }
 }
+
+class OrderResponse {
+  final OrderData order;
+  final String? paymentUrl;
+
+  OrderResponse({
+    required this.order,
+    this.paymentUrl,
+  });
+
+  factory OrderResponse.fromJson(Map<String, dynamic> json) {
+    return OrderResponse(
+      order: OrderData.fromJson(json['order']),
+      paymentUrl: json['paymentUrl'],
+    );
+  }
+}
+
+class OrderData {
+  final OrderBook book;
+  final OrderUser user;
+
+  OrderData({
+    required this.book,
+    required this.user,
+  });
+
+  factory OrderData.fromJson(Map<String, dynamic> json) {
+    return OrderData(
+      book: OrderBook.fromJson(json['book']),
+      user: OrderUser.fromJson(json['user']),
+    );
+  }
+}
+
+class OrderBook {
+  final String id;
+  final String title;
+  final String description;
+  final String cover;
+  final int duration;
+  final OrderAuthor author;
+
+  OrderBook({
+    required this.id,
+    required this.title,
+    required this.description,
+    required this.cover,
+    required this.duration,
+    required this.author,
+  });
+
+  factory OrderBook.fromJson(Map<String, dynamic> json) {
+    return OrderBook(
+      id: json['id'],
+      title: json['title'],
+      description: json['description'],
+      cover: json['cover'],
+      duration: json['duration'],
+      author: OrderAuthor.fromJson(json['Author']),
+    );
+  }
+}
+
+class OrderAuthor {
+  final String name;
+
+  OrderAuthor({required this.name});
+
+  factory OrderAuthor.fromJson(Map<String, dynamic> json) {
+    return OrderAuthor(name: json['name']);
+  }
+}
+
+class OrderUser {
+  final String id;
+  final String email;
+  final String name;
+  final String phone;
+
+  OrderUser({
+    required this.id,
+    required this.email,
+    required this.name,
+    required this.phone,
+  });
+
+  factory OrderUser.fromJson(Map<String, dynamic> json) {
+    return OrderUser(
+      id: json['id'],
+      email: json['email'],
+      name: json['name'],
+      phone: json['phone'],
+    );
+  }
+}

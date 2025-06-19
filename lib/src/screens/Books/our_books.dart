@@ -7,6 +7,32 @@ import 'logic/books_cubit.dart';
 import 'logic/books_state.dart';
 
 class BookListScreen extends StatelessWidget {
+  Widget _buildEmptyBooks() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Image.asset(
+            "assets/img/fav_embty.png",
+            width: 300,
+            height: 300,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            "لم تقم بشراء كتب بعد",
+            style: AppTexts.heading3Bold.copyWith(color: AppColors.neutral800),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            "ابدأ رحلتك القرائية الآن.",
+            style: AppTexts.contentRegular.copyWith(color: AppColors.neutral500),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
@@ -27,14 +53,7 @@ class BookListScreen extends StatelessWidget {
                           ));
                         } else if (state is BooksLoaded) {
                           if (state.books.isEmpty) {
-                            return Center(
-                              child: Text(
-                                "لا توجد كتب متاحة حالياً",
-                                style: AppTexts.contentRegular.copyWith(
-                                  color: AppColors.neutral700,
-                                ),
-                              ),
-                            );
+                            return _buildEmptyBooks();
                           }
 
                           return ListView.builder(
