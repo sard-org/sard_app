@@ -261,12 +261,21 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
     });
 
     try {
-      // Use book description as summary if available
+      // Try to fetch AI-generated summary from API first
       String summary;
-      if (bookData?.description != null && bookData!.description.isNotEmpty) {
-        summary = bookData!.description;
-      } else {
-        summary = '';
+      try {
+        summary = await _apiService.getBookSummary(widget.bookId);
+        print('AI Summary fetched successfully: ${summary.length} characters');
+      } catch (apiError) {
+        print('API Summary failed: $apiError');
+        // Fallback to book description if API fails
+        if (bookData?.description != null && bookData!.description.isNotEmpty) {
+          summary = bookData!.description;
+          print('Using book description as fallback summary');
+        } else {
+          // If no description available, throw the original API error
+          throw apiError;
+        }
       }
       
       setState(() {

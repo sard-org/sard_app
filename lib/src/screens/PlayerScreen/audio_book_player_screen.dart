@@ -333,12 +333,25 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
     });
 
     try {
-      // Use book description as summary if available
+      // Try to fetch AI-generated summary from API first
       String summary;
-      if (_bookData?.description != null && _bookData!.description.isNotEmpty) {
-        summary = _bookData!.description;
-      } else {
-        summary = '';
+      try {
+        if (bookId != null) {
+          summary = await _apiService!.getBookSummary(bookId!);
+          print('AI Summary fetched successfully: ${summary.length} characters');
+        } else {
+          throw Exception('معرف الكتاب غير متوفر');
+        }
+      } catch (apiError) {
+        print('API Summary failed: $apiError');
+        // Fallback to book description if API fails
+        if (_bookData?.description != null && _bookData!.description.isNotEmpty) {
+          summary = _bookData!.description;
+          print('Using book description as fallback summary');
+        } else {
+          // If no description available, throw the original API error
+          throw apiError;
+        }
       }
       
       setState(() {
