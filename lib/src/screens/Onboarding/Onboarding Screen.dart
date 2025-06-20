@@ -46,7 +46,10 @@ class _OnboardingState extends State<Onboarding> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
+        backgroundColor: AppColors.neutral100,
         appBar: AppBar(
+          backgroundColor: AppColors.neutral100,
+          elevation: 0,
           actions: <Widget>[
             if (currentIndex != 2)
               Padding(

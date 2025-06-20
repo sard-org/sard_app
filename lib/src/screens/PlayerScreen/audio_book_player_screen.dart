@@ -897,17 +897,13 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
                     style: AppTexts.contentRegular,
                     textAlign: TextAlign.center,
                   ),
-                  SizedBox(height: 24),
+                  SizedBox(height: 16),
                   // Stars with hover effect (RTL - Right to Left)
                   Container(
-                    padding: EdgeInsets.all(20),
+                    padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                     decoration: BoxDecoration(
-                      color: AppColors.primary100 ?? AppColors.primary100.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: AppColors.primary200.withOpacity(0.5),
-                        width: 1,
-                      ),
+                      color: AppColors.primary100.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -941,12 +937,12 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
                             });
                           },
                           child: Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 4),
+                            padding: EdgeInsets.symmetric(horizontal: 2),
                             child: AnimatedContainer(
                               duration: Duration(milliseconds: 150),
                               child: Icon(
                                 isActive ? Icons.star : Icons.star_border,
-                                size: 40,
+                                size: 32,
                                 color: isActive
                                     ? (hoveredRating == starNumber
                                         ? Colors.amber.shade400
@@ -959,7 +955,7 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
                       }),
                     ),
                   ),
-                  SizedBox(height: 16),
+                  SizedBox(height: 12),
                   // Show selected rating text
                   if (selectedRating > 0) ...[
                     Container(

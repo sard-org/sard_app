@@ -160,7 +160,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Text(
-                                        "لقد قدمت باضافة صوره جديده",
+                                        "لقد قدم باضافة صوره جديده",
                                         style: AppTexts.contentRegular.copyWith(
                                           color: Colors.green.shade700,
                                           fontSize: 12,

@@ -23,13 +23,13 @@ class _SplashScreenState extends State<SplashScreen>
     super.initState();
 
     _controller =
-        AnimationController(vsync: this, duration: Duration(seconds: 2));
+        AnimationController(vsync: this, duration: Duration(seconds: 3));
     _fadeInAnimation =
         CurvedAnimation(parent: _controller, curve: Curves.easeIn);
     _controller.forward();
 
     // Navigate after 3 seconds
-    Timer(const Duration(seconds: 2), _navigateBasedOnUserState);
+    Timer(const Duration(seconds: 3), _navigateBasedOnUserState);
   }
 
   Future<void> _navigateBasedOnUserState() async {
