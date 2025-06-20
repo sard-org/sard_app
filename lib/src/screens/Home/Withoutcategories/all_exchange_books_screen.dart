@@ -231,7 +231,7 @@ class _AllExchangeBooksScreenState extends State<AllExchangeBooksScreen> {
                                         crossAxisCount: 2,
                                         crossAxisSpacing: 12,
                                         mainAxisSpacing: 12,
-                                        childAspectRatio: 0.6,
+                                        childAspectRatio: 0.54, // تعديل النسبة لتتناسب مع الارتفاع الثابت
                                       ),
                                       physics: const BouncingScrollPhysics(),
                                       itemCount: exchangeBooks.length,

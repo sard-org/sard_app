@@ -181,7 +181,56 @@ class _CategorySectionState extends State<CategorySection> {
         }
 
         if (state is CategoriesError) {
-          return Center(child: Text('Error: ${state.message}'));
+          return Center(
+            child: Padding(
+              padding: EdgeInsets.all(24),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.error_outline,
+                    size: 64,
+                    color: AppColors.primary600,
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    'خطأ في تحميل الفئات',
+                    style: AppTexts.heading3Bold.copyWith(
+                      color: AppColors.neutral800,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    state.message,
+                    style: AppTexts.contentRegular.copyWith(
+                      color: AppColors.neutral500,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      context.read<CategoriesCubit>().getCategories();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary500,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
+                    ),
+                    child: Text(
+                      'إعادة المحاولة',
+                      style: AppTexts.contentBold.copyWith(
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
         }
 
         return const SizedBox();
@@ -382,7 +431,81 @@ class HomeScreenState extends State<HomeScreen> {
                   ],
                 );
               } else if (state is HomeError) {
-                return Center(child: Text('حصل خطأ: ${state.message}'));
+                return Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(24),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.error_outline,
+                          size: 80,
+                          color: AppColors.primary600,
+                        ),
+                        SizedBox(height: 24),
+                        RichText(
+                          textAlign: TextAlign.center,
+                          text: TextSpan(
+                            text: 'عذراً، حدث خطأ أثناء تحميل ',
+                            style: AppTexts.heading2Bold.copyWith(
+                              color: AppColors.neutral700,
+                            ),
+                            children: [
+                              TextSpan(
+                                text: 'الصفحة الرئيسية',
+                                style: AppTexts.heading2Bold.copyWith(
+                                  color: AppColors.red200,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(height: 16),
+                        Container(
+                          padding: EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary100,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: AppColors.primary200,
+                              width: 1,
+                            ),
+                          ),
+                          child: Text(
+                            state.message,
+                            style: AppTexts.contentRegular.copyWith(
+                              color: AppColors.neutral700,
+                              height: 1.5,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        SizedBox(height: 24),
+                        ElevatedButton(
+                          onPressed: () {
+                            context.read<HomeCubit>().getUserData();
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary500,
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 32,
+                              vertical: 12,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: Text(
+                            'إعادة المحاولة',
+                            style: AppTexts.contentBold.copyWith(
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
               }
               return SizedBox();
             },

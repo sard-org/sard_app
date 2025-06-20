@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import '../services/favorite_service.dart';
+import '../utils/error_translator.dart';
 
 // States
 abstract class GlobalFavoriteState extends Equatable {
@@ -70,7 +71,8 @@ class GlobalFavoriteCubit extends Cubit<GlobalFavoriteState> {
         isFavorite: !currentlyFavorite,
       ));
     } catch (e) {
-      emit(GlobalFavoriteError(e.toString()));
+      final userFriendlyError = ErrorTranslator.handleDioError(e);
+      emit(GlobalFavoriteError(userFriendlyError));
     }
   }
 
@@ -102,7 +104,8 @@ class GlobalFavoriteCubit extends Cubit<GlobalFavoriteState> {
         }
       }
     } catch (e) {
-      emit(GlobalFavoriteError(e.toString()));
+      final userFriendlyError = ErrorTranslator.handleDioError(e);
+      emit(GlobalFavoriteError(userFriendlyError));
     }
   }
 }

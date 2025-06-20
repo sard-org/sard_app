@@ -6,6 +6,7 @@ import 'audio_book_api_service.dart';
 import 'audio_book_model.dart';
 import '../../services/book_service.dart';
 import '../../services/text_to_speech_service.dart';
+import '../../utils/error_translator.dart';
 import '../PlayerScreen/audio_book_player_screen.dart';
 import '../Books/our_books.dart';
 import '../../../main.dart';
@@ -126,11 +127,13 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
                       ),
                     ],
                   ),
+                  const SizedBox(height: 18),
                   Expanded(
                     child:
                         _buildSummaryContent(scrollController, setModalState),
                   ),
                   if (!_isLoadingSummary && _summaryError == null)
+                  const SizedBox(height: 24),
                     Padding(
                       padding: EdgeInsets.only(bottom: 16),
                       child: GestureDetector(
@@ -762,40 +765,75 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
             )
           : errorMessage != null
               ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.error_outline,
-                        size: 64,
-                        color: AppColors.primary600,
-                      ),
-                      SizedBox(height: 16),
-                      Text(
-                        'حدث خطأ في تحميل بيانات الكتاب',
-                        style: AppTexts.heading3Bold
-                            .copyWith(color: AppColors.neutral800),
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        errorMessage!,
-                        style: AppTexts.contentRegular
-                            .copyWith(color: AppColors.neutral500),
-                        textAlign: TextAlign.center,
-                      ),
-                      SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: _loadBookData,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary500,
+                  child: Padding(
+                    padding: EdgeInsets.all(24),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.error_outline,
+                          size: 80,
+                          color: AppColors.primary600,
                         ),
-                        child: Text(
-                          'إعادة المحاولة',
-                          style: AppTexts.highlightAccent
-                              .copyWith(color: Colors.white),
+                        SizedBox(height: 24),
+                        RichText(
+                          textAlign: TextAlign.center,
+                          text: TextSpan(
+                            text: 'عذراً، حدث خطأ أثناء تحميل ',
+                            style: AppTexts.heading2Bold.copyWith(
+                              color: AppColors.neutral700,
+                            ),
+                            children: [
+                              TextSpan(
+                                text: 'تفاصيل الكتاب',
+                                style: AppTexts.heading2Bold.copyWith(
+                                  color: AppColors.red200,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                        SizedBox(height: 16),
+                        Container(
+                          padding: EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary100,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: AppColors.primary200,
+                              width: 1,
+                            ),
+                          ),
+                          child: Text(
+                            errorMessage!,
+                            style: AppTexts.contentRegular.copyWith(
+                              color: AppColors.neutral700,
+                              height: 1.5,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        SizedBox(height: 24),
+                        ElevatedButton(
+                          onPressed: _loadBookData,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary500,
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 32,
+                              vertical: 12,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: Text(
+                            'إعادة المحاولة',
+                            style: AppTexts.contentBold
+                                .copyWith(color: Colors.white),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 )
               : Column(
@@ -948,17 +986,21 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
                                       style: AppTexts.contentBold.copyWith(
                                           color: AppColors.neutral500)),
                                   SizedBox(width: 6),
+                                  // عرض النجوم من اليمين لليسار (RTL)
                                   ...List.generate(
                                       5,
-                                      (index) => Icon(
-                                            index <
-                                                    (bookData?.rating ?? 0)
-                                                        .floor()
-                                                ? Icons.star
-                                                : Icons.star_border,
-                                            color: Colors.amber,
-                                            size: 22,
-                                          )),
+                                      (index) {
+                                        final starIndex = 4 - index; // عكس الترقيم للعربية
+                                        return Icon(
+                                              starIndex <
+                                                      (bookData?.rating ?? 0)
+                                                          .floor()
+                                                  ? Icons.star
+                                                  : Icons.star_border,
+                                              color: Colors.amber,
+                                              size: 22,
+                                            );
+                                      }),
                                 ],
                               ),
                               SizedBox(height: 24),

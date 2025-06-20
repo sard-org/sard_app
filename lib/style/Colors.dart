@@ -27,7 +27,7 @@ class AppColors {
 
   // Red Colors (Feedback)
   static const Color red100 = Color(0xFFfb3a38);
-  static const Color red200 = Color(0xFFe00416);
+  static const Color red200 = Color(0xFFfb3a38);
 
   // Yellow Colors (Feedback)
   static const Color yellow100 = Color(0xFFffcb43);

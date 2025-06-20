@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../utils/error_translator.dart';
 
 class FavoriteService {
   static final FavoriteService _instance = FavoriteService._internal();
@@ -46,7 +47,7 @@ class FavoriteService {
         );
       }
     } catch (e) {
-      throw Exception('Failed to update favorite status: $e');
+      throw Exception(ErrorTranslator.handleDioError(e));
     }
   }
 
@@ -58,7 +59,7 @@ class FavoriteService {
       );
       return true;
     } catch (e) {
-      throw Exception('Failed to add to favorites: $e');
+      throw Exception(ErrorTranslator.handleDioError(e));
     }
   }
 
@@ -70,7 +71,7 @@ class FavoriteService {
       );
       return true;
     } catch (e) {
-      throw Exception('Failed to remove from favorites: $e');
+      throw Exception(ErrorTranslator.handleDioError(e));
     }
   }
 
@@ -81,7 +82,7 @@ class FavoriteService {
       final List<dynamic> books = favorites.map((e) => e['book']).toList();
       return books;
     } catch (e) {
-      throw Exception('Failed to get favorites: $e');
+      throw Exception(ErrorTranslator.handleDioError(e));
     }
   }
 }

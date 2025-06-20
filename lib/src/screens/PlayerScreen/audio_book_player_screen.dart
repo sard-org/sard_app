@@ -534,15 +534,19 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
                     style: AppTexts.contentBold
                         .copyWith(color: AppColors.neutral500)),
                 SizedBox(width: 6),
+                // عرض النجوم من اليمين لليسار (RTL)
                 ...List.generate(
                   5,
-                  (index) => Icon(
-                    index < (_bookData?.rating ?? 0).floor()
-                        ? Icons.star
-                        : Icons.star_border,
-                    color: Colors.amber,
-                    size: 18,
-                  ),
+                  (index) {
+                    final starIndex = 4 - index; // عكس الترقيم للعربية
+                    return Icon(
+                      starIndex < (_bookData?.rating ?? 0).floor()
+                          ? Icons.star
+                          : Icons.star_border,
+                      color: Colors.amber,
+                      size: 18,
+                    );
+                  },
                 ),
               ],
             ),

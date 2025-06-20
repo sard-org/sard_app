@@ -32,6 +32,7 @@ class ExchangeBookCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         width: 150,
+        height: 280, // إضافة ارتفاع ثابت
         decoration: BoxDecoration(
           border: Border.all(color: AppColors.neutral300),
           borderRadius: BorderRadius.circular(12),
@@ -125,16 +126,18 @@ class ExchangeBookCard extends StatelessWidget {
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: Text(
-                title,
-                style: AppTexts.contentBold.copyWith(
-                  fontSize: 14,
-                  color: AppColors.neutral900,
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Text(
+                  title,
+                  style: AppTexts.contentBold.copyWith(
+                    fontSize: 14,
+                    color: AppColors.neutral900,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
               ),
             ),
             const SizedBox(height: 8),

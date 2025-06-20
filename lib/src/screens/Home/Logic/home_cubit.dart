@@ -3,6 +3,7 @@ import 'dart:developer' as developer;
 import '../Data/home_model.dart';
 import '../Data/home_dio.dart';
 import 'home_state.dart';
+import '../../../utils/error_translator.dart';
 
 class HomeCubit extends Cubit<HomeState> {
   HomeCubit() : super(HomeInitial());
@@ -29,7 +30,8 @@ class HomeCubit extends Cubit<HomeState> {
       }
     } catch (e) {
       developer.log('Network error: $e', name: 'HomeCubit');
-      emit(HomeError('خطأ في الاتصال: $e'));
+      final userFriendlyError = ErrorTranslator.handleDioError(e);
+      emit(HomeError(userFriendlyError));
     }
   }
 }

@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../utils/error_translator.dart';
 
 class DioFav {
   final Dio dio;
@@ -49,13 +50,8 @@ class DioFav {
       final List<dynamic> favorites = response.data['favorites'] ?? [];
       final List<dynamic> books = favorites.map((e) => e['book']).toList();
       return books;
-    } on DioException catch (e) {
-      if (e.response?.statusCode == 401) {
-        throw Exception('يرجى تسجيل الدخول مرة أخرى');
-      }
-      throw Exception(e.response?.data?['message'] ?? 'حدث خطأ في جلب المفضلات');
     } catch (e) {
-      throw Exception('حدث خطأ غير متوقع: $e');
+      throw Exception(ErrorTranslator.handleDioError(e));
     }
   }
 
@@ -65,13 +61,8 @@ class DioFav {
         '/favorite',
         data: {"bookId": bookId},
       );
-    } on DioException catch (e) {
-      if (e.response?.statusCode == 401) {
-        throw Exception('يرجى تسجيل الدخول مرة أخرى');
-      }
-      throw Exception(e.response?.data?['message'] ?? 'حدث خطأ في إضافة الكتاب للمفضلة');
     } catch (e) {
-      throw Exception('حدث خطأ غير متوقع: $e');
+      throw Exception(ErrorTranslator.handleDioError(e));
     }
   }
 
@@ -81,13 +72,8 @@ class DioFav {
         '/favorite',
         data: {"bookId": bookId},
       );
-    } on DioException catch (e) {
-      if (e.response?.statusCode == 401) {
-        throw Exception('يرجى تسجيل الدخول مرة أخرى');
-      }
-      throw Exception(e.response?.data?['message'] ?? 'حدث خطأ في إزالة الكتاب من المفضلة');
     } catch (e) {
-      throw Exception('حدث خطأ غير متوقع: $e');
+      throw Exception(ErrorTranslator.handleDioError(e));
     }
   }
 }

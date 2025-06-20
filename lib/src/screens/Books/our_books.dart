@@ -85,32 +85,78 @@ class BookListScreen extends StatelessWidget {
                           );
                         } else if (state is BooksError) {
                           return Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  state.message,
-                                  style: AppTexts.contentRegular.copyWith(
-                                    color: AppColors.primary700,
+                            child: Padding(
+                              padding: EdgeInsets.all(24),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.error_outline,
+                                    size: 80,
+                                    color: AppColors.primary600,
                                   ),
-                                  textAlign: TextAlign.center,
-                                ),
-                                SizedBox(height: 16),
-                                ElevatedButton(
-                                  onPressed: () {
-                                    context.read<BooksCubit>().fetchBooks();
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: AppColors.primary500,
-                                  ),
-                                  child: Text(
-                                    "إعادة المحاولة",
-                                    style: AppTexts.heading1Bold.copyWith(
-                                      color: AppColors.neutral100,
+                                  SizedBox(height: 24),
+                                  RichText(
+                                    textAlign: TextAlign.center,
+                                    text: TextSpan(
+                                      text: 'عذراً، حدث خطأ أثناء تحميل ',
+                                      style: AppTexts.heading2Bold.copyWith(
+                                        color: AppColors.neutral700,
+                                      ),
+                                      children: [
+                                        TextSpan(
+                                          text: 'كتبك',
+                                          style: AppTexts.heading2Bold.copyWith(
+                                            color: AppColors.red200,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                ),
-                              ],
+                                  SizedBox(height: 16),
+                                  Container(
+                                    padding: EdgeInsets.all(16),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.primary100,
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(
+                                        color: AppColors.primary200,
+                                        width: 1,
+                                      ),
+                                    ),
+                                    child: Text(
+                                      state.message,
+                                      style: AppTexts.contentRegular.copyWith(
+                                        color: AppColors.neutral700,
+                                        height: 1.5,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                  SizedBox(height: 24),
+                                  ElevatedButton(
+                                    onPressed: () {
+                                      context.read<BooksCubit>().fetchBooks();
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: AppColors.primary500,
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 32,
+                                        vertical: 12,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                    ),
+                                    child: Text(
+                                      "إعادة المحاولة",
+                                      style: AppTexts.contentBold.copyWith(
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           );
                         }
@@ -177,64 +223,80 @@ class BookItem extends StatelessWidget {
       child: GestureDetector(
         onTap: onTap,
         child: Container(
-          margin: EdgeInsets.only(bottom: 12),
-          padding: const EdgeInsets.all(12),
+          width: double.infinity, // تأكيد أن الكارد يأخذ العرض الكامل
+          height: 200, // تحديث الارتفاع ليتناسب مع التصميم الجديد
+          margin: EdgeInsets.only(bottom: 16),
+          padding: const EdgeInsets.all(16),
           decoration: ShapeDecoration(
-            color: Color(0xFFFCFEF5),
+            color: Colors.white,
             shape: RoundedRectangleBorder(
-              side: BorderSide(width: 0.50, color: AppColors.primary900),
-              borderRadius: BorderRadius.circular(8),
+              side: BorderSide(width: 0.5, color: AppColors.neutral600), // تغيير إلى neutral600
+              borderRadius: BorderRadius.circular(12),
             ),
+            shadows: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.02), // تخفيف الشادو من 0.05 إلى 0.02
+                blurRadius: 4, // تقليل الـ blur من 8 إلى 4
+                offset: Offset(0, 1), // تقليل الـ offset من 2 إلى 1
+              ),
+            ],
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Container(
-                width: 93,
-                height: 125,
+                width: 120, // زيادة العرض أكثر
+                height: 160, // زيادة الارتفاع
                 decoration: ShapeDecoration(
                   image: DecorationImage(
                     image: imageUrl.startsWith('http')
                         ? NetworkImage(imageUrl) as ImageProvider
                         : AssetImage(imageUrl),
-                    fit: BoxFit.fill,
+                    fit: BoxFit.cover,
                   ),
                   shape: RoundedRectangleBorder(
-                    side: BorderSide(width: 2, color: Color(0xFF2B2B2B)),
-                    borderRadius: BorderRadius.circular(4),
+                    borderRadius: BorderRadius.circular(8),
                   ),
                 ),
               ),
-              SizedBox(width: 12),
+              SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    const SizedBox(height: 8),
                     Text(
                         author,
                         textAlign: TextAlign.start,
                         style: AppTexts.captionRegular.copyWith(
-                            color: AppColors.neutral400
-                        )
-                    ),
-                    SizedBox(height: 4),
-                    Text(
-                        title,
-                        textAlign: TextAlign.start,
-                        style: AppTexts.highlightStandard.copyWith(
-                            color: AppColors.neutral1000
-                        )
+                            color: AppColors.neutral500
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                     ),
                     SizedBox(height: 8),
                     Text(
-                      description,
-                      textAlign: TextAlign.start,
-                      style: AppTexts.contentRegular.copyWith(
-                          color: AppColors.neutral400
+                        title,
+                        textAlign: TextAlign.start,
+                        style: AppTexts.contentAccent.copyWith(
+                            color: AppColors.neutral900,
+                            fontWeight: FontWeight.w600,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                    ),
+                    SizedBox(height: 12),
+                    Expanded(
+                      child: Text(
+                        description.isNotEmpty ? description : 'لا يوجد وصف متاح',
+                        textAlign: TextAlign.start,
+                        style: AppTexts.captionEmphasis.copyWith( // تغيير إلى captionEmphasis
+                            color: AppColors.neutral500,
+                            height: 1.5,
+                        ),
+                        maxLines: 4, // تحديد عدد أسطر معقول
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),

@@ -244,6 +244,7 @@ class _AllRecommendedBooksScreenState extends State<AllRecommendedBooksScreen> {
                                             price: book.price,
                                             pricePoints: null,
                                             isFree: book.price == 0,
+                                            showDescription: true, // إظهار الوصف في هذه الصفحة
                                             onTap: () {
                                               Navigator.push(
                                                 context,

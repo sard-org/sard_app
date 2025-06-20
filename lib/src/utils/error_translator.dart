@@ -34,6 +34,13 @@ class ErrorTranslator {
       'internal server error': 'خطأ داخلي في الخادم',
       'bad request': 'طلب غير صحيح',
       'service unavailable': 'الخدمة غير متاحة',
+      // إضافة رسائل خطأ جديدة لمشاكل الاتصال
+      'failed host lookup': 'لا يمكن الاتصال بالخادم',
+      'connection errored': 'خطأ في الاتصال بالخادم',
+      'no address associated with hostname': 'لا يمكن الوصول للخادم',
+      'socket exception': 'مشكلة في الاتصال',
+      'connection error': 'خطأ في الاتصال',
+      'no internet connection': 'لا يوجد اتصال بالإنترنت',
     };
 
     // Check for exact matches first
@@ -90,5 +97,55 @@ class ErrorTranslator {
       default:
         return translatedMessage;
     }
+  }
+
+  /// معالجة أخطاء Dio بشكل شامل وإرجاع رسالة واضحة للمستخدم
+  static String handleDioError(dynamic error) {
+    if (error is Exception) {
+      String errorString = error.toString().toLowerCase();
+      
+      // معالجة أخطاء الاتصال الشائعة
+      if (errorString.contains('failed host lookup') || 
+          errorString.contains('connection errored') ||
+          errorString.contains('no address associated') ||
+          errorString.contains('socket exception')) {
+        return '''🔌 مشكلة في الاتصال
+
+❌ لا يمكن الوصول للخادم حالياً
+
+🔧 الحلول المقترحة:
+• تأكد من اتصالك بالإنترنت
+• تحقق من إعدادات الواي فاي أو البيانات
+• أعد المحاولة بعد قليل
+• تأكد من عمل التطبيقات الأخرى''';
+      }
+      
+      if (errorString.contains('connection timeout') ||
+          errorString.contains('receive timeout') ||
+          errorString.contains('send timeout')) {
+        return '''⏱️ انتهت مهلة الاتصال
+
+❌ الاتصال بطيء أو منقطع
+
+🔧 الحلول المقترحة:
+• تحقق من سرعة الإنترنت
+• انتقل لمكان بإشارة أقوى
+• أعد المحاولة بعد قليل''';
+      }
+      
+      if (errorString.contains('connection error')) {
+        return '''🌐 خطأ في الاتصال
+
+❌ مشكلة في الشبكة
+
+🔧 الحلول المقترحة:
+• تأكد من اتصالك بالإنترنت
+• جرب إغلاق وإعادة فتح التطبيق
+• تحقق من إعدادات الشبكة''';
+      }
+    }
+    
+    // في حالة عدم تحديد نوع الخطأ، استخدم الترجمة العادية
+    return translateError(error.toString());
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../Data/categories_dio.dart';
 import 'categories_state.dart';
+import '../../../../utils/error_translator.dart';
 
 class CategoriesCubit extends Cubit<CategoriesState> {
   final CategoriesService _categoriesService;
@@ -14,7 +15,8 @@ class CategoriesCubit extends Cubit<CategoriesState> {
       final categories = await _categoriesService.getCategories();
       emit(CategoriesLoaded(categories.categories));
     } catch (e) {
-      emit(CategoriesError(e.toString()));
+      final userFriendlyError = ErrorTranslator.handleDioError(e);
+      emit(CategoriesError(userFriendlyError));
     }
   }
 
@@ -33,7 +35,8 @@ class CategoriesCubit extends Cubit<CategoriesState> {
       final books = await _categoriesService.getCategoryBooks(categoryId);
       emit(CategoryBooksLoaded(books));
     } catch (e) {
-      emit(CategoriesError(e.toString()));
+      final userFriendlyError = ErrorTranslator.handleDioError(e);
+      emit(CategoriesError(userFriendlyError));
     }
   }
 }

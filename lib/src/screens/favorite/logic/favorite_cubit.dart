@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../data/dio_Fav.dart';
 import 'favorite_state.dart';
+import '../../../utils/error_translator.dart';
 
 class FavoriteCubit extends Cubit<FavoriteState> {
   final DioFav dioFav;
@@ -14,7 +15,8 @@ class FavoriteCubit extends Cubit<FavoriteState> {
       final data = await dioFav.getFavorites(token);
       emit(FavoriteSuccessState(data));
     } catch (e) {
-      emit(FavoriteErrorState(e.toString()));
+      final userFriendlyError = ErrorTranslator.handleDioError(e);
+      emit(FavoriteErrorState(userFriendlyError));
     }
   }
 
@@ -23,7 +25,8 @@ class FavoriteCubit extends Cubit<FavoriteState> {
       await dioFav.addToFavorite(token, id);
       await getFavorites();
     } catch (e) {
-      emit(FavoriteErrorState(e.toString()));
+      final userFriendlyError = ErrorTranslator.handleDioError(e);
+      emit(FavoriteErrorState(userFriendlyError));
     }
   }
 
@@ -32,7 +35,8 @@ class FavoriteCubit extends Cubit<FavoriteState> {
       await dioFav.removeFromFavorite(token, id);
       await getFavorites();
     } catch (e) {
-      emit(FavoriteErrorState(e.toString()));
+      final userFriendlyError = ErrorTranslator.handleDioError(e);
+      emit(FavoriteErrorState(userFriendlyError));
     }
   }
 }

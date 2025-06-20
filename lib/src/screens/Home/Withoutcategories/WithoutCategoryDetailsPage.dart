@@ -252,15 +252,19 @@ class _WithoutCategoryDetailsPageState
                     ),
                   )
                 else
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: recommendedBooks.asMap().entries.map((entry) {
-                        int index = entry.key;
-                        var book = entry.value;
+                  SizedBox(
+                    height: 200,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: recommendedBooks.length,
+                      itemBuilder: (context, index) {
+                        var book = recommendedBooks[index];
                         return Container(
-                          width: 280,
-                          margin: EdgeInsets.only(right: index == 0 ? 0 : 12),
+                          width: MediaQuery.of(context).size.width * 0.75, // تصغير إلى 75% لإظهار جزء من الكارد التالي
+                          margin: EdgeInsets.only(
+                            right: index == 0 ? 0 : 16, // إزالة المسافة من اليمين للكارد الأول
+                            left: index == recommendedBooks.length - 1 ? 16 : 0,
+                          ),
                           child: BookCardWidget(
                             id: book['id'].toString(),
                             author: book['author'] as String,
@@ -288,7 +292,7 @@ class _WithoutCategoryDetailsPageState
                             },
                           ),
                         );
-                      }).toList(),
+                      },
                     ),
                   ),
                 const SizedBox(height: 24),
@@ -354,7 +358,10 @@ class _WithoutCategoryDetailsPageState
                         int index = entry.key;
                         var book = entry.value;
                         return Container(
-                          margin: EdgeInsets.only(right: index == 0 ? 0 : 12),
+                          margin: EdgeInsets.only(
+                            right: index == 0 ? 0 : 12, // إزالة المسافة من اليمين للكارد الأول
+                            left: index == exchangeBooks.length - 1 ? 16 : 0,
+                          ),
                           child: ExchangeBookCard(
                           id: book['id'] as String,
                           title: book['title'] as String,

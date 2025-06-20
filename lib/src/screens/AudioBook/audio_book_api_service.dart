@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import '../Books/data/dio_client.dart';
 import 'audio_book_model.dart';
+import '../../utils/error_translator.dart';
 
 class AudioBookApiService {
   final Dio _dio = DioClient.dio;
@@ -124,14 +125,6 @@ class AudioBookApiService {
   }
 
   String _handleError(dynamic error) {
-    if (error is DioException) {
-      if (error.response?.data != null) {
-        if (error.response?.data['message'] != null) {
-          return error.response?.data['message'];
-        }
-      }
-      return error.message ?? 'حدث خطأ ما';
-    }
-    return error.toString();
+    return ErrorTranslator.handleDioError(error);
   }
 }

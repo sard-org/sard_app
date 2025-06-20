@@ -121,47 +121,76 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                             );
                           } else if (state is FavoriteErrorState) {
                             return Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.error_outline,
-                                    size: 64,
-                                    color: AppColors.primary600,
-                                  ),
-                                  const SizedBox(height: 16),
-                                  Text(
-                                    'حدث خطأ في تحميل المفضلات',
-                                    style: AppTexts.heading3Bold.copyWith(
-                                      color: AppColors.neutral800,
+                              child: Padding(
+                                padding: EdgeInsets.all(24),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.error_outline,
+                                      size: 80,
+                                      color: AppColors.primary600,
                                     ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    state.message,
-                                    style: AppTexts.contentRegular.copyWith(
-                                      color: AppColors.neutral500,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                  const SizedBox(height: 24),
-                                  ElevatedButton(
-                                    onPressed: () => cubit?.getFavorites(),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: AppColors.primary500,
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 24,
-                                        vertical: 12,
+                                    SizedBox(height: 24),
+                                    RichText(
+                                      textAlign: TextAlign.center,
+                                      text: TextSpan(
+                                        text: 'عذراً، حدث خطأ أثناء تحميل ',
+                                        style: AppTexts.heading2Bold.copyWith(
+                                          color: AppColors.neutral700,
+                                        ),
+                                        children: [
+                                          TextSpan(
+                                            text: 'مفضلتك',
+                                            style: AppTexts.heading2Bold.copyWith(
+                                              color: AppColors.red200,
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ),
-                                    child: Text(
-                                      'إعادة المحاولة',
-                                      style: AppTexts.highlightAccent.copyWith(
-                                        color: Colors.white,
+                                    SizedBox(height: 16),
+                                    Container(
+                                      padding: EdgeInsets.all(16),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.primary100,
+                                        borderRadius: BorderRadius.circular(12),
+                                        border: Border.all(
+                                          color: AppColors.primary200,
+                                          width: 1,
+                                        ),
+                                      ),
+                                      child: Text(
+                                        state.message,
+                                        style: AppTexts.contentRegular.copyWith(
+                                          color: AppColors.neutral700,
+                                          height: 1.5,
+                                        ),
+                                        textAlign: TextAlign.center,
                                       ),
                                     ),
-                                  ),
-                                ],
+                                    SizedBox(height: 24),
+                                    ElevatedButton(
+                                      onPressed: () => cubit?.getFavorites(),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: AppColors.primary500,
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal: 32,
+                                          vertical: 12,
+                                        ),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                      ),
+                                      child: Text(
+                                        'إعادة المحاولة',
+                                        style: AppTexts.contentBold.copyWith(
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             );
                           } else if (state is FavoriteSuccessState) {
@@ -306,52 +335,72 @@ class _BookItemState extends State<BookItem> {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         transform: Matrix4.identity()..scale(size),
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(12),
+        width: double.infinity, // تأكيد أن الكارد يأخذ العرض الكامل
+        height: 200, // تحديث الارتفاع ليتناسب مع التصميم الجديد
+        margin: const EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.all(16),
         decoration: ShapeDecoration(
-          color: const Color(0xFFFCFEF5),
+          color: Colors.white,
           shape: RoundedRectangleBorder(
-            side: const BorderSide(width: 0.50, color: AppColors.primary900),
-            borderRadius: BorderRadius.circular(8),
+            side: BorderSide(width: 0.5, color: AppColors.neutral600), // تغيير إلى neutral600
+            borderRadius: BorderRadius.circular(12),
           ),
+          shadows: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.02), // تخفيف الشادو من 0.05 إلى 0.02
+              blurRadius: 4, // تقليل الـ blur من 8 إلى 4
+              offset: Offset(0, 1), // تقليل الـ offset من 2 إلى 1
+            ),
+          ],
         ),
-        child: Row(
+                child: Row(
           children: [
             Container(
-              width: 93,
-              height: 125,
+              width: 120, // زيادة العرض أكثر
+              height: 160, // إرجاع الارتفاع الأصلي
               decoration: ShapeDecoration(
                 image: DecorationImage(
                   image: NetworkImage(widget.imageUrl),
-                  fit: BoxFit.fill,
+                  fit: BoxFit.cover,
                 ),
                 shape: RoundedRectangleBorder(
-                  side: const BorderSide(width: 2, color: Color(0xFF2B2B2B)),
-                  borderRadius: BorderRadius.circular(4),
+                  borderRadius: BorderRadius.circular(8),
                 ),
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  const SizedBox(height: 8),
                   Text(widget.author,
                       style: AppTexts.captionRegular
-                          .copyWith(color: AppColors.neutral400)),
+                          .copyWith(color: AppColors.neutral500),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis),
                   const SizedBox(height: 8),
                   Text(widget.title,
-                      style: AppTexts.highlightStandard
-                          .copyWith(color: AppColors.neutral1000)),
-                  const SizedBox(height: 8),
-                  Text(
-                    widget.description,
-                    style: AppTexts.contentRegular
-                        .copyWith(color: AppColors.neutral400),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
+                      style: AppTexts.contentAccent
+                          .copyWith(
+                            color: AppColors.neutral900,
+                            fontWeight: FontWeight.w600,
+                          ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis),
+                  const SizedBox(height: 12),
+                  Expanded(
+                    child: Text(
+                      widget.description.isNotEmpty ? widget.description : 'لا يوجد وصف متاح',
+                      style: AppTexts.captionEmphasis // تغيير إلى captionEmphasis
+                          .copyWith(
+                            color: AppColors.neutral500,
+                            height: 1.5,
+                          ),
+                      maxLines: 4, // تحديد عدد أسطر معقول
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
-                  const SizedBox(height: 8),
                   Row(
                     children: [
                       Text(
@@ -367,6 +416,7 @@ class _BookItemState extends State<BookItem> {
                       ),
                     ],
                   ),
+                  const SizedBox(height: 8),
                 ],
               ),
             ),

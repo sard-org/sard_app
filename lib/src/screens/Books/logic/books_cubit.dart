@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sard/src/screens/Books/data/dio_client.dart';
 import 'package:sard/src/screens/Books/book_model.dart';
 import 'books_state.dart';
+import '../../../utils/error_translator.dart';
 
 class BooksCubit extends Cubit<BooksState> {
   BooksCubit() : super(BooksInitial());
@@ -37,7 +38,8 @@ class BooksCubit extends Cubit<BooksState> {
         emit(const BooksError('فشل تحميل الكتب'));
       }
     } catch (e) {
-      emit(BooksError('حدث خطأ: ${e.toString()}'));
+      final userFriendlyError = ErrorTranslator.handleDioError(e);
+      emit(BooksError(userFriendlyError));
     }
   }
 }
