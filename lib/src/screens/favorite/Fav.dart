@@ -19,21 +19,28 @@ class FavoritesScreen extends StatefulWidget {
 }
 
 class _FavoritesScreenState extends State<FavoritesScreen> {
-  FavoriteCubit? cubit;
-  bool isInitializing = true;
+  FavoriteCubit? _favoriteCubit;
 
   @override
   void initState() {
     super.initState();
-    _initCubit();
+    _initializeFavorites();
   }
 
-  Future<void> _initCubit() async {
+  void _initializeFavorites() {
     try {
-      setState(() {
-        isInitializing = true;
-      });
+      // Try to get the cubit from the global providers
+      _favoriteCubit = context.read<FavoriteCubit>();
+      // Load favorites (will use cache if available)
+      _favoriteCubit?.getFavorites();
+    } catch (e) {
+      // If global cubit is not available, create a local one
+      _initLocalCubit();
+    }
+  }
 
+  Future<void> _initLocalCubit() async {
+    try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('auth_token') ?? '';
       
@@ -59,16 +66,12 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
       
       if (mounted) {
         setState(() {
-          cubit = favCubit;
-          isInitializing = false;
+          _favoriteCubit = favCubit;
         });
-        cubit?.getFavorites();
+        _favoriteCubit?.getFavorites();
       }
     } catch (e) {
       if (mounted) {
-        setState(() {
-          isInitializing = false;
-        });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Directionality(
@@ -82,10 +85,43 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     }
   }
 
+  Future<void> _refreshFavorites() async {
+    await _favoriteCubit?.refreshFavorites();
+  }
+
   @override
   void dispose() {
-    cubit?.close();
+    // Only dispose if it's a local cubit, not global
+    if (_favoriteCubit != context.read<FavoriteCubit?>()) {
+      _favoriteCubit?.close();
+    }
     super.dispose();
+  }
+
+  Widget _buildEmptyFavorites() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Image.asset(
+            "assets/img/fav_embty.png",
+            width: 300,
+            height: 300,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            "لا توجد كتب مفضلة",
+            style: AppTexts.heading3Bold.copyWith(color: AppColors.neutral800),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            "ابدأ بإضافة الكتب التي تحبها إلى مفضلتك",
+            style: AppTexts.contentRegular.copyWith(color: AppColors.neutral500),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -97,7 +133,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          if (isInitializing || cubit == null)
+          if (_favoriteCubit == null)
             Center(
               child: CircularProgressIndicator(
                 valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary500),
@@ -105,7 +141,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
             )
           else
             BlocProvider.value(
-              value: cubit!,
+              value: _favoriteCubit!,
               child: BaseScreen(
                 child: Column(
                   children: [
@@ -120,111 +156,138 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                               ),
                             );
                           } else if (state is FavoriteErrorState) {
-                            return Center(
-                              child: Padding(
-                                padding: EdgeInsets.all(24),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      Icons.error_outline,
-                                      size: 80,
-                                      color: AppColors.primary600,
-                                    ),
-                                    SizedBox(height: 24),
-                                    RichText(
-                                      textAlign: TextAlign.center,
-                                      text: TextSpan(
-                                        text: 'عذراً، حدث خطأ أثناء تحميل ',
-                                        style: AppTexts.heading2Bold.copyWith(
-                                          color: AppColors.neutral700,
-                                        ),
+                            return RefreshIndicator(
+                              onRefresh: _refreshFavorites,
+                              child: SingleChildScrollView(
+                                physics: AlwaysScrollableScrollPhysics(),
+                                child: Container(
+                                  height: MediaQuery.of(context).size.height - 200,
+                                  child: Center(
+                                    child: Padding(
+                                      padding: EdgeInsets.all(24),
+                                      child: Column(
+                                        mainAxisAlignment: MainAxisAlignment.center,
                                         children: [
-                                          TextSpan(
-                                            text: 'مفضلتك',
-                                            style: AppTexts.heading2Bold.copyWith(
-                                              color: AppColors.red200,
+                                          Icon(
+                                            Icons.error_outline,
+                                            size: 80,
+                                            color: AppColors.primary600,
+                                          ),
+                                          SizedBox(height: 24),
+                                          RichText(
+                                            textAlign: TextAlign.center,
+                                            text: TextSpan(
+                                              text: 'عذراً، حدث خطأ أثناء تحميل ',
+                                              style: AppTexts.heading2Bold.copyWith(
+                                                color: AppColors.neutral700,
+                                              ),
+                                              children: [
+                                                TextSpan(
+                                                  text: 'مفضلتك',
+                                                  style: AppTexts.heading2Bold.copyWith(
+                                                    color: AppColors.red200,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          SizedBox(height: 16),
+                                          Container(
+                                            padding: EdgeInsets.all(16),
+                                            decoration: BoxDecoration(
+                                              color: AppColors.primary100,
+                                              borderRadius: BorderRadius.circular(12),
+                                              border: Border.all(
+                                                color: AppColors.primary200,
+                                                width: 1,
+                                              ),
+                                            ),
+                                            child: Text(
+                                              state.message,
+                                              style: AppTexts.contentRegular.copyWith(
+                                                color: AppColors.neutral700,
+                                                height: 1.5,
+                                              ),
+                                              textAlign: TextAlign.center,
+                                            ),
+                                          ),
+                                          SizedBox(height: 24),
+                                          ElevatedButton(
+                                            onPressed: () => _favoriteCubit?.getFavorites(forceRefresh: true),
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: AppColors.primary500,
+                                              padding: EdgeInsets.symmetric(
+                                                horizontal: 32,
+                                                vertical: 12,
+                                              ),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.circular(8),
+                                              ),
+                                            ),
+                                            child: Text(
+                                              'إعادة المحاولة',
+                                              style: AppTexts.contentBold.copyWith(
+                                                color: Colors.white,
+                                              ),
                                             ),
                                           ),
                                         ],
                                       ),
                                     ),
-                                    SizedBox(height: 16),
-                                    Container(
-                                      padding: EdgeInsets.all(16),
-                                      decoration: BoxDecoration(
-                                        color: AppColors.primary100,
-                                        borderRadius: BorderRadius.circular(12),
-                                        border: Border.all(
-                                          color: AppColors.primary200,
-                                          width: 1,
-                                        ),
-                                      ),
-                                      child: Text(
-                                        state.message,
-                                        style: AppTexts.contentRegular.copyWith(
-                                          color: AppColors.neutral700,
-                                          height: 1.5,
-                                        ),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    ),
-                                    SizedBox(height: 24),
-                                    ElevatedButton(
-                                      onPressed: () => cubit?.getFavorites(),
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: AppColors.primary500,
-                                        padding: EdgeInsets.symmetric(
-                                          horizontal: 32,
-                                          vertical: 12,
-                                        ),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(8),
-                                        ),
-                                      ),
-                                      child: Text(
-                                        'إعادة المحاولة',
-                                        style: AppTexts.contentBold.copyWith(
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
+                                  ),
                                 ),
                               ),
                             );
                           } else if (state is FavoriteSuccessState) {
                             final books = state.favorites;
-                            if (books.isEmpty) return _buildEmptyFavorites();
-                            return ListView.builder(
-                              itemCount: books.length,
-                              itemBuilder: (context, index) {
-                                final book = books[index];
-                                final String? bookId = book['id']?.toString();
-                                if (bookId == null) return const SizedBox.shrink();
-
-                                return GestureDetector(
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => AudioBookScreen(
-                                          bookId: bookId,
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                  child: BookItem(
-                                    author: book["Author"]?["name"]?.toString() ?? 'مؤلف غير معروف',
-                                    title: book["title"]?.toString() ?? 'عنوان غير معروف',
-                                    description: book["description"]?.toString() ?? '',
-                                    price: "",
-                                    currency: "",
-                                    imageUrl: book["cover"]?.toString() ?? 'assets/img/Book_1.png',
-                                    onFavoritePressed: () => cubit?.removeFavorite(bookId),
+                            if (books.isEmpty) {
+                              return RefreshIndicator(
+                                onRefresh: _refreshFavorites,
+                                child: SingleChildScrollView(
+                                  physics: AlwaysScrollableScrollPhysics(),
+                                  child: Container(
+                                    height: MediaQuery.of(context).size.height - 200,
+                                    child: _buildEmptyFavorites(),
                                   ),
-                                );
-                              },
+                                ),
+                              );
+                            }
+                            
+                            return RefreshIndicator(
+                              onRefresh: _refreshFavorites,
+                              color: AppColors.primary500,
+                              backgroundColor: Colors.white,
+                              child: ListView.builder(
+                                physics: AlwaysScrollableScrollPhysics(),
+                                itemCount: books.length,
+                                itemBuilder: (context, index) {
+                                  final book = books[index];
+                                  final String? bookId = book['id']?.toString();
+                                  if (bookId == null) return const SizedBox.shrink();
+
+                                  return GestureDetector(
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => AudioBookScreen(
+                                            bookId: bookId,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    child: BookItem(
+                                      author: book["Author"]?["name"]?.toString() ?? 'مؤلف غير معروف',
+                                      title: book["title"]?.toString() ?? 'عنوان غير معروف',
+                                      description: book["description"]?.toString() ?? '',
+                                      price: "",
+                                      currency: "",
+                                      imageUrl: book["cover"]?.toString() ?? 'assets/img/Book_1.png',
+                                      onFavoritePressed: () => _favoriteCubit?.removeFavorite(bookId),
+                                    ),
+                                  );
+                                },
+                              ),
                             );
                           }
                           return const SizedBox.shrink();
@@ -255,33 +318,6 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                 ),
               ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildEmptyFavorites() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Image.asset(
-            "assets/img/fav_embty.png",
-            width: 300,
-            height: 300,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            "القائمة فارغة",
-            style: AppTexts.heading3Bold.copyWith(color: AppColors.neutral800),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            " أضف كتبًا إلى المفضلة لتكون دائمًا في متناولك",
-            style:
-                AppTexts.contentRegular.copyWith(color: AppColors.neutral500),
-            textAlign: TextAlign.center,
           ),
         ],
       ),

@@ -7,7 +7,32 @@ import 'logic/books_cubit.dart';
 import 'logic/books_state.dart';
 import '../PlayerScreen/audio_book_player_screen.dart';
 
-class BookListScreen extends StatelessWidget {
+class BookListScreen extends StatefulWidget {
+  @override
+  State<BookListScreen> createState() => _BookListScreenState();
+}
+
+class _BookListScreenState extends State<BookListScreen> {
+  late BooksCubit booksCubit;
+
+  @override
+  void initState() {
+    super.initState();
+    booksCubit = context.read<BooksCubit>();
+    // Fetch books only if not already loaded (cached)
+    _loadBooks();
+  }
+
+  void _loadBooks() {
+    // This will use cache if available, or fetch from API if needed
+    booksCubit.fetchBooks();
+  }
+
+  Future<void> _refreshBooks() async {
+    // Force refresh from API
+    await booksCubit.refreshBooks();
+  }
+
   Widget _buildEmptyBooks() {
     return Center(
       child: Column(
@@ -36,28 +61,40 @@ class BookListScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => BooksCubit()..fetchBooks(),
-      child: Scaffold(
-        body: Stack(
-          children: [
-            BaseScreen(
-              child: Column(
-                children: [
-                  SizedBox(height: 80),
-                  Expanded(
-                    child: BlocBuilder<BooksCubit, BooksState>(
-                      builder: (context, state) {
-                        if (state is BooksLoading) {
-                          return Center(child: CircularProgressIndicator(
-                            color: AppColors.primary700,
-                          ));
-                        } else if (state is BooksLoaded) {
-                          if (state.books.isEmpty) {
-                            return _buildEmptyBooks();
-                          }
+    return Scaffold(
+      body: Stack(
+        children: [
+          BaseScreen(
+            child: Column(
+              children: [
+                SizedBox(height: 80),
+                Expanded(
+                  child: BlocBuilder<BooksCubit, BooksState>(
+                    builder: (context, state) {
+                      if (state is BooksLoading) {
+                        return Center(child: CircularProgressIndicator(
+                          color: AppColors.primary700,
+                        ));
+                      } else if (state is BooksLoaded) {
+                        if (state.books.isEmpty) {
+                          return RefreshIndicator(
+                            onRefresh: _refreshBooks,
+                            child: SingleChildScrollView(
+                              physics: AlwaysScrollableScrollPhysics(),
+                              child: Container(
+                                height: MediaQuery.of(context).size.height - 200,
+                                child: _buildEmptyBooks(),
+                              ),
+                            ),
+                          );
+                        }
 
-                          return ListView.builder(
+                        return RefreshIndicator(
+                          onRefresh: _refreshBooks,
+                          color: AppColors.primary500,
+                          backgroundColor: Colors.white,
+                          child: ListView.builder(
+                            physics: AlwaysScrollableScrollPhysics(),
                             itemCount: state.books.length,
                             itemBuilder: (context, index) {
                               final book = state.books[index];
@@ -82,116 +119,134 @@ class BookListScreen extends StatelessWidget {
                                 },
                               );
                             },
-                          );
-                        } else if (state is BooksError) {
-                          return Center(
-                            child: Padding(
-                              padding: EdgeInsets.all(24),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.error_outline,
-                                    size: 80,
-                                    color: AppColors.primary600,
-                                  ),
-                                  SizedBox(height: 24),
-                                  RichText(
-                                    textAlign: TextAlign.center,
-                                    text: TextSpan(
-                                      text: 'عذراً، حدث خطأ أثناء تحميل ',
-                                      style: AppTexts.heading2Bold.copyWith(
-                                        color: AppColors.neutral700,
+                          ),
+                        );
+                      } else if (state is BooksError) {
+                        return RefreshIndicator(
+                          onRefresh: _refreshBooks,
+                          child: SingleChildScrollView(
+                            physics: AlwaysScrollableScrollPhysics(),
+                            child: Container(
+                              height: MediaQuery.of(context).size.height - 200,
+                              child: Center(
+                                child: Padding(
+                                  padding: EdgeInsets.all(24),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.error_outline,
+                                        size: 80,
+                                        color: AppColors.primary600,
                                       ),
-                                      children: [
-                                        TextSpan(
-                                          text: 'كتبك',
+                                      SizedBox(height: 24),
+                                      RichText(
+                                        textAlign: TextAlign.center,
+                                        text: TextSpan(
+                                          text: 'عذراً، حدث خطأ أثناء تحميل ',
                                           style: AppTexts.heading2Bold.copyWith(
-                                            color: AppColors.red200,
+                                            color: AppColors.neutral700,
+                                          ),
+                                          children: [
+                                            TextSpan(
+                                              text: 'كتبك',
+                                              style: AppTexts.heading2Bold.copyWith(
+                                                color: AppColors.red200,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      SizedBox(height: 16),
+                                      Container(
+                                        padding: EdgeInsets.all(16),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.primary100,
+                                          borderRadius: BorderRadius.circular(12),
+                                          border: Border.all(
+                                            color: AppColors.primary200,
+                                            width: 1,
                                           ),
                                         ),
-                                      ],
-                                    ),
+                                        child: Text(
+                                          state.message,
+                                          style: AppTexts.contentRegular.copyWith(
+                                            color: AppColors.neutral700,
+                                            height: 1.5,
+                                          ),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ),
+                                      SizedBox(height: 24),
+                                      ElevatedButton(
+                                        onPressed: () {
+                                          booksCubit.fetchBooks(forceRefresh: true);
+                                        },
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: AppColors.primary500,
+                                          padding: EdgeInsets.symmetric(
+                                            horizontal: 32,
+                                            vertical: 12,
+                                          ),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(8),
+                                          ),
+                                        ),
+                                        child: Text(
+                                          "إعادة المحاولة",
+                                          style: AppTexts.contentBold.copyWith(
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  SizedBox(height: 16),
-                                  Container(
-                                    padding: EdgeInsets.all(16),
-                                    decoration: BoxDecoration(
-                                      color: AppColors.primary100,
-                                      borderRadius: BorderRadius.circular(12),
-                                      border: Border.all(
-                                        color: AppColors.primary200,
-                                        width: 1,
-                                      ),
-                                    ),
-                                    child: Text(
-                                      state.message,
-                                      style: AppTexts.contentRegular.copyWith(
-                                        color: AppColors.neutral700,
-                                        height: 1.5,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ),
-                                  SizedBox(height: 24),
-                                  ElevatedButton(
-                                    onPressed: () {
-                                      context.read<BooksCubit>().fetchBooks();
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: AppColors.primary500,
-                                      padding: EdgeInsets.symmetric(
-                                        horizontal: 32,
-                                        vertical: 12,
-                                      ),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                    ),
-                                    child: Text(
-                                      "إعادة المحاولة",
-                                      style: AppTexts.contentBold.copyWith(
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                                ),
                               ),
                             ),
-                          );
-                        }
-                        return SizedBox();
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              child: Container(
-                padding: EdgeInsets.symmetric(vertical: 32, horizontal: 16),
-                decoration: BoxDecoration(
-                  color: AppColors.primary500,
-                  borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(12),
-                    bottomRight: Radius.circular(12),
+                          ),
+                        );
+                      }
+                      return RefreshIndicator(
+                        onRefresh: _refreshBooks,
+                        child: SingleChildScrollView(
+                          physics: AlwaysScrollableScrollPhysics(),
+                          child: Container(
+                            height: MediaQuery.of(context).size.height - 200,
+                            child: SizedBox(),
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ),
-                child: Center(
-                  child: Text(
-                    "كتبي",
-                    style: AppTexts.heading2Bold.copyWith(
-                      color: AppColors.neutral100,
-                    ),
+              ],
+            ),
+          ),
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              padding: EdgeInsets.symmetric(vertical: 32, horizontal: 16),
+              decoration: BoxDecoration(
+                color: AppColors.primary500,
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(12),
+                  bottomRight: Radius.circular(12),
+                ),
+              ),
+              child: Center(
+                child: Text(
+                  "كتبي",
+                  style: AppTexts.heading2Bold.copyWith(
+                    color: AppColors.neutral100,
                   ),
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

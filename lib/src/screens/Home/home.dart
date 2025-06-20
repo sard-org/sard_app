@@ -13,6 +13,7 @@ import '../Home/categories/CategoryDetailsPage.dart';
 import '../Home/categories/Data/categories_dio.dart';
 import '../Home/categories/Logic/categories_cubit.dart';
 import '../Home/categories/Logic/categories_state.dart';
+import '../Home/Logic/home_books_cubit.dart';
 import '../Home/search/search_results_screen.dart';
 
 class CategoryItem extends StatelessWidget {
@@ -251,6 +252,37 @@ class HomeScreenState extends State<HomeScreen> {
   final GlobalKey<_CategorySectionState> _categorySectionKey =
       GlobalKey<_CategorySectionState>();
 
+  late HomeCubit homeCubit;
+  late CategoriesCubit categoriesCubit;
+  late HomeBooksLCubit homeBooksLCubit;
+
+  @override
+  void initState() {
+    super.initState();
+    homeCubit = context.read<HomeCubit>();
+    categoriesCubit = context.read<CategoriesCubit>();
+    homeBooksLCubit = context.read<HomeBooksLCubit>();
+    _loadInitialData();
+  }
+
+  void _loadInitialData() {
+    // Load data using cache if available
+    homeCubit.getUserData();
+    categoriesCubit.getCategories();
+    homeBooksLCubit.loadRecommendedBooks(limit: 4);
+    homeBooksLCubit.loadExchangeBooks(limit: 3);
+  }
+
+  Future<void> _refreshData() async {
+    // Force refresh all data
+    await Future.wait([
+      homeCubit.refreshUserData(),
+      categoriesCubit.refreshCategories(),
+      homeBooksLCubit.refreshRecommendedBooks(),
+      homeBooksLCubit.refreshExchangeBooks(),
+    ]);
+  }
+
   void resetCategorySelection() {
     _categorySectionKey.currentState?.resetSelection();
   }
@@ -259,12 +291,9 @@ class HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(create: (_) => HomeCubit()..getUserData()),
-        BlocProvider(
-          create: (_) => CategoriesCubit(
-            CategoriesService(dio),
-          ),
-        ),
+        BlocProvider.value(value: homeCubit),
+        BlocProvider.value(value: categoriesCubit),
+        BlocProvider.value(value: homeBooksLCubit),
       ],
       child: Directionality(
         textDirection: TextDirection.rtl,
@@ -413,7 +442,7 @@ class HomeScreenState extends State<HomeScreen> {
                           );
                         } else {
                           return Text(
-                            'الرئيسية',
+                            'جاري تحميل البيانات',
                             style: AppTexts.heading1Bold.copyWith(
                               color: Colors.white,
                               fontSize: 24,
@@ -431,168 +460,157 @@ class HomeScreenState extends State<HomeScreen> {
                 if (state is HomeLoading) {
                   return Center(child: CircularProgressIndicator());
                 } else if (state is HomeLoaded) {
-                  UserModelhome user = state.user;
-
-                  // Generate dynamic streak icons based on user's actual streak
-                  List<Widget> _buildStreakIcons(int currentStreak) {
-                    List<Widget> icons = [];
-
-                    for (int i = 1; i <= 7; i++) {
-                      String assetPath = '';
-
-                      if (currentStreak == 0) {
-                        // If streak is 0 (just reset after completing 7 days) - show all as waiting
-                        assetPath = 'assets/img/streak_waiting.png';
-                      } else if (i < currentStreak) {
-                        // Completed days
-                        assetPath = 'assets/img/streakDone.png';
-                      } else if (i == currentStreak) {
-                        // Current day
-                        assetPath = 'assets/img/streak_Today.png';
-                      } else {
-                        // Future days
-                        assetPath = 'assets/img/streak_waiting.png';
-                      }
-
-                      icons.add(
-                        Image.asset(
-                          assetPath,
-                          width: 38,
-                          height: 38,
-                        ),
-                      );
-                    }
-
-                    return icons;
-                  }
-
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                SearchResultsScreen(searchQuery: ''),
-                          ),
-                        );
-                      },
-                      child: AbsorbPointer(
-                        child: TextField(
-                          decoration: InputDecoration(
-                            hintText: 'عن ماذا تبحث؟',
-                            hintStyle: AppTexts.contentEmphasis
-                                .copyWith(color: AppColors.neutral600),
-                            contentPadding: EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 12),
-                            prefixIcon:
-                                Icon(Icons.search, color: AppColors.neutral600),
-                            filled: true,
-                            fillColor: Colors.white,
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide:
-                                  BorderSide(color: AppColors.neutral300),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide:
-                                  BorderSide(color: AppColors.primary600),
-                            ),
-                          ),
-                          style: AppTexts.contentEmphasis
-                              .copyWith(color: AppColors.neutral1000),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Expanded(
-                      child: SingleChildScrollView(
-                        child: CategorySection(key: _categorySectionKey),
-                      ),
-                    ),
-                  ],
-                );
-              } else if (state is HomeError) {
-                return Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(24),
+                  return RefreshIndicator(
+                    onRefresh: _refreshData,
+                    color: AppColors.primary500,
+                    backgroundColor: Colors.white,
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Icon(
-                          Icons.error_outline,
-                          size: 80,
-                          color: AppColors.primary600,
-                        ),
-                        SizedBox(height: 24),
-                        RichText(
-                          textAlign: TextAlign.center,
-                          text: TextSpan(
-                            text: 'عذراً، حدث خطأ أثناء تحميل ',
-                            style: AppTexts.heading2Bold.copyWith(
-                              color: AppColors.neutral700,
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    SearchResultsScreen(searchQuery: ''),
+                              ),
+                            );
+                          },
+                          child: AbsorbPointer(
+                            child: TextField(
+                              decoration: InputDecoration(
+                                hintText: 'عن ماذا تبحث؟',
+                                hintStyle: AppTexts.contentEmphasis
+                                    .copyWith(color: AppColors.neutral600),
+                                contentPadding: EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 12),
+                                prefixIcon:
+                                    Icon(Icons.search, color: AppColors.neutral600),
+                                filled: true,
+                                fillColor: Colors.white,
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide:
+                                      BorderSide(color: AppColors.neutral300),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide:
+                                      BorderSide(color: AppColors.primary600),
+                                ),
+                              ),
+                              style: AppTexts.contentEmphasis
+                                  .copyWith(color: AppColors.neutral1000),
                             ),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Expanded(
+                          child: SingleChildScrollView(
+                            physics: AlwaysScrollableScrollPhysics(), // Important for RefreshIndicator
+                            child: CategorySection(key: _categorySectionKey),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+              } else if (state is HomeError) {
+                return RefreshIndicator(
+                  onRefresh: _refreshData,
+                  child: SingleChildScrollView(
+                    physics: AlwaysScrollableScrollPhysics(),
+                    child: Container(
+                      height: MediaQuery.of(context).size.height - 200,
+                      child: Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(24),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              TextSpan(
-                                text: 'الصفحة الرئيسية',
-                                style: AppTexts.heading2Bold.copyWith(
-                                  color: AppColors.red200,
+                              Icon(
+                                Icons.error_outline,
+                                size: 80,
+                                color: AppColors.primary600,
+                              ),
+                              SizedBox(height: 24),
+                              RichText(
+                                textAlign: TextAlign.center,
+                                text: TextSpan(
+                                  text: 'عذراً، حدث خطأ أثناء تحميل ',
+                                  style: AppTexts.heading2Bold.copyWith(
+                                    color: AppColors.neutral700,
+                                  ),
+                                  children: [
+                                    TextSpan(
+                                      text: 'الصفحة الرئيسية',
+                                      style: AppTexts.heading2Bold.copyWith(
+                                        color: AppColors.red200,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              SizedBox(height: 16),
+                              Container(
+                                padding: EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary100,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: AppColors.primary200,
+                                    width: 1,
+                                  ),
+                                ),
+                                child: Text(
+                                  state.message,
+                                  style: AppTexts.contentRegular.copyWith(
+                                    color: AppColors.neutral700,
+                                    height: 1.5,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                              SizedBox(height: 24),
+                              ElevatedButton(
+                                onPressed: () {
+                                  homeCubit.getUserData(forceRefresh: true);
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.primary500,
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 32,
+                                    vertical: 12,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
+                                child: Text(
+                                  'إعادة المحاولة',
+                                  style: AppTexts.contentBold.copyWith(
+                                    color: Colors.white,
+                                  ),
                                 ),
                               ),
                             ],
                           ),
                         ),
-                        SizedBox(height: 16),
-                        Container(
-                          padding: EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: AppColors.primary100,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: AppColors.primary200,
-                              width: 1,
-                            ),
-                          ),
-                          child: Text(
-                            state.message,
-                            style: AppTexts.contentRegular.copyWith(
-                              color: AppColors.neutral700,
-                              height: 1.5,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                        SizedBox(height: 24),
-                        ElevatedButton(
-                          onPressed: () {
-                            context.read<HomeCubit>().getUserData();
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary500,
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 32,
-                              vertical: 12,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          child: Text(
-                            'إعادة المحاولة',
-                            style: AppTexts.contentBold.copyWith(
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
                 );
               }
-              return SizedBox();
+              return RefreshIndicator(
+                onRefresh: _refreshData,
+                child: SingleChildScrollView(
+                  physics: AlwaysScrollableScrollPhysics(),
+                  child: Container(
+                    height: MediaQuery.of(context).size.height - 200,
+                    child: SizedBox(),
+                  ),
+                ),
+              );
             },
           ),
         ),

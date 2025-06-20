@@ -1,15 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:dio/dio.dart';
 import 'package:sard/src/screens/Home/home.dart';
 import 'package:sard/src/screens/Splash/Splash.dart';
 import 'package:sard/src/screens/auth/login/data/dio_login_helper.dart';
 import 'package:sard/src/screens/auth/login/logic/login_cubit.dart';
-import 'package:sard/src/screens/books/our_books.dart';
+import 'package:sard/src/screens/Books/our_books.dart';
 import 'package:sard/src/screens/favorite/Fav.dart';
 import 'package:sard/src/screens/settings/setting.dart';
 import 'package:sard/src/cubit/global_favorite_cubit.dart';
 import 'package:sard/style/Colors.dart';
 import 'package:sard/style/bloc_observar.dart';
+import 'src/screens/Books/logic/books_cubit.dart';
+import 'src/screens/favorite/logic/favorite_cubit.dart';
+import 'src/screens/favorite/data/dio_Fav.dart';
+import 'src/screens/Home/Logic/home_cubit.dart';
+import 'src/screens/Home/categories/Logic/categories_cubit.dart';
+import 'src/screens/Home/categories/Data/categories_dio.dart';
+import 'src/screens/Home/Logic/home_books_cubit.dart';
+import 'src/screens/Home/Withoutcategories/data/recommendations_api_service.dart';
+import 'src/screens/Home/Withoutcategories/data/exchange_books_api_service.dart';
 
 void main() {
   DioHelper.init();
@@ -21,19 +32,77 @@ void main() {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
-        providers: [
-          BlocProvider<AuthCubit>(
-            create: (context) => AuthCubit(),
+    return FutureBuilder<String?>(
+      future: _getAuthToken(),
+      builder: (context, snapshot) {
+        // Show loading while checking token
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return MaterialApp(
+            home: Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            ),
+          );
+        }
+
+        final authToken = snapshot.data ?? '';
+
+        return MultiBlocProvider(
+          providers: [
+            // Auth cubit (required for login/logout functionality)
+            BlocProvider<AuthCubit>(
+              create: (context) => AuthCubit(),
+            ),
+            // Global favorite cubit
+            BlocProvider<GlobalFavoriteCubit>(
+              create: (context) => GlobalFavoriteCubit(),
+            ),
+            // Home cubit (user data)
+            BlocProvider<HomeCubit>(
+              create: (context) => HomeCubit(),
+            ),
+            // Categories cubit
+            BlocProvider<CategoriesCubit>(
+              create: (context) => CategoriesCubit(
+                CategoriesService(Dio()..options.baseUrl = 'https://api.mohamed-ramadan.me/api/'),
+              ),
+            ),
+            // Home Books cubit (recommended & exchange books)
+            BlocProvider<HomeBooksLCubit>(
+              create: (context) => HomeBooksLCubit(
+                recommendationsService: RecommendationsApiService(),
+                exchangeBooksService: ExchangeBooksApiService(),
+              ),
+            ),
+            // Books cubit
+            BlocProvider<BooksCubit>(
+              create: (context) => BooksCubit(),
+            ),
+            // Favorites cubit (only if token exists)
+            if (authToken.isNotEmpty)
+              BlocProvider<FavoriteCubit>(
+                create: (context) => FavoriteCubit(
+                  dioFav: DioFav(),
+                  token: authToken,
+                ),
+              ),
+          ],
+          child: MaterialApp(
+            title: 'SARD',
+            debugShowCheckedModeBanner: false,
+            home: SplashScreen(),
           ),
-          BlocProvider<GlobalFavoriteCubit>(
-            create: (context) => GlobalFavoriteCubit(),
-          ),
-        ],
-        child: MaterialApp(
-          debugShowCheckedModeBanner: false,
-          home: SplashScreen(), //  البداية من شاشة الـ .
-        ));
+        );
+      },
+    );
+  }
+
+  Future<String?> _getAuthToken() async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      return prefs.getString('auth_token');
+    } catch (e) {
+      return null;
+    }
   }
 }
 

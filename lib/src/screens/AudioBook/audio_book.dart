@@ -936,7 +936,7 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
                                       ? Text(
                                           'مجانا',
                                           style: AppTexts.heading1Bold.copyWith(
-                                            color: AppColors.green200,
+                                            color: AppColors.primary500,
                                             fontSize: 28,
                                           ),
                                         )
@@ -949,7 +949,7 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
                                                     text: '${bookData!.price}',
                                                     style: AppTexts.heading1Bold
                                                         .copyWith(
-                                                      color: AppColors.green200,
+                                                      color: AppColors.primary500,
                                                       fontSize: 28,
                                                     ),
                                                   ),
@@ -980,7 +980,7 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
                                                       style: AppTexts
                                                           .heading1Bold
                                                           .copyWith(
-                                                        color: AppColors.green200,
+                                                        color: AppColors.primary500,
                                                         fontSize: 28,
                                                       ),
                                                     ),

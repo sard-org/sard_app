@@ -84,11 +84,7 @@ class _AllExchangeBooksScreenState extends State<AllExchangeBooksScreen> {
             size: 64,
             color: AppColors.neutral400,
           ),
-          const SizedBox(height: 16),
-          Text(
-            'لا توجد كتب للتبديل حالياً',
-            style: AppTexts.heading3Bold.copyWith(color: AppColors.neutral800),
-          ),
+
           const SizedBox(height: 8),
           Text(
             "اجمع النقاط لتتمكن من تبديلها بالكتب",

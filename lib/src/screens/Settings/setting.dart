@@ -10,6 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'Change Password/change_password.dart';
 import 'profile/edit_profile.dart';
 
+
 class SettingsScreen extends StatefulWidget {
   @override
   _SettingsScreenState createState() => _SettingsScreenState();
@@ -271,6 +272,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               () => _showLogoutConfirmation(),
                               isLogout: true,
                             ),
+                            const SizedBox(height: 4),
                           ],
                         ),
                       ),
