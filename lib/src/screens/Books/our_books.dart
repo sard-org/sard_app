@@ -18,7 +18,7 @@ class BookListScreen extends StatelessWidget {
             width: 300,
             height: 300,
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           Text(
             "لم تقم بشراء كتب بعد",
             style: AppTexts.heading3Bold.copyWith(color: AppColors.neutral800),

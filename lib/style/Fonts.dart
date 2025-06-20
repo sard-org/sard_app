@@ -5,72 +5,72 @@ class AppTexts {
 
   //Headings
   ////////////display1
-  static final display1Bold = GoogleFonts.poppins(
+  static final display1Bold = GoogleFonts.cairo(
     fontSize: 32,
     fontWeight: FontWeight.w700,
   );
-  static final display1Accent = GoogleFonts.poppins(
+  static final display1Accent = GoogleFonts.cairo(
     fontSize: 32,
     fontWeight: FontWeight.w600,
   );
-  static final display1Emphasis = GoogleFonts.poppins(
+  static final display1Emphasis = GoogleFonts.cairo(
     fontSize: 32,
     fontWeight: FontWeight.w500,
   );
-  static final display1Standard = GoogleFonts.poppins(
+  static final display1Standard = GoogleFonts.cairo(
     fontSize: 32,
     fontWeight: FontWeight.w400,
   );
   ////////////heading1
-  static final heading1Bold = GoogleFonts.poppins(
+  static final heading1Bold = GoogleFonts.cairo(
     fontSize: 28,
     fontWeight: FontWeight.w700,
   );
-  static final heading1Accent = GoogleFonts.poppins(
+  static final heading1Accent = GoogleFonts.cairo(
     fontSize: 28,
     fontWeight: FontWeight.w600,
   );
-  static final heading1Emphasis = GoogleFonts.poppins(
+  static final heading1Emphasis = GoogleFonts.cairo(
     fontSize: 28,
     fontWeight: FontWeight.w500,
   );
-  static final heading1Standard = GoogleFonts.poppins(
+  static final heading1Standard = GoogleFonts.cairo(
     fontSize: 28,
     fontWeight: FontWeight.w400,
   );
   ////////////heading2
-  static final heading2Bold = GoogleFonts.poppins(
+  static final heading2Bold = GoogleFonts.cairo(
     fontSize: 24,
     fontWeight: FontWeight.w700,
   );
-  static final heading2Accent = GoogleFonts.poppins(
+  static final heading2Accent = GoogleFonts.cairo(
     fontSize: 24,
     fontWeight: FontWeight.w600,
   );
-  static final heading2Emphasis = GoogleFonts.poppins(
+  static final heading2Emphasis = GoogleFonts.cairo(
     fontSize: 24,
     fontWeight: FontWeight.w500,
     height: 1.2,
   );
-  static final heading2Standard = GoogleFonts.poppins(
+  static final heading2Standard = GoogleFonts.cairo(
     fontSize: 24,
     fontWeight: FontWeight.w400,
     height: 1.2,
   );
   ////////////heading3
-  static final heading3Bold = GoogleFonts.poppins(
+  static final heading3Bold = GoogleFonts.cairo(
     fontSize: 20,
     fontWeight: FontWeight.w700,
   );
-  static final heading3Accent = GoogleFonts.poppins(
+  static final heading3Accent = GoogleFonts.cairo(
     fontSize: 20,
     fontWeight: FontWeight.w600,
   );
-  static final heading3Emphasis = GoogleFonts.poppins(
+  static final heading3Emphasis = GoogleFonts.cairo(
     fontSize: 20,
     fontWeight: FontWeight.w500,
   );
-  static final heading3Standard = GoogleFonts.poppins(
+  static final heading3Standard = GoogleFonts.cairo(
     fontSize: 20,
     fontWeight: FontWeight.w400,
   );
@@ -79,91 +79,91 @@ class AppTexts {
 
   //Body
   ////////////feature
-  static final featureBold = GoogleFonts.poppins(
+  static final featureBold = GoogleFonts.cairo(
     fontSize: 18,
     fontWeight: FontWeight.w700,
   );
-  static final featureAccent = GoogleFonts.poppins(
+  static final featureAccent = GoogleFonts.cairo(
     fontSize: 18,
     fontWeight: FontWeight.w600,
   );
-  static final featureEmphasis = GoogleFonts.poppins(
+  static final featureEmphasis = GoogleFonts.cairo(
     fontSize: 18,
     fontWeight: FontWeight.w500,
   );
-  static final featureStandard = GoogleFonts.poppins(
+  static final featureStandard = GoogleFonts.cairo(
     fontSize: 18,
     fontWeight: FontWeight.w400,
   );
   ////////////highlight
-  static final highlightBold = GoogleFonts.poppins(
+  static final highlightBold = GoogleFonts.cairo(
     fontSize: 16,
     fontWeight: FontWeight.w700,
   );
-  static final highlightAccent = GoogleFonts.poppins(
+  static final highlightAccent = GoogleFonts.cairo(
     fontSize: 16,
     fontWeight: FontWeight.w600,
   );
-  static final highlightEmphasis = GoogleFonts.poppins(
+  static final highlightEmphasis = GoogleFonts.cairo(
     fontSize: 16,
     fontWeight: FontWeight.w500,
   );
-  static final highlightStandard = GoogleFonts.poppins(
+  static final highlightStandard = GoogleFonts.cairo(
     fontSize: 16,
     fontWeight: FontWeight.w400,
   );
   ////////////content
-  static final contentBold = GoogleFonts.poppins(
+  static final contentBold = GoogleFonts.cairo(
     fontSize: 14,
     fontWeight: FontWeight.w700,
   );
-  static final contentAccent = GoogleFonts.poppins(
+  static final contentAccent = GoogleFonts.cairo(
     fontSize: 14,
     fontWeight: FontWeight.w600,
   );
-  static final contentEmphasis = GoogleFonts.poppins(
+  static final contentEmphasis = GoogleFonts.cairo(
     fontSize: 14,
     fontWeight: FontWeight.w500,
   );
-  static final contentRegular = GoogleFonts.poppins(
+  static final contentRegular = GoogleFonts.cairo(
     fontSize: 14,
     fontWeight: FontWeight.w400,
   );
   ////////////caption
-  static final captionBold = GoogleFonts.poppins(
+  static final captionBold = GoogleFonts.cairo(
     fontSize: 12,
     fontWeight: FontWeight.w700,
   );
-  static final captionAccent = GoogleFonts.poppins(
+  static final captionAccent = GoogleFonts.cairo(
     fontSize: 12,
     fontWeight: FontWeight.w600,
   );
-  static final captionEmphasis = GoogleFonts.poppins(
+  static final captionEmphasis = GoogleFonts.cairo(
     fontSize: 12,
     fontWeight: FontWeight.w500,
   );
-  static final captionRegular = GoogleFonts.poppins(
+  static final captionRegular = GoogleFonts.cairo(
     fontSize: 12,
     fontWeight: FontWeight.w400,
   );
   ////////////footnote
-  static final footnoteBold = GoogleFonts.poppins(
+  static final footnoteBold = GoogleFonts.cairo(
     fontSize: 10,
     fontWeight: FontWeight.w600,
   );
-  static final footnoteAccent = GoogleFonts.poppins(
+  static final footnoteAccent = GoogleFonts.cairo(
     fontSize: 10,
     fontWeight: FontWeight.w600,
   );
-  static final footnoteEmphasis = GoogleFonts.poppins(
+  static final footnoteEmphasis = GoogleFonts.cairo(
     fontSize: 10,
     fontWeight: FontWeight.w500,
   );
-  static final footnoteRegular = GoogleFonts.poppins(
+  static final footnoteRegular = GoogleFonts.cairo(
     fontSize: 10,
     fontWeight: FontWeight.w400,
   );
-  static final footnoteRegular11 = GoogleFonts.poppins(
+  static final footnoteRegular11 = GoogleFonts.cairo(
     fontSize: 10,
     fontWeight: FontWeight.w400,
   );

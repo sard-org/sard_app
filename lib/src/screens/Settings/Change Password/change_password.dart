@@ -56,13 +56,15 @@ class _ChangePasswordState extends State<ChangePassword> {
           }
         },
         builder: (context, state) {
-          return Scaffold(
-            backgroundColor: Colors.white,
-            body: Column(
-              children: [
-                _buildAppBar(context),
-                Expanded(
-                  child: BaseScreen(
+                  return Scaffold(
+          backgroundColor: Colors.white,
+          resizeToAvoidBottomInset: true,
+          body: Column(
+            children: [
+              _buildAppBar(context),
+              Expanded(
+                child: BaseScreen(
+                  child: SingleChildScrollView(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -79,6 +81,7 @@ class _ChangePasswordState extends State<ChangePassword> {
                           },
                           onChanged: (_) => _clearError(),
                         ),
+                        const SizedBox(height: 16),
                         _buildPasswordField(
                           "كلمة المرور الجديدة",
                           _newPasswordController,
@@ -91,6 +94,7 @@ class _ChangePasswordState extends State<ChangePassword> {
                           },
                           onChanged: (_) => _clearError(),
                         ),
+                        const SizedBox(height: 16),
                         _buildPasswordField(
                           "تأكيد كلمة المرور الجديدة",
                           _confirmPasswordController,
@@ -106,7 +110,7 @@ class _ChangePasswordState extends State<ChangePassword> {
 
                         if (_passwordError != null)
                           Padding(
-                            padding: const EdgeInsets.only(right: 8.0, top: 4.0, left: 16.0),
+                            padding: const EdgeInsets.only(right: 8.0, top: 16.0, left: 16.0),
                             child: Align(
                               alignment: Alignment.centerRight,
                               child: Text(
@@ -117,21 +121,39 @@ class _ChangePasswordState extends State<ChangePassword> {
                             ),
                           ),
 
-                        Spacer(),
-                        UpdateButton(
-                          title: state is ChangePasswordLoading ? "جاري التحديث..." : "تحديث",
-                          onPressed: state is ChangePasswordLoading
-                              ? () {}
-                              : () {
-                            FocusScope.of(context).unfocus(); // Hide keyboard
-                            context.read<ChangePasswordCubit>().changePassword(
-                              oldPassword: _oldPasswordController.text,
-                              newPassword: _newPasswordController.text,
-                              confirmPassword: _confirmPasswordController.text,
-                            );
-                          },
-                        ),
+                        const SizedBox(height: 100),
                       ],
+                    ),
+                  ),
+                ),
+                ),
+                Container(
+                  padding: const EdgeInsets.all(16.0),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, -2),
+                      ),
+                    ],
+                  ),
+                  child: SafeArea(
+                    top: false,
+                    child: UpdateButton(
+                      title: state is ChangePasswordLoading ? "جاري التحديث..." : "تحديث",
+                      isLoading: state is ChangePasswordLoading,
+                      onPressed: state is ChangePasswordLoading
+                          ? () {}
+                          : () {
+                        FocusScope.of(context).unfocus(); // Hide keyboard
+                        context.read<ChangePasswordCubit>().changePassword(
+                          oldPassword: _oldPasswordController.text,
+                          newPassword: _newPasswordController.text,
+                          confirmPassword: _confirmPasswordController.text,
+                        );
+                      },
                     ),
                   ),
                 ),
@@ -206,6 +228,14 @@ class _ChangePasswordState extends State<ChangePassword> {
               borderRadius: BorderRadius.circular(8),
               borderSide: BorderSide(color: AppColors.neutral400),
             ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: AppColors.neutral400),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: AppColors.primary500, width: 2),
+            ),
             filled: true,
             fillColor: Colors.white,
             prefixIcon: GestureDetector( // العين على اليسار
@@ -226,26 +256,49 @@ class _ChangePasswordState extends State<ChangePassword> {
 class UpdateButton extends StatelessWidget {
   final String title;
   final VoidCallback onPressed;
+  final bool isLoading;
 
-  const UpdateButton({required this.title, required this.onPressed, Key? key}) : super(key: key);
+  const UpdateButton({
+    required this.title,
+    required this.onPressed,
+    required this.isLoading,
+    Key? key
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
-      onPressed: onPressed,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.primary500,
-        minimumSize: Size(double.infinity, 50),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
+    return SizedBox(
+      width: double.infinity,
+      height: 50,
+      child: ElevatedButton(
+        onPressed: isLoading ? null : onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.primary500,
+          disabledBackgroundColor: AppColors.primary300,
+          foregroundColor: Colors.white,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
-      ),
-      child: Text(
-        title,
-        style: AppTexts.contentEmphasis.copyWith(
-          color: AppColors.neutral100,
-        ),
+        child: isLoading
+            ? const SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  strokeWidth: 2.0,
+                ),
+              )
+            : Text(
+                title,
+                style: AppTexts.highlightAccent.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
       ),
     );
   }
 }
+

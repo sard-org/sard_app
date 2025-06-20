@@ -4,7 +4,7 @@ import '../../../cubit/global_favorite_cubit.dart';
 import '../../../../style/Colors.dart';
 import '../../../../style/Fonts.dart';
 
-class BookCardWidget extends StatelessWidget {
+class BookCardWidget extends StatefulWidget {
   final String id;
   final String author;
   final String title;
@@ -32,17 +32,24 @@ class BookCardWidget extends StatelessWidget {
     super.key,
   });
 
+  @override
+  State<BookCardWidget> createState() => _BookCardWidgetState();
+}
+
+class _BookCardWidgetState extends State<BookCardWidget> {
+  bool _descriptionExpanded = false;
+
   Widget buildPriceTag() {
-    if (isFree) {
+    if (widget.isFree) {
       return Text(
         'مجانا',
         style: AppTexts.highlightAccent.copyWith(color: AppColors.primary1000),
       );
-    } else if (price != null) {
+    } else if (widget.price != null) {
       return Row(
         children: [
           Text(
-            '$price',
+            '${widget.price}',
             style:
                 AppTexts.highlightAccent.copyWith(color: AppColors.primary1000),
           ),
@@ -54,7 +61,7 @@ class BookCardWidget extends StatelessWidget {
           ),
         ],
       );
-    } else if (pricePoints != null) {
+    } else if (widget.pricePoints != null) {
       return Container(
         padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         decoration: BoxDecoration(
@@ -65,7 +72,7 @@ class BookCardWidget extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              '$pricePoints',
+              '${widget.pricePoints}',
               style: AppTexts.highlightAccent
                   .copyWith(color: AppColors.primary800),
             ),
@@ -79,12 +86,48 @@ class BookCardWidget extends StatelessWidget {
     }
   }
 
+  Widget _buildExpandableDescription(String description) {
+    if (description.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    // حساب عدد الأسطر التقريبي
+    final textStyle = AppTexts.contentRegular.copyWith(color: AppColors.neutral400);
+    final textSpan = TextSpan(text: description, style: textStyle);
+    final textPainter = TextPainter(
+      text: textSpan,
+      textDirection: TextDirection.rtl,
+      maxLines: 2,
+    );
+    
+    // قياس النص
+    textPainter.layout(maxWidth: MediaQuery.of(context).size.width - 150);
+    final isTextOverflowing = textPainter.didExceedMaxLines;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          description,
+          style: textStyle,
+          textAlign: TextAlign.start,
+          maxLines: _descriptionExpanded ? null : 2,
+          overflow: _descriptionExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
+        ),
+        if (isTextOverflowing) ...[
+          const SizedBox(height: 4),
+
+        ],
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: GestureDetector(
-        onTap: onTap,
+        onTap: widget.onTap,
         child: Container(
           margin: const EdgeInsets.only(bottom: 12),
           padding: const EdgeInsets.all(12),
@@ -100,12 +143,12 @@ class BookCardWidget extends StatelessWidget {
             children: [
               Container(
                 width: 93,
-                height: 155,
+                height: 125,
                 decoration: ShapeDecoration(
                   image: DecorationImage(
-                    image: imageUrl.startsWith('http')
-                        ? NetworkImage(imageUrl) as ImageProvider
-                        : AssetImage(imageUrl),
+                    image: widget.imageUrl.startsWith('http')
+                        ? NetworkImage(widget.imageUrl) as ImageProvider
+                        : AssetImage(widget.imageUrl),
                     fit: BoxFit.fill,
                   ),
                   shape: RoundedRectangleBorder(
@@ -120,25 +163,19 @@ class BookCardWidget extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      author,
+                      widget.author,
                       style: AppTexts.captionRegular
                           .copyWith(color: AppColors.neutral400),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 6),
                     Text(
-                      title,
+                      widget.title,
                       style: AppTexts.highlightStandard
                           .copyWith(color: AppColors.neutral1000),
                     ),
                     const SizedBox(height: 8),
-                    Text(
-                      description,
-                      style: AppTexts.contentRegular
-                          .copyWith(color: AppColors.neutral400),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 8),
+                    _buildExpandableDescription(widget.description),
+                    const SizedBox(height: 12),
                     buildPriceTag(),
                   ],
                 ),
@@ -148,7 +185,7 @@ class BookCardWidget extends StatelessWidget {
                   final globalFavoriteCubit =
                       context.read<GlobalFavoriteCubit>();
                   final isCurrentlyFavorite =
-                      globalFavoriteCubit.isFavorite(id);
+                      globalFavoriteCubit.isFavorite(widget.id);
 
                   return IconButton(
                     icon: Icon(
@@ -159,7 +196,7 @@ class BookCardWidget extends StatelessWidget {
                           ? Colors.red
                           : AppColors.primary900,
                     ),
-                    onPressed: onFavoriteTap ?? () {},
+                    onPressed: widget.onFavoriteTap ?? () {},
                   );
                 },
               ),

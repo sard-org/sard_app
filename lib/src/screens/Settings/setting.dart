@@ -59,7 +59,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       child: BaseScreen(
                         child: Column(
                           children: [
-                            SizedBox(height: 18),
                             _buildSettingsItem(
                               context,
                               "تعديل البيانات",
@@ -77,7 +76,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 profileCubit.getUserProfile();
                               },
                             ),
+                            const SizedBox(height: 4),
                             _buildDivider(),
+                            const SizedBox(height: 4),
                             _buildSettingsItem(
                               context,
                               "تعديل كلمة المرور",
@@ -88,7 +89,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                     builder: (_) => ChangePassword()),
                               ),
                             ),
+                            const SizedBox(height: 4),
                             _buildDivider(),
+                            const SizedBox(height: 4),
                             _buildSettingsItem(
                               context,
                               "تسجيل الخروج",
@@ -160,9 +163,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
               Text(
                 "يومك سعيد!",
                 style: AppTexts.contentRegular.copyWith(
-                  color: AppColors.neutral400,
+                  color: AppColors.neutral100,
                 ),
               ),
+              const SizedBox(height: 4),
               Text(
                 state is ProfileLoaded ? state.user.name : "جاري التحميل...",
                 style: AppTexts.heading2Bold.copyWith(
@@ -184,7 +188,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     bool isLogout = false,
   }) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: EdgeInsets.symmetric(horizontal: 0, vertical: 8),
       child: GestureDetector(
         onTap: onTap,
         child: Container(
@@ -229,7 +233,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Widget _buildDivider() {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16),
+      padding: EdgeInsets.symmetric(horizontal: 0),
       child: Divider(
         color: AppColors.neutral300,
         thickness: 1,

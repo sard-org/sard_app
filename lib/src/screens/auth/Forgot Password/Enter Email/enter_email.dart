@@ -51,9 +51,19 @@ class ForgotPasswordScreen extends StatelessWidget {
                           const SizedBox(height: 64),
                           Align(
                             alignment: Alignment.center,
-                            child: Text(
-                              "نسيت كلمة المرور؟",
-                              style: AppTexts.display1Bold,
+                            child: Text.rich(
+                              TextSpan(
+                                children: [
+                                  TextSpan(
+                                    text: 'نسيت ',
+                                    style: AppTexts.display1Bold.copyWith(color: AppColors.neutral1000),
+                                  ),
+                                  TextSpan(
+                                    text: 'كلمة المرور؟',
+                                    style: AppTexts.display1Bold.copyWith(color: AppColors.primary500), // غيّر اللون حسب رغبتك
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                           const SizedBox(height: 8),
@@ -61,7 +71,7 @@ class ForgotPasswordScreen extends StatelessWidget {
                             alignment: Alignment.center,
                             child: Text(
                               "أدخل بريدك الإلكتروني لإعادة تعيين كلمة المرور.",
-                              style: AppTexts.highlightEmphasis,
+                              style: AppTexts.highlightEmphasis.copyWith(color: AppColors.neutral600),
                               textAlign: TextAlign.center,
                             ),
                           ),
@@ -80,11 +90,19 @@ class ForgotPasswordScreen extends StatelessWidget {
                                 hintStyle: AppTexts.contentRegular,
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(8),
-                                  borderSide:
-                                      BorderSide(color: AppColors.neutral400),
+                                  borderSide: BorderSide(color: AppColors.neutral400),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide: BorderSide(color: AppColors.neutral400),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide: BorderSide(color: AppColors.primary500, width: 2),
                                 ),
                                 filled: true,
                                 fillColor: Colors.white,
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                               ),
                             ),
                           ),

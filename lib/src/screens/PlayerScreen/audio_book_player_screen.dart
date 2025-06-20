@@ -39,6 +39,7 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
   bool _isPlaying = false;
   Timer? _playbackTimer;
   bool _isSubmittingRating = false;
+  bool _descriptionExpanded = false; // إضافة متغير لتتبع حالة التوسع
 
   // Get book ID and order ID from widget
   late final String? bookId;
@@ -485,13 +486,7 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
         ),
         SizedBox(height: 8),
         // Book description
-        Text(
-          _bookData?.description ?? '',
-          style: AppTexts.contentRegular.copyWith(color: AppColors.neutral500),
-          textAlign: TextAlign.right,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-        ),
+        _buildExpandableDescription(_bookData?.description ?? ''),
         SizedBox(height: 8),
         // Book categories if available
         if (_bookData != null && _bookData!.bookCategory.isNotEmpty)
@@ -554,6 +549,56 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
             // زر إضافة تقييم
           ],
         ),
+      ],
+    );
+  }
+
+  Widget _buildExpandableDescription(String description) {
+    if (description.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    // حساب عدد الأسطر التقريبي
+    final textStyle = AppTexts.contentRegular.copyWith(color: AppColors.neutral500);
+    final textSpan = TextSpan(text: description, style: textStyle);
+    final textPainter = TextPainter(
+      text: textSpan,
+      textDirection: TextDirection.rtl,
+      maxLines: 2,
+    );
+    
+    // قياس النص
+    textPainter.layout(maxWidth: MediaQuery.of(context).size.width - 32);
+    final isTextOverflowing = textPainter.didExceedMaxLines;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Text(
+          description,
+          style: textStyle,
+          textAlign: TextAlign.right,
+          maxLines: _descriptionExpanded ? null : 2,
+          overflow: _descriptionExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
+        ),
+        if (isTextOverflowing) ...[
+          const SizedBox(height: 4),
+          GestureDetector(
+            onTap: () {
+              setState(() {
+                _descriptionExpanded = !_descriptionExpanded;
+              });
+            },
+            child: Text(
+              _descriptionExpanded ? 'عرض أقل' : 'قراءة المزيد',
+              style: AppTexts.contentAccent.copyWith(
+                color: AppColors.primary500,
+                fontWeight: FontWeight.w600,
+                decoration: TextDecoration.underline
+              ),
+            ),
+          ),
+        ],
       ],
     );
   }
@@ -1130,7 +1175,7 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          SizedBox(height: 24),
+                          const SizedBox(height: 16),
                           _buildBookCover(),
                           SizedBox(height: 24),
                           _buildBookInfo(),
@@ -1195,8 +1240,7 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
                                 style: AppTexts.captionBold,
                               ),
                               Text(
-                                '${(_bookData?.duration ?? 0) ~/ 60} دقيقة',
-                                style: AppTexts.captionBold,
+                                '${(_bookData?.duration ?? 0) } ثانية ',
                               ),
                             ],
                           ),

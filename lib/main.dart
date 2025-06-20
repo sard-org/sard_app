@@ -98,14 +98,19 @@ class _MainScreenState extends State<MainScreen> {
           },
           selectedItemColor: AppColors.primary500,
           unselectedItemColor: AppColors.neutral400,
+          backgroundColor: Colors.white,
+          elevation: 8.0,
           items: List.generate(4, (index) {
             return BottomNavigationBarItem(
-              icon: Image.asset(
-                _currentIndex == index
-                    ? selectedIconPaths[index]
-                    : iconPaths[index],
-                width: 28,
-                height: 28,
+              icon: Padding(
+                padding: const EdgeInsets.only(bottom: 4.0),
+                child: Image.asset(
+                  _currentIndex == index
+                      ? selectedIconPaths[index]
+                      : iconPaths[index],
+                  width: 28,
+                  height: 28,
+                ),
               ),
               label: ["الرئيسية", "كتبي", "المفضلات", "الإعدادات"][index],
             );

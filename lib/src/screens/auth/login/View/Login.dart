@@ -74,16 +74,31 @@ class _LoginScreenState extends State<LoginScreen> {
                   SizedBox(height: MediaQuery.of(context).size.height * 0.06),
                   Align(
                     alignment: Alignment.center,
-                    child: Text("أهلاً بعودتك!",
-                        style: AppTexts.display1Bold,
-                        textAlign: TextAlign.right),
+                    child: Text.rich(
+                      TextSpan(
+                        children: [
+                          TextSpan(
+                            text: 'أهلاً',
+                            style: AppTexts.display1Bold.copyWith(color: AppColors.neutral1000),
+                          ),
+                          TextSpan(
+                            text: ' ',
+                          ),
+                          TextSpan(
+                            text: 'بعودتك!',
+                            style: AppTexts.display1Bold.copyWith(color: AppColors.primary500),
+                          ),
+                        ],
+                      ),
+                      textAlign: TextAlign.right,
+                    ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 12),
                   Align(
                     alignment: Alignment.center,
                     child: Text(
                         "الرجاء إدخال بريدك الإلكتروني وكلمة المرور للوصول إلى حسابك.",
-                        style: AppTexts.highlightEmphasis,
+                        style: AppTexts.highlightEmphasis.copyWith(color: AppColors.neutral600),
                         textAlign: TextAlign.center),
                   ),
                   const SizedBox(height: 32),
@@ -95,6 +110,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     keyboardType: TextInputType.emailAddress,
                     isEmailField: true,
                   ),
+                  const SizedBox(height: 16),
                   _buildTextField(
                     label: 'كلمة المرور',
                     hint: 'أدخل كلمة المرور',
@@ -106,42 +122,29 @@ class _LoginScreenState extends State<LoginScreen> {
                       });
                     },
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          children: [
-                            Checkbox(
-                              value: _rememberMe,
-                              onChanged: (val) {
-                                setState(() {
-                                  _rememberMe = val!;
-                                });
-                              },
-                            ),
-                            const SizedBox(width: 4),
-                            Text("تذكرني", style: AppTexts.contentRegular),
-                          ],
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        ForgotPasswordScreen()));
-                          },
-                          child: Text("نسيت كلمة المرور",
-                              style: AppTexts.contentRegular.copyWith(
-                                  color: AppColors.primary500,
-                                  decoration: TextDecoration.underline)),
-                        ),
-                      ],
-                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                        ],
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      ForgotPasswordScreen()));
+                        },
+                        child: Text("نسيت كلمة المرور",
+                            style: AppTexts.contentAccent.copyWith(
+                                color: AppColors.primary500,
+                                decoration: TextDecoration.underline)),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 32),
                   BlocConsumer<AuthCubit, AuthState>(
                     listener: (context, state) async {
                       if (state is AuthSuccess) {
@@ -277,13 +280,14 @@ class _LoginScreenState extends State<LoginScreen> {
                                     builder: (context) => RegisterScreen()));
                           },
                           child: Text("إنشاء حساب",
-                              style: AppTexts.contentEmphasis.copyWith(
+                              style: AppTexts.contentAccent.copyWith(
                                   color: AppColors.primary500,
                                   decoration: TextDecoration.underline)),
                         ),
                       ],
                     ),
                   ),
+                  const SizedBox(height: 16),
                   SizedBox(height: MediaQuery.of(context).size.height * 0.05),
                 ],
               ),

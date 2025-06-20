@@ -242,7 +242,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
             width: 300,
             height: 300,
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           Text(
             "القائمة فارغة",
             style: AppTexts.heading3Bold.copyWith(color: AppColors.neutral800),

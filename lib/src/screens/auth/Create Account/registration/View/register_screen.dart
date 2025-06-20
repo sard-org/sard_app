@@ -97,27 +97,40 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             const SizedBox(height: 40),
                             Align(
                               alignment: Alignment.center,
-                              child: Text(
-                                "مرحبًا بك في سرد",
-                                style: AppTexts.display1Bold,
+                              child: Text.rich(
+                                TextSpan(
+                                  children: [
+                                    TextSpan(
+                                      text: 'مرحبًا بك في ',
+                                      style: AppTexts.display1Bold.copyWith(color: AppColors.neutral1000),
+                                    ),
+                                    TextSpan(
+                                      text: 'سرد',
+                                      style: AppTexts.display1Bold.copyWith(color: AppColors.primary500), // غيّر اللون حسب رغبتك
+                                    ),
+                                  ],
+                                ),
                                 textAlign: TextAlign.center,
                               ),
                             ),
-                            const SizedBox(height: 8),
+                            const SizedBox(height: 12),
                             Align(
                               alignment: Alignment.center,
                               child: Text(
                                 "الرجاء إدخال بريدك الإلكتروني وسنرسل رمز التأكيد إلى بريدك الإلكتروني",
-                                style: AppTexts.highlightEmphasis,
+                                style: AppTexts.highlightEmphasis.copyWith(color: AppColors.neutral600),
                                 textAlign: TextAlign.center,
+
                               ),
                             ),
                             const SizedBox(height: 24),
                             _buildTextField(
                                 "الاسم الكامل", "أدخل اسمك", _nameController),
+                            const SizedBox(height: 16),
                             _buildTextField("البريد الإلكتروني",
                                 "أدخل بريدك الإلكتروني", _emailController,
                                 isEmailField: true),
+                            const SizedBox(height: 16),
                             _buildTextField(
                               "كلمة المرور",
                               "أدخل كلمة المرور",
@@ -129,6 +142,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 });
                               },
                             ),
+                            const SizedBox(height: 16),
                             _buildTextField(
                               "تأكيد كلمة المرور",
                               "أعد إدخال كلمة المرور",
@@ -212,7 +226,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             },
             child: Text(
               "تسجيل الدخول",
-              style: AppTexts.contentEmphasis.copyWith(
+              style: AppTexts.contentAccent.copyWith(
                 color: AppColors.primary500,
                 decoration: TextDecoration.underline,
               ),
@@ -225,6 +239,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
               color: AppColors.neutral900,
             ),
           ),
+
+
         ],
       ),
     );

@@ -140,7 +140,7 @@ class _OnboardingState extends State<Onboarding> {
                         textAlign: TextAlign.center,
                       ),
                       
-                      SizedBox(height: isSmallScreen ? 4 : 8),
+                      SizedBox(height: isSmallScreen ? 8 : 12),
                       
                       // Description
                       Text(
@@ -152,7 +152,7 @@ class _OnboardingState extends State<Onboarding> {
                         ),
                       ),
                       
-                      SizedBox(height: isSmallScreen ? 20 : 40),
+                      SizedBox(height: isSmallScreen ? 24 : 32),
                       
                       // Page Indicators
                       Row(
@@ -172,7 +172,7 @@ class _OnboardingState extends State<Onboarding> {
                         }),
                       ),
                       
-                      SizedBox(height: isSmallScreen ? 16 : 24),
+                      SizedBox(height: isSmallScreen ? 20 : 28),
                       
                       // Navigation Buttons
                       if (index == 1) _buildNavigationButtons() 

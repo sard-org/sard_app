@@ -25,7 +25,7 @@ class _OtpVerificationCodeScreenState extends State<OtpVerificationCodeScreen> {
   final List<FocusNode> _focusNodes = List.generate(4, (_) => FocusNode());
 
   Timer? _timer;
-  int _secondsRemaining = 60;
+  int _secondsRemaining = 600;
 
   @override
   void initState() {
@@ -61,7 +61,7 @@ class _OtpVerificationCodeScreenState extends State<OtpVerificationCodeScreen> {
 
   void _resendCode() {
     setState(() {
-      _secondsRemaining = 60;
+      _secondsRemaining = 600;
     });
     _startTimer();
 
@@ -111,6 +111,7 @@ class _OtpVerificationCodeScreenState extends State<OtpVerificationCodeScreen> {
         builder: (context, state) {
           return Scaffold(
             backgroundColor: Colors.white,
+            resizeToAvoidBottomInset: true,
             body: Directionality(
               textDirection: TextDirection.rtl,
               child: Column(
@@ -118,94 +119,110 @@ class _OtpVerificationCodeScreenState extends State<OtpVerificationCodeScreen> {
                   _buildAppBar(context),
                   Expanded(
                     child: BaseScreen(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          const SizedBox(height: 40),
-                          Text(
-                            'أدخل رمز التحقق',
-                            style: AppTexts.display1Bold,
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            'لقد قمنا بإرسال رمز التأكيد للبريد الإلكتروني التالي:',
-                            style: AppTexts.highlightEmphasis,
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            widget.email,
-                            style: AppTexts.contentEmphasis,
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 36),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: List.generate(4, (index) {
-                              int rtlIndex = 3 - index;
-                              return SizedBox(
-                                width: 60,
-                                child: TextField(
-                                  controller: _controllers[rtlIndex],
-                                  focusNode: _focusNodes[rtlIndex],
-                                  textAlign: TextAlign.center,
-                                  textDirection: TextDirection.rtl,
-                                  keyboardType: TextInputType.number,
-                                  maxLength: 1,
-                                  style: TextStyle(
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.bold,
-                                    color: _controllers[rtlIndex].text.isNotEmpty
-                                        ? AppColors.primary800
-                                        : Colors.black,
+                      child: SingleChildScrollView(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            const SizedBox(height: 16),
+                            Text.rich(
+                              TextSpan(
+                                children: [
+                                  TextSpan(
+                                    text: 'أدخل ',
+                                    style: AppTexts.display1Bold.copyWith(color: AppColors.neutral1000), // لون البداية
                                   ),
-                                  decoration: InputDecoration(
-                                    counterText: '',
-                                    enabledBorder: OutlineInputBorder(
-                                      borderSide: BorderSide(color: AppColors.neutral300),
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderSide: BorderSide(color: AppColors.primary500, width: 2),
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
+                                  TextSpan(
+                                    text: 'رمز التحقق',
+                                    style: AppTexts.display1Bold.copyWith(color: AppColors.primary500), // اللون المميز
                                   ),
-                                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                                  onChanged: (value) {
-                                    setState(() {});
-                                    if (value.isNotEmpty && rtlIndex < 3) {
-                                      _focusNodes[rtlIndex + 1].requestFocus();
-                                    } else if (value.isEmpty && rtlIndex > 0) {
-                                      _focusNodes[rtlIndex - 1].requestFocus();
-                                    }
-                                  },
-                                ),
-                              );
-                            }),
-                          ),
-                          const SizedBox(height: 20),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                '(${_formatTime(_secondsRemaining)}) سينتهي الرمز خلال',
-                                style: AppTexts.contentRegular.copyWith(color: AppColors.primary500),
+                                ],
                               ),
-                              const SizedBox(width: 4),
-                              TextButton(
-                                onPressed: _secondsRemaining == 0 ? _resendCode : null,
-                                child: Text(
-                                  'إعادة الإرسال',
-                                  style: AppTexts.contentEmphasis.copyWith(
-                                    color: _secondsRemaining == 0 ? AppColors.primary500 : AppColors.neutral400,
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              'لقد قمنا بإرسال رمز التأكيد للبريد الإلكتروني التالي:',
+                              style: AppTexts.highlightEmphasis.copyWith(color: AppColors.neutral600),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              widget.email,
+                              style: AppTexts.contentEmphasis,
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 36),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: List.generate(4, (index) {
+                                int rtlIndex = 3 - index;
+                                return SizedBox(
+                                  width: 60,
+                                  child: TextField(
+                                    controller: _controllers[rtlIndex],
+                                    focusNode: _focusNodes[rtlIndex],
+                                    textAlign: TextAlign.center,
+                                    textDirection: TextDirection.rtl,
+                                    keyboardType: TextInputType.number,
+                                    maxLength: 1,
+                                    style: TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                      color: _controllers[rtlIndex].text.isNotEmpty
+                                          ? AppColors.primary800
+                                          : Colors.black,
+                                    ),
+                                    decoration: InputDecoration(
+                                      counterText: '',
+                                      enabledBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(color: AppColors.neutral300),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(color: AppColors.primary500, width: 2),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                    ),
+                                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                                    onChanged: (value) {
+                                      setState(() {});
+                                      if (value.isNotEmpty && rtlIndex < 3) {
+                                        _focusNodes[rtlIndex + 1].requestFocus();
+                                      } else if (value.isEmpty && rtlIndex > 0) {
+                                        _focusNodes[rtlIndex - 1].requestFocus();
+                                      }
+                                    },
+                                  ),
+                                );
+                              }),
+                            ),
+                            const SizedBox(height: 20),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  '(${_formatTime(_secondsRemaining)}) سينتهي الرمز خلال',
+                                  style: AppTexts.contentRegular.copyWith(
+                                    color: _secondsRemaining == 0 
+                                      ? AppColors.neutral600 
+                                      : AppColors.primary500
                                   ),
                                 ),
-                              ),
-                            ],
-                          ),
-                          const Spacer(),
-                        ],
+                                const SizedBox(width: 4),
+                                TextButton(
+                                  onPressed: _secondsRemaining == 0 ? _resendCode : null,
+                                  child: Text(
+                                    'إعادة الإرسال',
+                                    style: AppTexts.contentEmphasis.copyWith(
+                                      color: _secondsRemaining == 0 ? AppColors.primary500 : AppColors.neutral400,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 40),
+                          ],
+                        ),
                       ),
                     ),
                   ),

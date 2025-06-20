@@ -211,7 +211,7 @@ class _AllExchangeBooksScreenState extends State<AllExchangeBooksScreen> {
               BaseScreen(
                 child: Column(
                   children: [
-                    const SizedBox(height: 80),
+                    const SizedBox(height: 100),
                     Expanded(
                       child: isLoading
                           ? const Center(
@@ -230,7 +230,7 @@ class _AllExchangeBooksScreenState extends State<AllExchangeBooksScreen> {
                                           const SliverGridDelegateWithFixedCrossAxisCount(
                                         crossAxisCount: 2,
                                         crossAxisSpacing: 12,
-                                        mainAxisSpacing: 16,
+                                        mainAxisSpacing: 12,
                                         childAspectRatio: 0.6,
                                       ),
                                       physics: const BouncingScrollPhysics(),

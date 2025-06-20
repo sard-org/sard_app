@@ -32,7 +32,6 @@ class ExchangeBookCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         width: 150,
-        margin: const EdgeInsets.only(right: 12),
         decoration: BoxDecoration(
           border: Border.all(color: AppColors.neutral300),
           borderRadius: BorderRadius.circular(12),

@@ -255,10 +255,12 @@ class _WithoutCategoryDetailsPageState
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Row(
-                      children: recommendedBooks.map((book) {
+                      children: recommendedBooks.asMap().entries.map((entry) {
+                        int index = entry.key;
+                        var book = entry.value;
                         return Container(
                           width: 280,
-                          margin: EdgeInsets.only(right: 12),
+                          margin: EdgeInsets.only(right: index == 0 ? 0 : 12),
                           child: BookCardWidget(
                             id: book['id'].toString(),
                             author: book['author'] as String,
@@ -348,8 +350,12 @@ class _WithoutCategoryDetailsPageState
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Row(
-                      children: exchangeBooks.map((book) {
-                        return ExchangeBookCard(
+                      children: exchangeBooks.asMap().entries.map((entry) {
+                        int index = entry.key;
+                        var book = entry.value;
+                        return Container(
+                          margin: EdgeInsets.only(right: index == 0 ? 0 : 12),
+                          child: ExchangeBookCard(
                           id: book['id'] as String,
                           title: book['title'] as String,
                           author: book['author'] as String,
@@ -371,6 +377,7 @@ class _WithoutCategoryDetailsPageState
                             globalFavoriteCubit
                                 .toggleFavorite(book['id'].toString());
                           },
+                        ),
                         );
                       }).toList(),
                     ),

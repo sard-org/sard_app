@@ -53,20 +53,21 @@ class CategoryDetailsPage extends StatelessWidget {
                       fontSize: 16,
                     ),
                   ),
+                  const SizedBox(height: 8),
                 ],
               ),
             );
           }
 
           return ListView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            padding: const EdgeInsets.symmetric(vertical: 16),
             itemCount: books.length,
             physics: const BouncingScrollPhysics(),
             shrinkWrap: true,
             itemBuilder: (context, index) {
               final bookData = books[index] as Map<String, dynamic>;
               return Padding(
-                padding: const EdgeInsets.only(bottom: 16),
+                padding: const EdgeInsets.only(bottom: 12),
                 child: BookCardWidget(
                   id: bookData['id'] ?? '',
                   author: bookData['Author']?['name'] ?? '',
@@ -98,9 +99,12 @@ class CategoryDetailsPage extends StatelessWidget {
           );
         }
 
-        return const Center(
-          child: CircularProgressIndicator(
-            color: AppColors.primary700,
+        return Container(
+          height: 200,
+          child: const Center(
+            child: CircularProgressIndicator(
+              color: AppColors.primary700,
+            ),
           ),
         );
       },

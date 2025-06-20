@@ -212,7 +212,7 @@ class _AllRecommendedBooksScreenState extends State<AllRecommendedBooksScreen> {
               BaseScreen(
                 child: Column(
                   children: [
-                    const SizedBox(height: 80),
+                    const SizedBox(height: 100),
                     Expanded(
                       child: isLoading
                           ? const Center(
@@ -233,7 +233,7 @@ class _AllRecommendedBooksScreenState extends State<AllRecommendedBooksScreen> {
                                         final book = recommendedBooks[index];
                                         return Padding(
                                           padding:
-                                              const EdgeInsets.only(bottom: 16),
+                                              const EdgeInsets.only(bottom: 12),
                                           child: BookCardWidget(
                                             id: book.id,
                                             author: book.author.name,

@@ -76,12 +76,22 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          const SizedBox(height: 40),
+                          const SizedBox(height: 16),
                           Directionality(
                             textDirection: TextDirection.rtl,
-                            child: Text(
-                              'إنشاء كلمة مرور جديدة',
-                              style: AppTexts.heading2Accent,
+                            child: Text.rich(
+                              TextSpan(
+                                children: [
+                                  TextSpan(
+                                    text: 'إنشاء كلمة ',
+                                    style: AppTexts.heading2Accent.copyWith(color: AppColors.neutral1000), // لون "إنشاء"
+                                  ),
+                                  TextSpan(
+                                    text: 'مرور جديدة',
+                                    style: AppTexts.heading2Accent.copyWith(color: AppColors.primary500), // غيّر اللون حسب ما يناسبك
+                                  ),
+                                ],
+                              ),
                               textAlign: TextAlign.center,
                             ),
                           ),
@@ -90,7 +100,7 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
                             textDirection: TextDirection.rtl,
                             child: Text(
                               'قم بتعيين كلمة مرور قوية للحفاظ على أمان حسابك',
-                              style: AppTexts.highlightEmphasis,
+                              style: AppTexts.highlightEmphasis.copyWith(color: AppColors.neutral600),
                               textAlign: TextAlign.center,
                             ),
                           ),
@@ -106,7 +116,7 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
                               });
                             },
                           ),
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 16),
                           _buildPasswordField(
                             'تأكيد كلمة المرور',
                             _confirmPasswordController,

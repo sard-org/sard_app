@@ -196,8 +196,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                 SizedBox(height: 12),
                               ],
                             ),
+                            const SizedBox(height: 16),
                             _buildEmailField(),
+                            const SizedBox(height: 16),
                             _buildPhoneField(),
+                            const SizedBox(height: 16),
                             _buildDropdownField(
                                 "النوع", ["ذكر", "أنثى"], selectedGender,
                                 (value) {
@@ -205,17 +208,32 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                 selectedGender = value!;
                               });
                             }),
-                            SizedBox(height: 24),
-                            if (state is ProfileUpdateLoading)
-                              Center(child: CircularProgressIndicator()),
-                            if (state is! ProfileUpdateLoading)
-                              UpdateButton(
-                                title: "تحديث",
-                                onPressed: _validateAndUpdate,
-                              ),
+                            const SizedBox(height: 24),
                           ],
                         ),
                       ),
+                    ),
+                  ),
+                ),
+                // زر التحديث في أسفل الشاشة
+                Container(
+                  padding: const EdgeInsets.all(16.0),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, -2),
+                      ),
+                    ],
+                  ),
+                  child: SafeArea(
+                    top: false,
+                    child: UpdateButton(
+                      title: "تحديث",
+                      isLoading: state is ProfileUpdateLoading,
+                      onPressed: _validateAndUpdate,
                     ),
                   ),
                 ),
@@ -500,34 +518,48 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
 class UpdateButton extends StatelessWidget {
   final String title;
+  final bool isLoading;
   final VoidCallback onPressed;
 
   const UpdateButton({
     Key? key,
     required this.title,
+    required this.isLoading,
     required this.onPressed,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: double.infinity,
-      margin: EdgeInsets.symmetric(horizontal: 16),
+      height: 50,
       child: ElevatedButton(
-        onPressed: onPressed,
+        onPressed: isLoading ? null : onPressed,
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary500,
-          padding: EdgeInsets.symmetric(vertical: 16),
+          disabledBackgroundColor: AppColors.primary300,
+          foregroundColor: Colors.white,
+          elevation: 0,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(12),
           ),
         ),
-        child: Text(
-          title,
-          style: AppTexts.heading3Bold.copyWith(
-            color: Colors.white,
-          ),
-        ),
+        child: isLoading
+            ? const SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  strokeWidth: 2.0,
+                ),
+              )
+            : Text(
+                title,
+                style: AppTexts.highlightAccent.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
       ),
     );
   }
