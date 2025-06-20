@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../../style/BaseScreen.dart';
 import '../../../../../style/Colors.dart';
 import '../../../../../style/Fonts.dart';
+import '../../../../utils/error_translator.dart';
 import '../../login/View/Login.dart';
 import '../Create a New Password/create_a_new_password.dart';
 import '../password_reset_cubits.dart';
@@ -73,6 +74,8 @@ class _OtpVerificationCodeScreenState extends State<OtpVerificationCodeScreen> {
     context.read<OtpVerificationCubit>().resendOtp();
   }
 
+
+
   @override
   void dispose() {
     _timer?.cancel();
@@ -103,8 +106,24 @@ class _OtpVerificationCodeScreenState extends State<OtpVerificationCodeScreen> {
               ),
             );
           } else if (state is OtpVerificationError) {
+            String errorMessage = ErrorTranslator.translateError(state.message);
+            if (state.attemptsLeft > 0) {
+              String attemptText = state.attemptsLeft == 1 ? 'محاولة' : 'محاولات';
+              errorMessage += '. المتبقي: ${state.attemptsLeft} $attemptText';
+            }
+            
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message)),
+              SnackBar(
+                content: Directionality(
+                  textDirection: TextDirection.rtl,
+                  child: Text(
+                    errorMessage,
+                    textAlign: TextAlign.right,
+                    style: TextStyle(fontFamily: 'Cairo'),
+                  ),
+                ),
+                backgroundColor: Colors.red,
+              ),
             );
           }
         },

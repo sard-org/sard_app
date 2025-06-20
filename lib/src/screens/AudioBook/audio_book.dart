@@ -420,13 +420,25 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
                 SizedBox(height: 24),
 
                 // Success Message
-                Text(
-                  'تم تفعيل الكتاب بنجاح، وضافناه لمكتبتك',
-                  style: AppTexts.heading3Bold.copyWith(
-                    color: AppColors.green200,
+                Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text: 'تم تفعيل الكتاب بنجاح، ',
+                        style: AppTexts.heading3Bold.copyWith(color: AppColors.neutral1000),
+                      ),
+                      TextSpan(
+                        text: 'وضافناه لمكتبتك',
+                        style: AppTexts.heading3Bold.copyWith(
+                          color: AppColors.green200, // غيّر اللون حسب النظام عندك
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
                   ),
                   textAlign: TextAlign.center,
                 ),
+
                 SizedBox(height: 16),
 
                 // Description
@@ -453,7 +465,7 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
                             context,
                             MaterialPageRoute(
                               builder: (context) =>
-                                  MainScreen(initialIndex: 1), // 1 = Books tab
+                                  MainScreen(initialIndex: 0), // 1 = Books tab
                             ),
                             (route) => false,
                           );
@@ -466,7 +478,7 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
                           ),
                         ),
                         child: Text(
-                          'كتبي',
+                          'الرئيسية',
                           style: AppTexts.highlightAccent.copyWith(
                             color: AppColors.primary500,
                           ),
@@ -484,7 +496,7 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
                             context,
                             MaterialPageRoute(
                               builder: (context) =>
-                                  MainScreen(initialIndex: 0), // 0 = Home tab
+                                  MainScreen(initialIndex: 1), // 0 = Home tab
                             ),
                             (route) => false,
                           );
@@ -497,7 +509,7 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
                           ),
                         ),
                         child: Text(
-                          'الرئيسية',
+                          'كتبي',
                           style: AppTexts.highlightAccent.copyWith(
                             color: Colors.white,
                           ),
@@ -901,7 +913,7 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
                                       ? Text(
                                           'مجانا',
                                           style: AppTexts.heading1Bold.copyWith(
-                                            color: Colors.green[800],
+                                            color: AppColors.green200,
                                             fontSize: 28,
                                           ),
                                         )
@@ -914,7 +926,7 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
                                                     text: '${bookData!.price}',
                                                     style: AppTexts.heading1Bold
                                                         .copyWith(
-                                                      color: Colors.green[800],
+                                                      color: AppColors.green200,
                                                       fontSize: 28,
                                                     ),
                                                   ),
@@ -945,8 +957,7 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
                                                       style: AppTexts
                                                           .heading1Bold
                                                           .copyWith(
-                                                        color:
-                                                            Colors.green[800],
+                                                        color: AppColors.green200,
                                                         fontSize: 28,
                                                       ),
                                                     ),

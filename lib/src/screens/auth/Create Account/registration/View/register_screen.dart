@@ -25,9 +25,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _confirmPasswordController =
       TextEditingController();
   bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
 
   // إضافة controller للـ ScrollView لتجنب مشكلة الـ overflow عند فتح لوحة المفاتيح
   final ScrollController _scrollController = ScrollController();
+
+  // إضافة متغيرات لرسائل الخطأ
+  String? _nameError;
+  String? _emailError;
+  String? _passwordError;
+  String? _confirmPasswordError;
 
   @override
   void dispose() {
@@ -37,6 +44,99 @@ class _RegisterScreenState extends State<RegisterScreen> {
     _confirmPasswordController.dispose();
     _scrollController.dispose();
     super.dispose();
+  }
+
+  // دالة التحقق من صحة الاسم
+  String? _validateName(String name) {
+    if (name.trim().isEmpty) {
+      return 'الاسم الكامل مطلوب';
+    }
+    if (name.trim().length < 2) {
+      return 'الاسم يجب أن يكون أكثر من حرفين';
+    }
+    return null;
+  }
+
+  // دالة التحقق من صحة البريد الإلكتروني
+  String? _validateEmail(String email) {
+    if (email.trim().isEmpty) {
+      return 'البريد الإلكتروني مطلوب';
+    }
+    final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
+    if (!emailRegex.hasMatch(email.trim())) {
+      return 'البريد الإلكتروني غير صحيح';
+    }
+    return null;
+  }
+
+  // دالة التحقق من صحة كلمة المرور
+  String? _validatePassword(String password) {
+    if (password.isEmpty) {
+      return 'كلمة المرور مطلوبة';
+    }
+    if (password.length < 8) {
+      return 'كلمة المرور يجب أن تكون 8 أحرف على الأقل';
+    }
+    if (!RegExp(r'[A-Z]').hasMatch(password)) {
+      return 'كلمة المرور يجب أن تحتوي على حرف كبير';
+    }
+    if (!RegExp(r'[a-z]').hasMatch(password)) {
+      return 'كلمة المرور يجب أن تحتوي على حرف صغير';
+    }
+    if (!RegExp(r'[0-9]').hasMatch(password)) {
+      return 'كلمة المرور يجب أن تحتوي على رقم';
+    }
+    if (!RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(password)) {
+      return 'كلمة المرور يجب أن تحتوي على رمز خاص (!@#\$%^&*)';
+    }
+    return null;
+  }
+
+  // دالة التحقق من تطابق كلمة المرور
+  String? _validateConfirmPassword(String password, String confirmPassword) {
+    if (confirmPassword.isEmpty) {
+      return 'تأكيد كلمة المرور مطلوب';
+    }
+    
+    // التحقق من جميع شروط كلمة المرور
+    if (confirmPassword.length < 8) {
+      return 'تأكيد كلمة المرور يجب أن يكون 8 أحرف على الأقل';
+    }
+    if (!RegExp(r'[A-Z]').hasMatch(confirmPassword)) {
+      return 'تأكيد كلمة المرور يجب أن يحتوي على حرف كبير';
+    }
+    if (!RegExp(r'[a-z]').hasMatch(confirmPassword)) {
+      return 'تأكيد كلمة المرور يجب أن يحتوي على حرف صغير';
+    }
+    if (!RegExp(r'[0-9]').hasMatch(confirmPassword)) {
+      return 'تأكيد كلمة المرور يجب أن يحتوي على رقم';
+    }
+    if (!RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(confirmPassword)) {
+      return 'تأكيد كلمة المرور يجب أن يحتوي على رمز خاص (!@#\$%^&*)';
+    }
+    
+    if (password != confirmPassword) {
+      return 'كلمة المرور وتأكيد كلمة المرور غير متطابقين';
+    }
+    return null;
+  }
+
+  // دالة التحقق من صحة جميع البيانات
+  bool _validateForm() {
+    setState(() {
+      _nameError = _validateName(_nameController.text);
+      _emailError = _validateEmail(_emailController.text);
+      _passwordError = _validatePassword(_passwordController.text);
+      _confirmPasswordError = _validateConfirmPassword(
+        _passwordController.text,
+        _confirmPasswordController.text,
+      );
+    });
+
+    return _nameError == null &&
+        _emailError == null &&
+        _passwordError == null &&
+        _confirmPasswordError == null;
   }
 
   @override
@@ -125,17 +225,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             ),
                             const SizedBox(height: 24),
                             _buildTextField(
-                                "الاسم الكامل", "أدخل اسمك", _nameController),
+                                "الاسم الكامل", "أدخل اسمك", _nameController,
+                                errorText: _nameError),
                             const SizedBox(height: 16),
                             _buildTextField("البريد الإلكتروني",
                                 "أدخل بريدك الإلكتروني", _emailController,
-                                isEmailField: true),
+                                isEmailField: true, errorText: _emailError),
                             const SizedBox(height: 16),
                             _buildTextField(
                               "كلمة المرور",
                               "أدخل كلمة المرور",
                               _passwordController,
                               obscureText: _obscurePassword,
+                              errorText: _passwordError,
                               toggleVisibility: () {
                                 setState(() {
                                   _obscurePassword = !_obscurePassword;
@@ -147,13 +249,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               "تأكيد كلمة المرور",
                               "أعد إدخال كلمة المرور",
                               _confirmPasswordController,
-                              obscureText: _obscurePassword,
+                              obscureText: _obscureConfirmPassword,
+                              errorText: _confirmPasswordError,
                               toggleVisibility: () {
                                 setState(() {
-                                  _obscurePassword = !_obscurePassword;
+                                  _obscureConfirmPassword = !_obscureConfirmPassword;
                                 });
                               },
                             ),
+                            _buildPasswordRequirements(),
                             const SizedBox(height: 24),
                             _buildRegisterButton(context, state),
                             const SizedBox(height: 16),
@@ -184,12 +288,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
           onPressed: state is RegisterLoadingState
               ? null
               : () {
-                  BlocProvider.of<RegisterCubit>(context).registerUser(
-                    name: _nameController.text,
-                    email: _emailController.text.toLowerCase(),
-                    password: _passwordController.text,
-                    confirmPassword: _confirmPasswordController.text,
-                  );
+                  if (_validateForm()) {
+                    BlocProvider.of<RegisterCubit>(context).registerUser(
+                      name: _nameController.text,
+                      email: _emailController.text.toLowerCase(),
+                      password: _passwordController.text,
+                      confirmPassword: _confirmPasswordController.text,
+                    );
+                  }
                 },
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.primary500,
@@ -246,6 +352,79 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
+  Widget _buildPasswordRequirements() {
+    final password = _passwordController.text;
+    final confirmPassword = _confirmPasswordController.text;
+    
+    return Padding(
+      padding: const EdgeInsets.only(top: 8, right: 8, bottom: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Text(
+            'شروط كلمة المرور:',
+            style: AppTexts.contentRegular.copyWith(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: AppColors.neutral700,
+            ),
+            textAlign: TextAlign.right,
+          ),
+          const SizedBox(height: 4),
+          _buildPasswordRequirement(
+            '8 أحرف على الأقل', 
+            password.length >= 8 && confirmPassword.length >= 8
+          ),
+          _buildPasswordRequirement(
+            'حرف كبير (A-Z)', 
+            RegExp(r'[A-Z]').hasMatch(password) && RegExp(r'[A-Z]').hasMatch(confirmPassword)
+          ),
+          _buildPasswordRequirement(
+            'حرف صغير (a-z)', 
+            RegExp(r'[a-z]').hasMatch(password) && RegExp(r'[a-z]').hasMatch(confirmPassword)
+          ),
+          _buildPasswordRequirement(
+            'رقم (0-9)', 
+            RegExp(r'[0-9]').hasMatch(password) && RegExp(r'[0-9]').hasMatch(confirmPassword)
+          ),
+          _buildPasswordRequirement(
+            'رمز خاص (!@#\$%^&*)', 
+            RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(password) && 
+            RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(confirmPassword)
+          ),
+          _buildPasswordRequirement(
+            'تطابق كلمة المرور', 
+            password.isNotEmpty && confirmPassword.isNotEmpty && password == confirmPassword
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPasswordRequirement(String requirement, bool isMet) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 2),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          Text(
+            requirement,
+            style: AppTexts.contentRegular.copyWith(
+              fontSize: 11,
+              color: isMet ? Colors.green : AppColors.neutral500,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Icon(
+            isMet ? Icons.check_circle : Icons.radio_button_unchecked,
+            size: 14,
+            color: isMet ? Colors.green : AppColors.neutral400,
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildTextField(
     String label,
     String hint,
@@ -253,6 +432,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     bool obscureText = false,
     VoidCallback? toggleVisibility,
     bool isEmailField = false,
+    String? errorText,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -267,6 +447,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
             obscureText: obscureText,
             inputFormatters:
                 isEmailField ? [LowercaseTextInputFormatter()] : null,
+            onChanged: (value) {
+              // إزالة رسالة الخطأ عند بدء الكتابة
+              setState(() {
+                if (label == "الاسم الكامل") _nameError = null;
+                if (label == "البريد الإلكتروني") _emailError = null;
+                if (label == "كلمة المرور") _passwordError = null;
+                if (label == "تأكيد كلمة المرور") _confirmPasswordError = null;
+              });
+            },
             onTap: () {
               // التمرير لأسفل عند الضغط على الحقل لتجنب مشكلة الـ overflow
               Future.delayed(const Duration(milliseconds: 300), () {
@@ -284,15 +473,30 @@ class _RegisterScreenState extends State<RegisterScreen> {
               hintStyle: AppTexts.contentRegular,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: AppColors.neutral400),
+                borderSide: BorderSide(
+                  color: errorText != null ? Colors.red : AppColors.neutral400,
+                ),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: AppColors.neutral400),
+                borderSide: BorderSide(
+                  color: errorText != null ? Colors.red : AppColors.neutral400,
+                ),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: AppColors.primary500, width: 2),
+                borderSide: BorderSide(
+                  color: errorText != null ? Colors.red : AppColors.primary500,
+                  width: 2,
+                ),
+              ),
+              errorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(color: Colors.red),
+              ),
+              focusedErrorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(color: Colors.red, width: 2),
               ),
               filled: true,
               fillColor: Colors.white,
@@ -309,6 +513,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   : null,
             ),
           ),
+          if (errorText != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 4, right: 8),
+              child: Text(
+                errorText,
+                style: AppTexts.contentRegular.copyWith(
+                  color: Colors.red,
+                  fontSize: 12,
+                ),
+                textAlign: TextAlign.right,
+              ),
+            ),
         ],
       ),
     );

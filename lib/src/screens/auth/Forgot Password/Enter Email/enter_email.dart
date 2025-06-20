@@ -4,6 +4,7 @@ import '../../../../../style/BaseScreen.dart';
 import '../../../../../style/Colors.dart';
 import '../../../../../style/Fonts.dart';
 import '../../../../utils/text_input_formatters.dart';
+import '../../../../utils/error_translator.dart';
 import '../password_reset_cubits.dart';
 import '../password_reset_api_service.dart';
 import '../otp Forgot Password/otp_forget.dart';
@@ -29,7 +30,14 @@ class ForgotPasswordScreen extends StatelessWidget {
           } else if (state is ForgetPasswordError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(state.message),
+                content: Directionality(
+                  textDirection: TextDirection.rtl,
+                  child: Text(
+                    ErrorTranslator.translateError(state.message),
+                    textAlign: TextAlign.right,
+                    style: TextStyle(fontFamily: 'Cairo'),
+                  ),
+                ),
                 backgroundColor: Colors.red,
               ),
             );
@@ -118,11 +126,17 @@ class ForgotPasswordScreen extends StatelessWidget {
                           : () {
                               if (_emailController.text.isEmpty) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content:
-                                        Text('الرجاء إدخال البريد الإلكتروني'),
-                                    backgroundColor: Colors.red,
+                                  SnackBar(
+                                    content: Directionality(
+                                      textDirection: TextDirection.rtl,
+                                      child: Text(
+                                        'الرجاء إدخال البريد الإلكتروني',
+                                        style: TextStyle(color: AppColors.neutral100),
+                                      ),
+                                    ),
+                                    backgroundColor:  AppColors.red100,
                                   ),
+
                                 );
                                 return;
                               }

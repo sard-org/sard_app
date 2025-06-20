@@ -40,6 +40,7 @@ class ForgetPasswordCubit extends Cubit<PasswordResetState> {
 class OtpVerificationCubit extends Cubit<PasswordResetState> {
   final PasswordResetApiService _apiService;
   String? _email;
+  int _otpAttempts = 0;
 
   OtpVerificationCubit(this._apiService) : super(OtpVerificationInitial());
 
@@ -49,24 +50,44 @@ class OtpVerificationCubit extends Cubit<PasswordResetState> {
 
   String? get email => _email;
 
+  // الحصول على عدد المحاولات المتبقية
+  int get remainingAttempts => 3 - _otpAttempts;
+
   Future<void> verifyOtp(String otp) async {
     if (_email == null) {
       emit(const OtpVerificationError('البريد الإلكتروني غير متوفر. يرجى العودة وإعادة المحاولة.'));
       return;
     }
 
+    // التحقق من تجاوز الحد الأقصى للمحاولات قبل المحاولة
+    if (_otpAttempts >= 3) {
+      emit(const OtpVerificationError('تم تجاوز الحد الأقصى للمحاولات'));
+      return;
+    }
+
     emit(OtpVerificationLoading());
+
+    // زيادة عدد المحاولات
+    _otpAttempts++;
 
     try {
       final success = await _apiService.validateOtp(_email!, otp);
 
       if (success) {
+        // إعادة تعيين المحاولات عند النجاح
+        _otpAttempts = 0;
         emit(OtpVerificationSuccess(_email!));
       } else {
-        emit(const OtpVerificationError('رمز التحقق غير صحيح. يرجى المحاولة مرة أخرى.'));
+        emit(OtpVerificationError(
+          'رمز التحقق غير صحيح',
+          attemptsLeft: remainingAttempts,
+        ));
       }
     } catch (e) {
-      emit(OtpVerificationError('حدث خطأ: ${e.toString()}'));
+      emit(OtpVerificationError(
+        'حدث خطأ: ${e.toString()}',
+        attemptsLeft: remainingAttempts,
+      ));
     }
   }
 
@@ -75,6 +96,9 @@ class OtpVerificationCubit extends Cubit<PasswordResetState> {
       emit(const OtpVerificationError('البريد الإلكتروني غير متوفر. يرجى العودة وإعادة المحاولة.'));
       return;
     }
+
+    // إعادة تعيين المحاولات عند إعادة الإرسال
+    _otpAttempts = 0;
 
     try {
       await _apiService.sendResetEmail(_email!);

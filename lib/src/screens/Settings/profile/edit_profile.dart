@@ -11,6 +11,7 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
+import '../../../utils/error_translator.dart';
 
 class EditProfileScreen extends StatefulWidget {
   @override
@@ -21,7 +22,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
-  String selectedGender = "ذكر";
+  String? selectedGender;
   XFile? _pickedImage;
   Uint8List? _imageBytes; // For web compatibility
   String? _lastUserName;
@@ -55,13 +56,22 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             final user = state is ProfileLoaded
                 ? state.user
                 : (state as ProfileUpdateSuccess).user;
+            String? newGender;
+            if (user.gender == 'male') {
+              newGender = 'ذكر';
+            } else if (user.gender == 'female') {
+              newGender = 'أنثى';
+            } else {
+              newGender = null; // لم يتم اختيار النوع بعد
+            }
+            
             if (_lastUserName != user.name ||
                 _lastPhoneNumber != user.phone ||
-                selectedGender != (user.gender == 'male' ? 'ذكر' : 'أنثى')) {
+                selectedGender != newGender) {
               _emailController.text = user.email;
               _nameController.text = user.name;
               _phoneController.text = user.phone ?? '';
-              selectedGender = user.gender == 'male' ? 'ذكر' : 'أنثى';
+              selectedGender = newGender;
               _lastUserName = user.name;
               _lastPhoneNumber = user.phone;
               setState(() {});
@@ -76,6 +86,36 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               _pickedImage = null;
               _imageBytes = null;
             });
+          }
+          if (state is ProfileError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Directionality(
+                  textDirection: TextDirection.rtl,
+                  child: Text(
+                    ErrorTranslator.translateError(state.message),
+                    textAlign: TextAlign.right,
+                    style: TextStyle(fontFamily: 'Cairo'),
+                  ),
+                ),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+          if (state is ProfileUpdateError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Directionality(
+                  textDirection: TextDirection.rtl,
+                  child: Text(
+                    ErrorTranslator.translateError(state.message),
+                    textAlign: TextAlign.right,
+                    style: TextStyle(fontFamily: 'Cairo'),
+                  ),
+                ),
+                backgroundColor: Colors.red,
+              ),
+            );
           }
         },
         child: BlocBuilder<ProfileCubit, ProfileState>(
@@ -108,7 +148,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                       onTap: _pickImage,
                                       child: Container(
                                         decoration: BoxDecoration(
-                                          color: Colors.green,
+                                          color: AppColors.green200,
                                           shape: BoxShape.circle,
                                           border: Border.all(
                                               color: Colors.white, width: 2),
@@ -370,7 +410,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   Widget _buildDropdownField(String label, List<String> options,
-      String selectedValue, Function(String?) onChanged) {
+      String? selectedValue, Function(String?) onChanged) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
@@ -390,6 +430,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               child: DropdownButton<String>(
                 isExpanded: true,
                 value: selectedValue,
+                hint: Text(
+                  "قم بالاختيار",
+                  textAlign: TextAlign.right,
+                  style: AppTexts.contentRegular.copyWith(
+                    color: AppColors.neutral500,
+                  ),
+                ),
                 icon: Icon(Icons.arrow_drop_down, color: AppColors.neutral500),
                 items: options.map((option) {
                   return DropdownMenuItem<String>(
@@ -408,6 +455,24 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   void _validateAndUpdate() {
+    // التحقق من اختيار النوع
+    if (selectedGender == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Directionality(
+            textDirection: TextDirection.rtl,
+            child: Text(
+              'يرجى اختيار النوع',
+              textAlign: TextAlign.right,
+              style: TextStyle(fontFamily: 'Cairo'),
+            ),
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
     // تحويل النوع
     String genderApiValue = selectedGender == 'ذكر' ? 'male' : 'female';
 

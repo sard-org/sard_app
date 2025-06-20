@@ -1114,7 +1114,7 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
             textDirection: TextDirection.rtl,
             child: Text('تم إضافة تقييمك بنجاح! شكراً لك'),
           ),
-          backgroundColor: Colors.green,
+          backgroundColor: AppColors.green200,
           duration: Duration(seconds: 3),
         ),
       );

@@ -47,11 +47,12 @@ class OtpVerificationSuccess extends PasswordResetState {
 
 class OtpVerificationError extends PasswordResetState {
   final String message;
+  final int attemptsLeft;
 
-  const OtpVerificationError(this.message);
+  const OtpVerificationError(this.message, {this.attemptsLeft = 0});
 
   @override
-  List<Object?> get props => [message];
+  List<Object?> get props => [message, attemptsLeft];
 }
 
 // States for creating new password

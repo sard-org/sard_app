@@ -7,6 +7,7 @@ import 'package:sard/src/screens/auth/login/View/Login.dart';
 import '../../../../../../style/BaseScreen.dart';
 import '../../../../../../style/Colors.dart';
 import '../../../../../../style/Fonts.dart';
+import '../../../../../utils/error_translator.dart';
 import '../../registration/logic/register_cubit.dart';
 import '../../registration/logic/register_state.dart';
 
@@ -100,6 +101,132 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
     registerCubit.resendOtp();
   }
 
+  // إضافة popup النجاح
+  void _showSuccessPopup() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Container(
+            padding: const EdgeInsets.all(30),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // العنوان
+                Text(
+                  'إنشاء حساب',
+                  style: AppTexts.heading1Bold.copyWith(
+                    color: AppColors.neutral1000,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 20),
+                
+                // خط فاصل
+                Container(
+                  height: 1,
+                  width: double.infinity,
+                  color: AppColors.neutral300,
+                ),
+                const SizedBox(height: 30),
+                
+                // أيقونة النجاح
+                Container(
+                  width: 120,
+                  height: 120,
+                  decoration: BoxDecoration(
+                    color: AppColors.green200.withOpacity(0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Container(
+                    margin: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: AppColors.green200,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.check,
+                      color: Colors.white,
+                      size: 40,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 30),
+                
+                // النص الرئيسي
+                RichText(
+                  textAlign: TextAlign.center,
+                  text: TextSpan(
+                    children: [
+                      TextSpan(
+                        text: 'تم تسجيل حسابك ',
+                        style: AppTexts.heading2Bold.copyWith(
+                          color: AppColors.neutral1000,
+                        ),
+                      ),
+                      TextSpan(
+                        text: 'بنجاح',
+                        style: AppTexts.heading2Bold.copyWith(
+                          color: AppColors.green200,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 15),
+                
+                // النص الفرعي
+                Text(
+                  'شكرًا لانضمامك إلى تطبيق سَرد! يمكنك الآن استكشاف مكتبتك وبدء قراءة كتبك المفضلة.',
+                  style: AppTexts.contentRegular.copyWith(
+                    color: AppColors.neutral600,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 40),
+                
+                // زر هيا بنا
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop(); // إغلاق الـ popup
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(builder: (context) => LoginScreen()),
+                        (route) => false,
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary500,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text(
+                      'هيا بنا',
+                      style: AppTexts.contentEmphasis.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   void dispose() {
     _timer?.cancel();
@@ -117,27 +244,8 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
     return BlocConsumer<RegisterCubit, RegisterStates>(
       listener: (context, state) {
         if (state is OtpVerificationSuccessState) {
-          // إظهار رسالة النجاح
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              backgroundColor: AppColors.green100,
-              content: Directionality(
-                textDirection: TextDirection.rtl,
-                child: Text(
-                  state.message,
-                  style: const TextStyle(
-                      fontSize: 14, fontWeight: FontWeight.bold),
-                ),
-              ),
-              duration: const Duration(seconds: 2),
-            ),
-          );
-          // التنقل إلى صفحة تسجيل الدخول بعد التحقق من الرمز بنجاح
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => LoginScreen()),
-            (route) => false,
-          );
+          // إظهار popup النجاح بدلاً من SnackBar والتنقل المباشر
+          _showSuccessPopup();
         } else if (state is OtpVerificationErrorState) {
           setState(() {
             _isErrorShown = true;

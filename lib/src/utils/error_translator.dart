@@ -11,6 +11,7 @@ class ErrorTranslator {
       'user not found': 'المستخدم غير موجود',
       'invalid credentials': 'بيانات الدخول غير صحيحة',
       'invalid email': 'البريد الإلكتروني غير صحيح',
+      'email must be an email': 'يجب أن يكون البريد الإلكتروني صحيحاً',
       'invalid password': 'كلمة المرور غير صحيحة',
       'password too short': 'كلمة المرور قصيرة جداً',
       'password too weak': 'كلمة المرور ضعيفة',
@@ -24,6 +25,11 @@ class ErrorTranslator {
           'يرجى تأكيد البريد الإلكتروني قبل تسجيل الدخول',
       'verification code expired': 'رمز التحقق منتهي الصلاحية',
       'invalid verification code': 'رمز التحقق غير صحيح',
+      'email verified successfully': 'تم التحقق من البريد الإلكتروني بنجاح',
+      'otp is required': 'رمز التحقق مطلوب',
+      'otp must be 4 digits': 'رمز التحقق يجب أن يكون 4 أرقام',
+      'invalid otp': 'رمز التحقق غير صحيح',
+      'otp expired': 'انتهت صلاحية رمز التحقق',
       'too many requests': 'تم إرسال طلبات كثيرة، يرجى الانتظار',
       'network error': 'خطأ في الشبكة',
       'server error': 'خطأ في الخادم',
@@ -73,7 +79,7 @@ class ErrorTranslator {
     // If no specific translation found, provide generic message based on status code
     switch (statusCode) {
       case 400:
-        return 'طلب غير صحيح - يرجى التحقق من البيانات المدخلة';
+        return 'البيانات المدخلة غير صحيحة - يرجى المحاولة مرة أخرى';
       case 401:
         return 'غير مخول - يرجى تسجيل الدخول مرة أخرى';
       case 403:

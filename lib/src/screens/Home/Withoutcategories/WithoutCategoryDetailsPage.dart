@@ -179,7 +179,7 @@ class _WithoutCategoryDetailsPageState
               content: Text(state.isFavorite
                   ? 'تم إضافة الكتاب إلى المفضلات'
                   : 'تم إزالة الكتاب من المفضلات'),
-              backgroundColor: Colors.green,
+              backgroundColor: AppColors.green200,
             ),
           );
 
