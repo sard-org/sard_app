@@ -335,97 +335,124 @@ class _BookItemState extends State<BookItem> {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         transform: Matrix4.identity()..scale(size),
-        width: double.infinity, // تأكيد أن الكارد يأخذ العرض الكامل
-        height: 200, // تحديث الارتفاع ليتناسب مع التصميم الجديد
+        width: double.infinity,
         margin: const EdgeInsets.only(bottom: 16),
         padding: const EdgeInsets.all(16),
         decoration: ShapeDecoration(
           color: Colors.white,
           shape: RoundedRectangleBorder(
-            side: BorderSide(width: 0.5, color: AppColors.neutral600), // تغيير إلى neutral600
+            side: BorderSide(width: 0.5, color: AppColors.neutral300),
             borderRadius: BorderRadius.circular(12),
           ),
           shadows: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.02), // تخفيف الشادو من 0.05 إلى 0.02
-              blurRadius: 4, // تقليل الـ blur من 8 إلى 4
-              offset: Offset(0, 1), // تقليل الـ offset من 2 إلى 1
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 8,
+              offset: Offset(0, 2),
             ),
           ],
         ),
-                child: Row(
-          children: [
-            Container(
-              width: 120, // زيادة العرض أكثر
-              height: 160, // إرجاع الارتفاع الأصلي
-              decoration: ShapeDecoration(
-                image: DecorationImage(
-                  image: NetworkImage(widget.imageUrl),
-                  fit: BoxFit.cover,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+                child: IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 80,
+                height: 120,
+                decoration: ShapeDecoration(
+                  image: DecorationImage(
+                    image: NetworkImage(widget.imageUrl),
+                    fit: BoxFit.cover,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 8),
-                  Text(widget.author,
-                      style: AppTexts.captionRegular
-                          .copyWith(color: AppColors.neutral500),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis),
-                  const SizedBox(height: 8),
-                  Text(widget.title,
-                      style: AppTexts.contentAccent
-                          .copyWith(
-                            color: AppColors.neutral900,
-                            fontWeight: FontWeight.w600,
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            widget.author,
+                            style: AppTexts.captionRegular
+                                .copyWith(color: AppColors.neutral500),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis),
-                  const SizedBox(height: 12),
-                  Expanded(
-                    child: Text(
-                      widget.description.isNotEmpty ? widget.description : 'لا يوجد وصف متاح',
-                      style: AppTexts.captionEmphasis // تغيير إلى captionEmphasis
-                          .copyWith(
-                            color: AppColors.neutral500,
-                            height: 1.5,
+                          const SizedBox(height: 8),
+                          Text(
+                            widget.title,
+                            style: AppTexts.contentBold
+                                .copyWith(
+                                  color: AppColors.neutral900,
+                                  fontSize: 16,
+                                ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                      maxLines: 4, // تحديد عدد أسطر معقول
-                      overflow: TextOverflow.ellipsis,
+                          const SizedBox(height: 8),
+                          if (widget.description.isNotEmpty)
+                            Expanded(
+                              child: Text(
+                                widget.description,
+                                style: AppTexts.captionRegular
+                                    .copyWith(
+                                      color: AppColors.neutral600,
+                                      height: 1.4,
+                                    ),
+                                maxLines: 3,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                        ],
+                      ),
                     ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Text(
+                          widget.price,
+                          style: AppTexts.highlightAccent
+                              .copyWith(color: AppColors.primary1000),
+                        ),
+                        const SizedBox(width: 2),
+                        Text(
+                          widget.currency,
+                          style: AppTexts.footnoteRegular11
+                              .copyWith(color: AppColors.primary1000),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              Column(
+                children: [
+                  IconButton(
+                    padding: EdgeInsets.all(4),
+                    constraints: BoxConstraints(
+                      minWidth: 40,
+                      minHeight: 40,
+                    ),
+                    icon: Icon(
+                      Icons.favorite,
+                      color: isFavorite ? Colors.red : AppColors.neutral500,
+                      size: 28,
+                    ),
+                    onPressed: toggleFavorite,
                   ),
-                  Row(
-                    children: [
-                      Text(
-                        widget.price,
-                        style: AppTexts.highlightAccent
-                            .copyWith(color: AppColors.primary1000),
-                      ),
-                      const SizedBox(width: 2),
-                      Text(
-                        widget.currency,
-                        style: AppTexts.footnoteRegular11
-                            .copyWith(color: AppColors.primary1000),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
+                  const Spacer(),
                 ],
               ),
-            ),
-            IconButton(
-              icon: Icon(Icons.favorite,
-                  color: isFavorite ? Colors.red : AppColors.primary900),
-              onPressed: toggleFavorite,
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

@@ -268,122 +268,207 @@ class HomeScreenState extends State<HomeScreen> {
       ],
       child: Directionality(
         textDirection: TextDirection.rtl,
-        child: BaseScreen(
-          child: BlocBuilder<HomeCubit, HomeState>(
-            builder: (context, state) {
-              if (state is HomeLoading) {
-                return Center(child: CircularProgressIndicator());
-              } else if (state is HomeLoaded) {
-                UserModelhome user = state.user;
+        child: Scaffold(
+          body: Column(
+            children: [
+              Container(
+                  width: double.infinity,
+                padding: EdgeInsets.fromLTRB(16, 0, 16, 16),
+                decoration: BoxDecoration(
+                  color: AppColors.primary500,
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(12),
+                    bottomRight: Radius.circular(12),
+                  ),
+                ),
+                                  child: SafeArea(
+                    bottom: false,
+                    child: BlocBuilder<HomeCubit, HomeState>(
+                      builder: (context, state) {
+                        if (state is HomeLoaded) {
+                          UserModelhome user = state.user;
+                          
+                          // Generate dynamic streak icons for AppBar
+                          List<Widget> _buildStreakIconsForAppBar(int currentStreak) {
+                            List<Widget> icons = [];
 
-                // Generate dynamic streak icons based on user's actual streak
-                List<Widget> _buildStreakIcons(int currentStreak) {
-                  List<Widget> icons = [];
+                            for (int i = 1; i <= 7; i++) {
+                              String assetPath = '';
 
-                  for (int i = 1; i <= 7; i++) {
-                    String assetPath = '';
+                              if (i == 7) {
+                                // اليوم السابع دايماً له شكل مختلف
+                                assetPath = 'assets/img/streak week done.png';
+                              } else if (currentStreak == 0) {
+                                assetPath = 'assets/img/streak_waiting.png';
+                              } else if (i < currentStreak) {
+                                assetPath = 'assets/img/streakDone.png';
+                              } else if (i == currentStreak) {
+                                assetPath = 'assets/img/streak_Today.png';
+                              } else {
+                                assetPath = 'assets/img/streak_waiting.png';
+                              }
 
-                    if (currentStreak == 0) {
-                      // If streak is 0 (just reset after completing 7 days) - show all as waiting
-                      assetPath = 'assets/img/streak_waiting.png';
-                    } else if (i < currentStreak) {
-                      // Completed days
-                      assetPath = 'assets/img/streakDone.png';
-                    } else if (i == currentStreak) {
-                      // Current day
-                      assetPath = 'assets/img/streak_Today.png';
-                    } else {
-                      // Future days
-                      assetPath = 'assets/img/streak_waiting.png';
+                              icons.add(
+                                Image.asset(
+                                  assetPath,
+                                  width: 38,
+                                  height: 38,
+                                ),
+                              );
+                            }
+
+                            return icons;
+                          }
+                          
+                          return Column(
+                            children: [
+                              Row(
+                                children: [
+                                  CircleAvatar(
+                                    radius: 28,
+                                    backgroundImage: user.photo.isNotEmpty
+                                        ? NetworkImage(user.photo)
+                                        : AssetImage('assets/img/Avatar.png')
+                                            as ImageProvider,
+                                    onBackgroundImageError: user.photo.isNotEmpty
+                                        ? (exception, stackTrace) {
+                                            // Handle network image load error
+                                          }
+                                        : null,
+                                  ),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        RichText(
+                                          text: TextSpan(
+                                            text: 'اهلا, ',
+                                            style: AppTexts.heading2Bold.copyWith(
+                                              color: AppColors.neutral200,
+                                              fontSize: 22,
+                                            ),
+                                            children: [
+                                              TextSpan(
+                                                text: user.name,
+                                                style: AppTexts.heading1Bold.copyWith(
+                                                  color: AppColors.neutral100,
+                                                  fontSize: 24,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          '${user.message}',
+                                          style: AppTexts.contentRegular.copyWith(
+                                            color: AppColors.neutral100,
+                                          ),
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Row(
+                                    children: _buildStreakIconsForAppBar(user.streak),
+                                  ),
+                                  Container(
+                                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.2),
+                                      borderRadius: BorderRadius.circular(4),
+                                      border: Border.all(color: Colors.white.withOpacity(0.3)),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          '${user.points}',
+                                          style: AppTexts.heading2Bold.copyWith(
+                                            color: Colors.white,
+                                            fontSize: 18,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Image.asset(
+                                          'assets/img/coin.png',
+                                          width: 24,
+                                          height: 24,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          );
+                        } else {
+                          return Text(
+                            'الرئيسية',
+                            style: AppTexts.heading1Bold.copyWith(
+                              color: Colors.white,
+                              fontSize: 24,
+                            ),
+                          );
+                        }
+                      },
+                    ),
+                  ),
+              ),
+              Expanded(
+                child: BaseScreen(
+                  child: BlocBuilder<HomeCubit, HomeState>(
+              builder: (context, state) {
+                if (state is HomeLoading) {
+                  return Center(child: CircularProgressIndicator());
+                } else if (state is HomeLoaded) {
+                  UserModelhome user = state.user;
+
+                  // Generate dynamic streak icons based on user's actual streak
+                  List<Widget> _buildStreakIcons(int currentStreak) {
+                    List<Widget> icons = [];
+
+                    for (int i = 1; i <= 7; i++) {
+                      String assetPath = '';
+
+                      if (currentStreak == 0) {
+                        // If streak is 0 (just reset after completing 7 days) - show all as waiting
+                        assetPath = 'assets/img/streak_waiting.png';
+                      } else if (i < currentStreak) {
+                        // Completed days
+                        assetPath = 'assets/img/streakDone.png';
+                      } else if (i == currentStreak) {
+                        // Current day
+                        assetPath = 'assets/img/streak_Today.png';
+                      } else {
+                        // Future days
+                        assetPath = 'assets/img/streak_waiting.png';
+                      }
+
+                      icons.add(
+                        Image.asset(
+                          assetPath,
+                          width: 38,
+                          height: 38,
+                        ),
+                      );
                     }
 
-                    icons.add(
-                      Image.asset(
-                        assetPath,
-                        width: 36,
-                        height: 36,
-                      ),
-                    );
+                    return icons;
                   }
 
-                  return icons;
-                }
-
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        CircleAvatar(
-                          radius: 24,
-                          backgroundImage: user.photo.isNotEmpty
-                              ? NetworkImage(user.photo)
-                              : AssetImage('assets/img/Avatar.png')
-                                  as ImageProvider,
-                          onBackgroundImageError: user.photo.isNotEmpty
-                              ? (exception, stackTrace) {
-                                  // Handle network image load error
-                                }
-                              : null,
-                        ),
-                        const SizedBox(width: 8),
-                        RichText(
-                          text: TextSpan(
-                            text: 'اهلا, ',
-                            style: AppTexts.highlightEmphasis
-                                .copyWith(color: AppColors.neutral600),
-                            children: [
-                              TextSpan(
-                                text: user.name,
-                                style: AppTexts.heading3Bold
-                                    .copyWith(color: AppColors.neutral1000),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      '${user.message}',
-                      textDirection: TextDirection.rtl,
-                      style: AppTexts.contentRegular
-                          .copyWith(color: AppColors.neutral600),
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          children: _buildStreakIcons(user.streak),
-                        ),
-                        Container(
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: AppColors.primary100,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Row(
-                            children: [
-                              Text(
-                                '${user.points}',
-                                style: AppTexts.heading1Bold.copyWith(
-                                    fontSize: 16, color: AppColors.primary700),
-                              ),
-                              const SizedBox(width: 4),
-                              Image.asset(
-                                'assets/img/coin.png',
-                                width: 24,
-                                height: 24,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                     GestureDetector(
                       onTap: () {
                         Navigator.push(
@@ -509,6 +594,10 @@ class HomeScreenState extends State<HomeScreen> {
               }
               return SizedBox();
             },
+          ),
+        ),
+              ),
+            ],
           ),
         ),
       ),

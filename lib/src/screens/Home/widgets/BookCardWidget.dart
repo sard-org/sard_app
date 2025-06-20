@@ -131,111 +131,126 @@ class _BookCardWidgetState extends State<BookCardWidget> {
       child: GestureDetector(
         onTap: widget.onTap,
         child: Container(
-          width: double.infinity, // تأكيد أن الكارد يأخذ العرض الكامل
-          height: widget.showDescription ? 180 : 140, // زيادة الارتفاع عند عرض الوصف
+          width: double.infinity,
           margin: const EdgeInsets.only(bottom: 16),
           padding: const EdgeInsets.all(16),
           decoration: ShapeDecoration(
             color: Colors.white,
             shape: RoundedRectangleBorder(
-              side: BorderSide(width: 0.5, color: AppColors.neutral600), // تغيير إلى neutral600
+              side: BorderSide(width: 0.5, color: AppColors.neutral300),
               borderRadius: BorderRadius.circular(12),
             ),
             shadows: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.02), // تخفيف الشادو من 0.05 إلى 0.02
-                blurRadius: 4, // تقليل الـ blur من 8 إلى 4
-                offset: Offset(0, 1), // تقليل الـ offset من 2 إلى 1
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 8,
+                offset: Offset(0, 2),
               ),
             ],
           ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 120, // زيادة عرض الصورة أكثر
-                height: 160, // زيادة ارتفاع الصورة
-                decoration: ShapeDecoration(
-                  image: DecorationImage(
-                    image: widget.imageUrl.startsWith('http')
-                        ? NetworkImage(widget.imageUrl) as ImageProvider
-                        : AssetImage(widget.imageUrl),
-                    fit: BoxFit.cover,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+          child: IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 80,
+                  height: 120,
+                  decoration: ShapeDecoration(
+                    image: DecorationImage(
+                      image: widget.imageUrl.startsWith('http')
+                          ? NetworkImage(widget.imageUrl) as ImageProvider
+                          : AssetImage(widget.imageUrl),
+                      fit: BoxFit.cover,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
                 ),
-              ),
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const SizedBox(height: 8),
-                    Text(
-                      widget.author,
-                      style: AppTexts.captionRegular
-                          .copyWith(color: AppColors.neutral500),
-                      maxLines: 1, // سطر واحد فقط
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      widget.title,
-                      style: AppTexts.contentAccent
-                          .copyWith(
-                            color: AppColors.neutral900,
-                            fontWeight: FontWeight.w600,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            widget.author,
+                            style: AppTexts.captionRegular
+                                .copyWith(color: AppColors.neutral500),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                      maxLines: 3,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 12),
-                    // إضافة الوصف إذا كان مطلوب عرضه
-                    if (widget.showDescription) ...[
-                      Expanded(
-                        child: Text(
-                          widget.description.isNotEmpty ? widget.description : 'لا يوجد وصف متاح',
-                          style: AppTexts.captionEmphasis
-                              .copyWith(
-                                color: AppColors.neutral500,
-                                height: 1.5,
+                          const SizedBox(height: 8),
+                          Text(
+                            widget.title,
+                            style: AppTexts.contentBold
+                                .copyWith(
+                                  color: AppColors.neutral900,
+                                  fontSize: 16,
+                                ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 8),
+                          if (widget.description.isNotEmpty)
+                            Expanded(
+                              child: Text(
+                                widget.description,
+                                style: AppTexts.captionRegular
+                                    .copyWith(
+                                      color: AppColors.neutral600,
+                                      height: 1.4,
+                                    ),
+                                maxLines: 3,
+                                overflow: TextOverflow.ellipsis,
                               ),
-                          textAlign: TextAlign.start,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                            ),
+                        ],
                       ),
-                      const SizedBox(height: 12),
-                    ],
+                    ),
+                    const SizedBox(height: 8),
                     buildPriceTag(),
-                    const SizedBox(height: 4),
                   ],
                 ),
               ),
-              BlocBuilder<GlobalFavoriteCubit, GlobalFavoriteState>(
-                builder: (context, state) {
-                  final globalFavoriteCubit =
-                      context.read<GlobalFavoriteCubit>();
-                  final isCurrentlyFavorite =
-                      globalFavoriteCubit.isFavorite(widget.id);
+              Column(
+                children: [
+                  BlocBuilder<GlobalFavoriteCubit, GlobalFavoriteState>(
+                    builder: (context, state) {
+                      final globalFavoriteCubit =
+                          context.read<GlobalFavoriteCubit>();
+                      final isCurrentlyFavorite =
+                          globalFavoriteCubit.isFavorite(widget.id);
 
-                  return IconButton(
-                    icon: Icon(
-                      isCurrentlyFavorite
-                          ? Icons.favorite
-                          : Icons.favorite_border,
-                      color: isCurrentlyFavorite
-                          ? Colors.red
-                          : AppColors.primary900,
-                    ),
-                    onPressed: widget.onFavoriteTap ?? () {},
-                  );
-                },
+                      return IconButton(
+                        padding: EdgeInsets.all(4),
+                        constraints: BoxConstraints(
+                          minWidth: 40,
+                          minHeight: 40,
+                        ),
+                        icon: Icon(
+                          isCurrentlyFavorite
+                              ? Icons.favorite
+                              : Icons.favorite_border,
+                          color: isCurrentlyFavorite
+                              ? Colors.red
+                              : AppColors.neutral500,
+                          size: 28,
+                        ),
+                        onPressed: widget.onFavoriteTap ?? () {},
+                      );
+                    },
+                  ),
+                  const Spacer(),
+                ],
               ),
             ],
           ),
+            ),
         ),
       ),
     );
