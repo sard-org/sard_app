@@ -2,6 +2,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../screens/AudioBook/audio_book_api_service.dart';
 import '../screens/AudioBook/audio_book_model.dart';
 
@@ -14,6 +15,11 @@ class AudioBookService {
   bool _isPlaying = false;
   bool _isLoading = false;
   AudioBookContentResponse? _currentBook;
+  
+  // إضافة متغيرات لتتبع الوقت والمدة
+  Duration _currentPosition = Duration.zero;
+  Duration _totalDuration = Duration.zero;
+  Duration? _savedPosition; // حفظ آخر موضع
 
   AudioBookService() {
     _audioPlayer = AudioPlayer();
@@ -39,7 +45,23 @@ class AudioBookService {
       } else if (state == PlayerState.stopped) {
         print('Audio stopped');
         _isPlaying = false;
+      } else if (state == PlayerState.playing) {
+        _isPlaying = true;
+      } else if (state == PlayerState.paused) {
+        _isPlaying = false;
       }
+    });
+
+    // إضافة مستمع لتتبع الموضع الحالي
+    _audioPlayer.onPositionChanged.listen((Duration position) {
+      _currentPosition = position;
+      print('Position changed: $position');
+    });
+
+    // إضافة مستمع لتتبع المدة الكاملة
+    _audioPlayer.onDurationChanged.listen((Duration duration) {
+      _totalDuration = duration;
+      print('Duration changed: $duration');
     });
 
     _audioPlayer.onLog.listen((String message) {
@@ -146,13 +168,49 @@ class AudioBookService {
       );
 
       // Set player mode and play the cached file
+      print('Setting up audio player with file: ${file.path}');
       await _audioPlayer.setPlayerMode(PlayerMode.mediaPlayer);
+      
+      // Stop any previous audio
+      await _audioPlayer.stop();
+      
+      // Set the source
       await _audioPlayer.setSourceDeviceFile(file.path);
+      
+      // Reset position tracking
+      _currentPosition = Duration.zero;
+      _totalDuration = Duration.zero;
+      
+      print('Starting audio playback...');
       await _audioPlayer.resume();
+      
+      // Wait a bit for the duration to be detected
+      await Future.delayed(const Duration(milliseconds: 1000));
+      print('Audio player state after start: ${_audioPlayer.state}');
+      
+      // استرجاع آخر موضع محفوظ والانتقال إليه
+      final savedPos = await _getSavedPosition();
+      if (savedPos.inMilliseconds > 0) {
+        print('Resuming from saved position: ${savedPos.inSeconds} seconds');
+        await _audioPlayer.seek(savedPos);
+        _currentPosition = savedPos;
+      }
 
       await Future.delayed(const Duration(milliseconds: 500));
-      final state = await _audioPlayer.getCurrentPosition();
-      print('Current position after 500ms: $state');
+      final currentPos = await _audioPlayer.getCurrentPosition();
+      final duration = await _audioPlayer.getDuration();
+      
+      // Update our tracking variables manually if listeners didn't fire
+      if (currentPos != null) {
+        _currentPosition = currentPos;
+        print('Manually updated current position: $currentPos');
+      }
+      if (duration != null) {
+        _totalDuration = duration;
+        print('Manually updated duration: $duration');
+      }
+      
+      print('Final state - Position: $_currentPosition, Duration: $_totalDuration');
     } catch (e) {
       print('Error playing audio: $e');
       _isPlaying = false;
@@ -229,7 +287,23 @@ class AudioBookService {
       }
     } else {
       _isPlaying = false;
+      // مسح الموضع المحفوظ عند انتهاء الكتاب
+      await _clearSavedPosition();
       print('Reached end of audio book');
+    }
+  }
+
+  // دالة لمسح الموضع المحفوظ
+  Future<void> _clearSavedPosition() async {
+    try {
+      if (_currentBook != null) {
+        final prefs = await SharedPreferences.getInstance();
+        final key = 'audio_position_${_currentBook!.id}';
+        await prefs.remove(key);
+        print('Cleared saved position for book ${_currentBook!.id}');
+      }
+    } catch (e) {
+      print('Error clearing saved position: $e');
     }
   }
 
@@ -255,20 +329,28 @@ class AudioBookService {
   }
 
   Future<void> stopAudio() async {
+    // حفظ الموضع الحالي قبل التوقف
+    await _saveLastPosition();
+    
     _isPlaying = false;
     if (kIsWeb) {
       await _flutterTts.stop();
     } else {
       await _audioPlayer.stop();
     }
+    print('Audio stopped at position: ${_currentPosition.inSeconds} seconds');
   }
 
   Future<void> pauseAudio() async {
+    // حفظ الموضع الحالي عند الإيقاف المؤقت
+    await _saveLastPosition();
+    
     if (kIsWeb) {
       await _flutterTts.stop(); // pause غير مدعوم في TTS
     } else {
       await _audioPlayer.pause();
     }
+    print('Audio paused at position: ${_currentPosition.inSeconds} seconds');
   }
 
   Future<void> resumeAudio() async {
@@ -282,7 +364,12 @@ class AudioBookService {
 
   bool _isValidUrl(String url) {
     return url.isNotEmpty &&
-        (url.startsWith('http://') || url.startsWith('https://'));
+        (url.startsWith('http://') || url.startsWith('https://')) &&
+        (url.toLowerCase().contains('.mp3') || 
+         url.toLowerCase().contains('.wav') || 
+         url.toLowerCase().contains('.m4a') ||
+         url.contains('drive.google.com') ||
+         url.contains('export=download'));
   }
 
   // Convert Google Drive URL to direct download URL if needed
@@ -308,9 +395,156 @@ class AudioBookService {
     return url;
   }
 
-  // Getters
-  double get progress =>
-      _audioSegments.isEmpty ? 0.0 : (_currentIndex + 1) / _audioSegments.length;
+  // دالة لحفظ آخر موضع
+  Future<void> _saveLastPosition() async {
+    try {
+      if (_currentBook != null && _currentPosition.inSeconds > 0) {
+        final prefs = await SharedPreferences.getInstance();
+        final key = 'audio_position_${_currentBook!.id}';
+        await prefs.setInt(key, _currentPosition.inMilliseconds);
+        print('Saved position: ${_currentPosition.inSeconds} seconds for book ${_currentBook!.id}');
+      }
+    } catch (e) {
+      print('Error saving position: $e');
+    }
+  }
+
+  // دالة لاسترجاع آخر موضع
+  Future<Duration> _getSavedPosition() async {
+    try {
+      if (_currentBook != null) {
+        final prefs = await SharedPreferences.getInstance();
+        final key = 'audio_position_${_currentBook!.id}';
+        final milliseconds = prefs.getInt(key) ?? 0;
+        final savedPos = Duration(milliseconds: milliseconds);
+        print('Retrieved saved position: ${savedPos.inSeconds} seconds for book ${_currentBook!.id}');
+        return savedPos;
+      }
+    } catch (e) {
+      print('Error getting saved position: $e');
+    }
+    return Duration.zero;
+  }
+
+  // دالة لتحديث البيانات يدوياً
+  Future<void> updateAudioData() async {
+    try {
+      if (!kIsWeb && _audioPlayer.state != PlayerState.stopped) {
+        final currentPos = await _audioPlayer.getCurrentPosition();
+        final duration = await _audioPlayer.getDuration();
+        
+        if (currentPos != null && currentPos != _currentPosition) {
+          _currentPosition = currentPos;
+          // حفظ الموضع تلقائياً كل تحديث
+          _saveLastPosition();
+        }
+        if (duration != null && duration != _totalDuration) {
+          _totalDuration = duration;
+        }
+      }
+    } catch (e) {
+      print('Error updating audio data: $e');
+    }
+  }
+
+  // إضافة وظائف التحكم في الصوت
+  Future<void> seekForward10Seconds() async {
+    try {
+      print('Seeking forward 10 seconds. Current position: $_currentPosition, Total: $_totalDuration');
+      
+             if (!kIsWeb && (_audioPlayer.state == PlayerState.playing || _audioPlayer.state == PlayerState.paused)) {
+          final newPosition = _currentPosition + Duration(seconds: 10);
+        if (_totalDuration.inMilliseconds > 0 && newPosition <= _totalDuration) {
+          await _audioPlayer.seek(newPosition);
+          print('Seeked to: $newPosition');
+        } else if (_currentIndex < _audioSegments.length - 1) {
+          // إذا تجاوز المدة، انتقل للمقطع التالي
+          print('End reached, playing next segment');
+          await playNext();
+        }
+      } else {
+        print('Cannot seek: Web platform or not playing');
+      }
+    } catch (e) {
+      print('Error seeking forward: $e');
+    }
+  }
+
+  Future<void> seekBackward10Seconds() async {
+    try {
+      print('Seeking backward 10 seconds. Current position: $_currentPosition');
+      
+             if (!kIsWeb && (_audioPlayer.state == PlayerState.playing || _audioPlayer.state == PlayerState.paused)) {
+          final newPosition = _currentPosition - Duration(seconds: 10);
+        if (newPosition >= Duration.zero) {
+          await _audioPlayer.seek(newPosition);
+          print('Seeked to: $newPosition');
+        } else if (_currentIndex > 0) {
+          // إذا تجاوز البداية، ارجع للمقطع السابق
+          print('Beginning reached, playing previous segment');
+          await playPrevious();
+        } else {
+          // إذا كنا في المقطع الأول، ارجع للبداية
+          await _audioPlayer.seek(Duration.zero);
+          print('Seeked to beginning');
+        }
+      } else {
+        print('Cannot seek: Web platform or not playing');
+      }
+    } catch (e) {
+      print('Error seeking backward: $e');
+    }
+  }
+
+  Future<void> seekToPosition(double value) async {
+    try {
+      if (!kIsWeb && _totalDuration.inMilliseconds > 0) {
+        final position = Duration(
+          milliseconds: (value * _totalDuration.inMilliseconds).round(),
+        );
+        await _audioPlayer.seek(position);
+      }
+    } catch (e) {
+      print('Error seeking to position: $e');
+    }
+  }
+
+  // Getters محدثة
+  double get progress {
+    if (_totalDuration.inMilliseconds > 0) {
+      return _currentPosition.inMilliseconds / _totalDuration.inMilliseconds;
+    }
+    return _audioSegments.isEmpty ? 0.0 : (_currentIndex + 1) / _audioSegments.length;
+  }
+
+  Duration get currentPosition => _currentPosition;
+  Duration get totalDuration => _totalDuration;
+  
+  // دالة لإعادة بدء الكتاب من البداية
+  Future<void> restartFromBeginning() async {
+    try {
+      await _clearSavedPosition();
+      _currentPosition = Duration.zero;
+      if (!kIsWeb) {
+        await _audioPlayer.seek(Duration.zero);
+      }
+      print('Restarted audio from beginning');
+    } catch (e) {
+      print('Error restarting from beginning: $e');
+    }
+  }
+  
+  String get currentPositionText {
+    final minutes = _currentPosition.inMinutes;
+    final seconds = _currentPosition.inSeconds % 60;
+    return '$minutes:${seconds.toString().padLeft(2, '0')}';
+  }
+  
+  String get totalDurationText {
+    final minutes = _totalDuration.inMinutes;
+    final seconds = _totalDuration.inSeconds % 60;
+    return '$minutes:${seconds.toString().padLeft(2, '0')}';
+  }
 
   bool get isPlaying => _isPlaying;
   bool get isLoading => _isLoading;

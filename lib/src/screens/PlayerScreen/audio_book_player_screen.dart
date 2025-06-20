@@ -64,13 +64,21 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
   }
 
   void _startPlaybackTimer() {
-    _playbackTimer = Timer.periodic(Duration(milliseconds: 500), (timer) {
+    _playbackTimer = Timer.periodic(Duration(milliseconds: 250), (timer) {
       if (mounted) {
         final currentlyPlaying = _audioBookService.isPlaying;
+        bool needsUpdate = false;
+        
         if (_isPlaying != currentlyPlaying) {
-          setState(() {
-            _isPlaying = currentlyPlaying;
-          });
+          _isPlaying = currentlyPlaying;
+          needsUpdate = true;
+        }
+        
+        // تحديث الواجهة دوريًا لعرض الوقت الحالي والشريط
+        if (_audioBookService.isPlaying || needsUpdate) {
+          // استدعاء تحديث البيانات يدوياً
+          _audioBookService.updateAudioData();
+          setState(() {});
         }
       }
     });
@@ -193,10 +201,12 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
                       ),
                     ],
                   ),
+                  const SizedBox(height: 18),
                   Expanded(
                     child:
                         _buildSummaryContent(scrollController, setModalState),
                   ),
+                  const SizedBox(height: 18),
                   if (!_isLoadingSummary && _summaryError == null)
                     Column(
                       children: [
@@ -1225,9 +1235,9 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
                             thumbColor: AppColors.primary500,
                           ),
                           child: Slider(
-                            value: _audioBookService.progress,
+                            value: _audioBookService.progress.clamp(0.0, 1.0),
                             onChanged: (value) {
-                              // TODO: Implement seek functionality
+                              _audioBookService.seekToPosition(value);
                             },
                           ),
                         ),
@@ -1238,13 +1248,16 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                (_audioBookService.isPlaying || _isPlaying)
-                                    ? 'يتم التشغيل...'
-                                    : 'متوقف',
+                                _audioBookService.currentPositionText.isNotEmpty
+                                    ? _audioBookService.currentPositionText
+                                    : '0:00',
                                 style: AppTexts.captionBold,
                               ),
                               Text(
-                                '${(_bookData?.duration ?? 0) } ثانية ',
+                                _audioBookService.totalDurationText.isNotEmpty
+                                    ? _audioBookService.totalDurationText
+                                    : '${(_bookData?.duration ?? 0)} ثانية',
+                                style: AppTexts.captionBold,
                               ),
                             ],
                           ),
@@ -1256,9 +1269,9 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
                           children: [
                             _buildCircleButton(
                               icon: Icons.replay_10,
-                              onTap: () {
-                                // TODO: Implement 10 second rewind
-                                print('Rewind 10 seconds');
+                              onTap: () async {
+                                await _audioBookService.seekBackward10Seconds();
+                                setState(() {}); // تحديث الواجهة
                               },
                             ),
                             SizedBox(width: 32),
@@ -1266,9 +1279,9 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
                             SizedBox(width: 32),
                             _buildCircleButton(
                               icon: Icons.forward_10,
-                              onTap: () {
-                                // TODO: Implement 10 second forward
-                                print('Forward 10 seconds');
+                              onTap: () async {
+                                await _audioBookService.seekForward10Seconds();
+                                setState(() {}); // تحديث الواجهة
                               },
                             ),
                           ],
