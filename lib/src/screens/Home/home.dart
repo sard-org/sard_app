@@ -331,7 +331,7 @@ class HomeScreenState extends State<HomeScreen> {
                         RichText(
                           text: TextSpan(
                             text: 'اهلا, ',
-                            style: AppTexts.heading1Standard
+                            style: AppTexts.highlightEmphasis
                                 .copyWith(color: AppColors.neutral600),
                             children: [
                               TextSpan(

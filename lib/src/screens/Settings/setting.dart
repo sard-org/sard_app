@@ -24,6 +24,178 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _profileCubitFuture = ProfileCubit.init(); // تحميل cubit مع التوكن
   }
 
+  // إضافة popup تأكيد تسجيل الخروج في أسفل الصفحة
+  void _showLogoutConfirmation() {
+    showModalBottomSheet(
+      context: context,
+      isDismissible: true,
+      enableDrag: true,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (BuildContext context) {
+        return Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(20),
+              topRight: Radius.circular(20),
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(18),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // العنوان
+                Text(
+                  'تسجيل خروج',
+                  style: AppTexts.heading1Bold.copyWith(
+                    color: AppColors.neutral1000,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
+                
+                // خط فاصل
+                Container(
+                  height: 1,
+                  width: double.infinity,
+                  color: AppColors.neutral300,
+                ),
+                const SizedBox(height: 24),
+                
+                // أيقونة التحذير
+                Container(
+                  width: 120,
+                  height: 120,
+                  decoration: BoxDecoration(
+                    color: AppColors.red200.withOpacity(0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Container(
+                    margin: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: AppColors.red200,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.help_outline,
+                      color: Colors.white,
+                      size: 32,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                
+                // النص الرئيسي
+                RichText(
+                  textAlign: TextAlign.center,
+                  text: TextSpan(
+                    children: [
+                      TextSpan(
+                        text: 'هل أنت متأكد من رغبتك في ',
+                        style: AppTexts.heading2Bold.copyWith(
+                          color: AppColors.neutral1000,
+                        ),
+                      ),
+                      TextSpan(
+                        text: 'تسجيل الخروج؟',
+                        style: AppTexts.heading2Bold.copyWith(
+                          color: AppColors.red200,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                
+                // النص الفرعي
+                Text(
+                  'هل أنت متأكد أنك تريد تسجيل الخروج؟',
+                  style: AppTexts.contentRegular.copyWith(
+                    color: AppColors.neutral600,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 32),
+                
+                // الأزرار
+                Row(
+                  children: [
+                    // زر الخروج
+                    Expanded(
+                      child: SizedBox(
+                        height: 50,
+                        child: OutlinedButton(
+                          onPressed: () async {
+                            Navigator.of(context).pop(); // إغلاق الـ popup
+                            
+                            // حذف جميع البيانات المحفوظة بما في ذلك التوكين
+                            final prefs = await SharedPreferences.getInstance();
+                            await prefs.clear();
+                            
+                            // الانتقال لصفحة تسجيل الدخول
+                            Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(builder: (_) => LoginScreen()),
+                              (route) => false,
+                            );
+                          },
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: AppColors.primary500,
+                            side: BorderSide(color: AppColors.primary500),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: Text(
+                            'خروج',
+                            style: AppTexts.contentEmphasis.copyWith(
+                              color: AppColors.primary500,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    // زر الإلغاء
+                    Expanded(
+                      child: SizedBox(
+                        height: 50,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.of(context).pop(); // إغلاق الـ popup فقط
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary500,
+                            foregroundColor: Colors.white,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: Text(
+                            'إلغاء',
+                            style: AppTexts.contentEmphasis.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<ProfileCubit>(
@@ -96,17 +268,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               context,
                               "تسجيل الخروج",
                               "assets/img/Logout.png",
-                              () async {
-                                final prefs =
-                                    await SharedPreferences.getInstance();
-                                await prefs.clear();
-                                Navigator.pushAndRemoveUntil(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (_) => LoginScreen()),
-                                  (route) => false,
-                                );
-                              },
+                              () => _showLogoutConfirmation(),
                               isLogout: true,
                             ),
                           ],

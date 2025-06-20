@@ -40,6 +40,10 @@ class ErrorTranslator {
       'internal server error': 'خطأ داخلي في الخادم',
       'bad request': 'طلب غير صحيح',
       'service unavailable': 'الخدمة غير متاحة',
+      'new password must be different from current password': 'كلمة المرور الجديدة يجب أن تكون مختلفة عن كلمة المرور الحالية',
+      'current password is incorrect': 'كلمة المرور الحالية غير صحيحة',
+      'incorrect password': 'كلمة المرور غير صحيحة',
+      'wrong password': 'كلمة المرور خاطئة',
       // إضافة رسائل خطأ جديدة لمشاكل الاتصال
       'failed host lookup': 'لا يمكن الاتصال بالخادم',
       'connection errored': 'خطأ في الاتصال بالخادم',

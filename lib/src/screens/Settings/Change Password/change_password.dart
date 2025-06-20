@@ -50,7 +50,21 @@ class _ChangePasswordState extends State<ChangePassword> {
             });
           } else if (state is ChangePasswordSuccess) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message.toString())),
+              SnackBar(
+                content: Text(
+                  state.message.toString(),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                backgroundColor: AppColors.green200,
+                duration: Duration(seconds: 3),
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
             );
             Navigator.pop(context);
           }

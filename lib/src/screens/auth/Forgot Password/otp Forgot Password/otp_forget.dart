@@ -277,10 +277,10 @@ class _OtpVerificationCodeScreenState extends State<OtpVerificationCodeScreen> {
                               ),
                             ),
                             child: state is OtpVerificationLoading
-                                ? CircularProgressIndicator(color: Colors.white)
+                                ? CircularProgressIndicator(color: AppColors.neutral100)
                                 : Text(
                                     'تحقق',
-                                    style: AppTexts.contentEmphasis.copyWith(color: Colors.white),
+                                    style: AppTexts.contentEmphasis.copyWith(color: AppColors.neutral100),
                                   ),
                           ),
                         ),

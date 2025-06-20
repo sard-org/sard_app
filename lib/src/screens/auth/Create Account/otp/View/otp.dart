@@ -101,18 +101,25 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
     registerCubit.resendOtp();
   }
 
-  // إضافة popup النجاح
+  // إضافة popup النجاح في أسفل الصفحة
   void _showSuccessPopup() {
-    showDialog(
+    showModalBottomSheet(
       context: context,
-      barrierDismissible: false,
+      isDismissible: false,
+      enableDrag: false,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
       builder: (BuildContext context) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
+        return Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(20),
+              topRight: Radius.circular(20),
+            ),
           ),
-          child: Container(
-            padding: const EdgeInsets.all(30),
+          child: Padding(
+            padding: const EdgeInsets.all(18),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -124,7 +131,7 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
                   ),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 24),
                 
                 // خط فاصل
                 Container(
@@ -132,7 +139,7 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
                   width: double.infinity,
                   color: AppColors.neutral300,
                 ),
-                const SizedBox(height: 30),
+                const SizedBox(height: 24),
                 
                 // أيقونة النجاح
                 Container(
@@ -151,11 +158,11 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
                     child: const Icon(
                       Icons.check,
                       color: Colors.white,
-                      size: 40,
+                      size: 32,
                     ),
                   ),
                 ),
-                const SizedBox(height: 30),
+                const SizedBox(height: 24),
                 
                 // النص الرئيسي
                 RichText(
@@ -177,19 +184,19 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 15),
+                const SizedBox(height: 16),
                 
                 // النص الفرعي
                 Text(
-                  'شكرًا لانضمامك إلى تطبيق سَرد! يمكنك الآن استكشاف مكتبتك وبدء قراءة كتبك المفضلة.',
+                  'حاول الاحتفاظ بكلمة المرور بعيداً لتفادي نسيانها في المرات القادمة، كما يجب أن تكون حسابك و بياناتك آمنة.',
                   style: AppTexts.contentRegular.copyWith(
                     color: AppColors.neutral600,
                   ),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 40),
+                const SizedBox(height: 32),
                 
-                // زر هيا بنا
+                // زر تسجيل الدخول
                 SizedBox(
                   width: double.infinity,
                   height: 50,
@@ -211,7 +218,7 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
                       ),
                     ),
                     child: Text(
-                      'هيا بنا',
+                      'تسجيل الدخول',
                       style: AppTexts.contentEmphasis.copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.w600,
@@ -219,6 +226,7 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
                     ),
                   ),
                 ),
+                const SizedBox(height: 20),
               ],
             ),
           ),

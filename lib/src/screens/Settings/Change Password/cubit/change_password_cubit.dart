@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../../utils/error_translator.dart';
 import 'change_password_state.dart';
 
 class ChangePasswordCubit extends Cubit<ChangePasswordState> {
@@ -77,7 +78,8 @@ class ChangePasswordCubit extends Cubit<ChangePasswordState> {
         switch (e.response?.statusCode) {
           case 400:
             if (e.response?.data != null && e.response?.data['message'] != null) {
-              emit(ChangePasswordError(e.response?.data['message']));
+              final translatedMessage = ErrorTranslator.translateError(e.response?.data['message']);
+              emit(ChangePasswordError(translatedMessage));
             } else {
               emit(ChangePasswordError('كلمة المرور القديمة غير صحيحة'));
             }

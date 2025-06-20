@@ -79,7 +79,25 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           }
           if (state is ProfileUpdateSuccess) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('تم تحديث البيانات بنجاح')),
+              SnackBar(
+                content: Directionality(
+                  textDirection: TextDirection.rtl,
+                  child: Text(
+                    'تم تحديث البيانات بنجاح',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    textAlign: TextAlign.right,
+                  ),
+                ),
+                backgroundColor: AppColors.green200,
+                duration: Duration(seconds: 3),
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
             );
             // تنظيف الصورة المحددة بعد النجاح
             setState(() {
@@ -200,7 +218,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Text(
-                                        "لقد قدم باضافة صوره جديده",
+                                        "لقد قمت باضافة صوره جديده",
                                         style: AppTexts.contentRegular.copyWith(
                                           color: Colors.green.shade700,
                                           fontSize: 12,

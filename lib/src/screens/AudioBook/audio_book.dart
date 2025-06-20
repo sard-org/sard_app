@@ -376,47 +376,67 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
   }
 
   void _showOrderSuccessDialog() {
-    showDialog(
+    showModalBottomSheet(
       context: context,
-      barrierDismissible: false,
+      isDismissible: false,
+      enableDrag: false,
+      backgroundColor: Colors.transparent,
       builder: (BuildContext context) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+        return Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(20),
+              topRight: Radius.circular(20),
+            ),
           ),
-          child: Container(
-            padding: EdgeInsets.all(24),
+          child: Padding(
+            padding: const EdgeInsets.all(30),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Title
+                // العنوان
                 Text(
                   'تم شراء الكتاب بنجاح',
                   style: AppTexts.heading2Bold.copyWith(
-                    color: AppColors.neutral800,
+                    color: AppColors.neutral1000,
                   ),
                   textAlign: TextAlign.center,
                 ),
-                SizedBox(height: 24),
+                
+                SizedBox(height: 20),
+                
+                // خط فاصل
+                Container(
+                  height: 1,
+                  width: double.infinity,
+                  color: AppColors.neutral300,
+                ),
+                
+                SizedBox(height: 30),
 
                 // Success Icon
                 Container(
-                  width: 80,
-                  height: 80,
+                  width: 120,
+                  height: 120,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: AppColors.green200.withOpacity(0.1),
-                    border: Border.all(
+                    color: AppColors.green200.withOpacity(0.2),
+                  ),
+                  child: Container(
+                    margin: EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
                       color: AppColors.green200,
-                      width: 2,
+                    ),
+                    child: Icon(
+                      Icons.check,
+                      size: 30,
+                      color: Colors.white,
                     ),
                   ),
-                  child: Icon(
-                    Icons.check,
-                    size: 40,
-                    color: AppColors.green200,
-                  ),
                 ),
+                
                 SizedBox(height: 24),
 
                 // Success Message
@@ -430,7 +450,7 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
                       TextSpan(
                         text: 'وضافناه لمكتبتك',
                         style: AppTexts.heading3Bold.copyWith(
-                          color: AppColors.green200, // غيّر اللون حسب النظام عندك
+                          color: AppColors.green200,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -450,12 +470,13 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
                   ),
                   textAlign: TextAlign.center,
                 ),
+                
                 SizedBox(height: 32),
 
                 // Buttons
                 Row(
                   children: [
-                    // كتبي Button
+                    // الرئيسية Button
                     Expanded(
                       child: OutlinedButton(
                         onPressed: () {
@@ -465,7 +486,7 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
                             context,
                             MaterialPageRoute(
                               builder: (context) =>
-                                  MainScreen(initialIndex: 0), // 1 = Books tab
+                                  MainScreen(initialIndex: 0), // 0 = Home tab
                             ),
                             (route) => false,
                           );
@@ -486,7 +507,7 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
                       ),
                     ),
                     SizedBox(width: 16),
-                    // الرئيسية Button
+                    // كتبي Button
                     Expanded(
                       child: ElevatedButton(
                         onPressed: () {
@@ -496,7 +517,7 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
                             context,
                             MaterialPageRoute(
                               builder: (context) =>
-                                  MainScreen(initialIndex: 1), // 0 = Home tab
+                                  MainScreen(initialIndex: 1), // 1 = Books tab
                             ),
                             (route) => false,
                           );
@@ -518,6 +539,8 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
                     ),
                   ],
                 ),
+                
+                SizedBox(height: 20),
               ],
             ),
           ),
