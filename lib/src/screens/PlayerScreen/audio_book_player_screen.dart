@@ -805,13 +805,27 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
                 borderRadius: BorderRadius.circular(16),
               ),
               title: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Expanded(
-                    child: Text(
-                      'تقييم الكتاب',
-                      style: AppTexts.heading2Bold,
-                      textAlign: TextAlign.right,
+                    child: RichText(
+                      textAlign: TextAlign.center,
+                      text: TextSpan(
+                        style: AppTexts.heading2Bold,
+                        children: [
+                          TextSpan(text: 'تقييم '  ,
+                              style: AppTexts.heading2Bold.copyWith(
+                                color: AppColors.neutral1000,
+                              ),),
+
+                          TextSpan(
+                            text: 'الكتاب',
+                            style: AppTexts.heading2Bold.copyWith(
+                              color: AppColors.primary500,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ],
@@ -825,55 +839,66 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
                     textAlign: TextAlign.center,
                   ),
                   SizedBox(height: 24),
-                  // Stars with hover effect
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: List.generate(5, (index) {
-                      final starNumber = index + 1;
-                      final isActive = (hoveredRating > 0
-                              ? hoveredRating
-                              : selectedRating) >=
-                          starNumber;
+                  // Stars with hover effect (RTL - Right to Left)
+                  Container(
+                    padding: EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary100 ?? AppColors.primary100.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: AppColors.primary200.withOpacity(0.5),
+                        width: 1,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(5, (index) {
+                        final starNumber = 5 - index; // Reverse for RTL
+                        final isActive = (hoveredRating > 0
+                                ? hoveredRating
+                                : selectedRating) >=
+                            starNumber;
 
-                      return GestureDetector(
-                        onTap: _isSubmittingRating
-                            ? null
-                            : () {
-                                setDialogState(() {
-                                  selectedRating = starNumber;
-                                  hoveredRating =
-                                      0; // Reset hover when selected
-                                });
-                              },
-                        onTapDown: (_) {
-                          if (!_isSubmittingRating) {
+                        return GestureDetector(
+                          onTap: _isSubmittingRating
+                              ? null
+                              : () {
+                                  setDialogState(() {
+                                    selectedRating = starNumber;
+                                    hoveredRating =
+                                        0; // Reset hover when selected
+                                  });
+                                },
+                          onTapDown: (_) {
+                            if (!_isSubmittingRating) {
+                              setDialogState(() {
+                                hoveredRating = starNumber;
+                              });
+                            }
+                          },
+                          onTapCancel: () {
                             setDialogState(() {
-                              hoveredRating = starNumber;
+                              hoveredRating = 0;
                             });
-                          }
-                        },
-                        onTapCancel: () {
-                          setDialogState(() {
-                            hoveredRating = 0;
-                          });
-                        },
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 4),
-                          child: AnimatedContainer(
-                            duration: Duration(milliseconds: 150),
-                            child: Icon(
-                              isActive ? Icons.star : Icons.star_border,
-                              size: 40,
-                              color: isActive
-                                  ? (hoveredRating == starNumber
-                                      ? Colors.amber.shade400
-                                      : Colors.amber)
-                                  : Colors.grey.shade400,
+                          },
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 4),
+                            child: AnimatedContainer(
+                              duration: Duration(milliseconds: 150),
+                              child: Icon(
+                                isActive ? Icons.star : Icons.star_border,
+                                size: 40,
+                                color: isActive
+                                    ? (hoveredRating == starNumber
+                                        ? Colors.amber.shade400
+                                        : Colors.amber)
+                                    : Colors.grey.shade400,
+                              ),
                             ),
                           ),
-                        ),
-                      );
-                    }),
+                        );
+                      }),
+                    ),
                   ),
                   SizedBox(height: 16),
                   // Show selected rating text
@@ -894,29 +919,56 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
                       ),
                     ),
                     SizedBox(height: 12),
-                    // Confirm button
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: _isSubmittingRating
-                            ? null
-                            : () async {
-                                await _submitRating(
-                                    selectedRating, setDialogState);
-                              },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary500,
-                          foregroundColor: Colors.white,
-                          padding: EdgeInsets.symmetric(vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
+                    // Action buttons
+                    Column(
+                      children: [
+                        // Confirm button
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: _isSubmittingRating
+                                ? null
+                                : () async {
+                                    await _submitRating(
+                                        selectedRating, setDialogState);
+                                  },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primary500,
+                              foregroundColor: Colors.white,
+                              padding: EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: Text(
+                              'تأكيد التقييم',
+                              style: AppTexts.contentBold,
+                            ),
                           ),
                         ),
-                        child: Text(
-                          'تأكيد التقييم',
-                          style: AppTexts.contentBold,
+                        SizedBox(height: 8),
+                        // Cancel button
+                        SizedBox(
+                          width: double.infinity,
+                          child: OutlinedButton(
+                            onPressed: _isSubmittingRating
+                                ? null
+                                : () => Navigator.of(context).pop(),
+                            style: OutlinedButton.styleFrom(
+                              side: BorderSide(color: AppColors.primary500),
+                              foregroundColor: AppColors.primary500,
+                              padding: EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: Text(
+                              'إلغاء',
+                              style: AppTexts.contentBold,
+                            ),
+                          ),
                         ),
-                      ),
+                      ],
                     ),
                   ] else ...[
                     Text(
@@ -952,21 +1004,7 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
                   ],
                 ],
               ),
-              actions: [
-                TextButton(
-                  onPressed: _isSubmittingRating
-                      ? null
-                      : () => Navigator.of(context).pop(),
-                  child: Text(
-                    'إلغاء',
-                    style: TextStyle(
-                      color: _isSubmittingRating
-                          ? AppColors.neutral400
-                          : AppColors.neutral600,
-                    ),
-                  ),
-                ),
-              ],
+              actions: [],
             );
           },
         );
