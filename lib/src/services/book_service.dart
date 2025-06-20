@@ -54,4 +54,37 @@ class BookService {
       throw Exception('فشل في الحصول على الملخص: $e');
     }
   }
+
+  Future<Map<String, dynamic>> addBookReview(
+      String bookId, int numberOfStars) async {
+    try {
+      final response = await _dio.post(
+        '/books/$bookId/review',
+        data: {'numberOfStars': numberOfStars},
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return response.data;
+      } else {
+        throw Exception('فشل في إضافة التقييم');
+      }
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 400) {
+        // User has already reviewed this book
+        if (e.response?.data != null && e.response!.data['message'] != null) {
+          throw Exception(e.response!.data['message']);
+        } else {
+          throw Exception('لقد قمت بتقييم هذا الكتاب مسبقاً');
+        }
+      } else if (e.response?.statusCode == 404) {
+        throw Exception('الكتاب غير موجود');
+      } else if (e.response?.statusCode == 401) {
+        throw Exception('يجب تسجيل الدخول أولاً');
+      } else {
+        throw Exception('فشل في إضافة التقييم');
+      }
+    } catch (e) {
+      throw Exception('فشل في إضافة التقييم: $e');
+    }
+  }
 }

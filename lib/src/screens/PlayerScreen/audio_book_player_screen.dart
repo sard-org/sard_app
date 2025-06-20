@@ -38,6 +38,7 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
   String? _audioError;
   bool _isPlaying = false;
   Timer? _playbackTimer;
+  bool _isSubmittingRating = false;
 
   // Get book ID and order ID from widget
   late final String? bookId;
@@ -338,14 +339,16 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
       try {
         if (bookId != null) {
           summary = await _apiService!.getBookSummary(bookId!);
-          print('AI Summary fetched successfully: ${summary.length} characters');
+          print(
+              'AI Summary fetched successfully: ${summary.length} characters');
         } else {
           throw Exception('معرف الكتاب غير متوفر');
         }
       } catch (apiError) {
         print('API Summary failed: $apiError');
         // Fallback to book description if API fails
-        if (_bookData?.description != null && _bookData!.description.isNotEmpty) {
+        if (_bookData?.description != null &&
+            _bookData!.description.isNotEmpty) {
           summary = _bookData!.description;
           print('Using book description as fallback summary');
         } else {
@@ -353,7 +356,7 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
           throw apiError;
         }
       }
-      
+
       setState(() {
         _bookSummary = summary;
         _isLoadingSummary = false;
@@ -520,9 +523,9 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
           children: [
             // النجوم والتقييم
             GestureDetector(
-              onTap: () {},
+              onTap: _showRatingDialog,
               child: Text(
-                'إضافة تعليق',
+                'إضافة تقييم',
                 style: AppTexts.contentBold.copyWith(
                     color: AppColors.primary700,
                     decoration: TextDecoration.underline),
@@ -548,16 +551,12 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
                 ),
               ],
             ),
-            // زر إضافة تعليق
+            // زر إضافة تقييم
           ],
         ),
       ],
     );
   }
-
-
-
-
 
   Future<void> _handleTextToSpeech() async {
     if (_bookSummary == null || _bookSummary!.isEmpty) {
@@ -693,8 +692,6 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
     }
   }
 
-
-
   void _playSampleAudio() async {
     if (_isLoadingAudio || _audioError != null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -707,7 +704,7 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
       );
       return;
     }
-    
+
     try {
       if (_audioBookService.isPlaying) {
         await _audioBookService.stopAudio();
@@ -746,7 +743,9 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
           ],
         ),
         child: Icon(
-          (_audioBookService.isPlaying || _isPlaying) ? Icons.pause : Icons.play_arrow,
+          (_audioBookService.isPlaying || _isPlaying)
+              ? Icons.pause
+              : Icons.play_arrow,
           size: 35,
           color: Colors.white,
         ),
@@ -792,6 +791,290 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
     );
   }
 
+  void _showRatingDialog() {
+    int hoveredRating = 0; // Track which star is being hovered/touched
+    int selectedRating = 0; // Track selected rating
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Expanded(
+                    child: Text(
+                      'تقييم الكتاب',
+                      style: AppTexts.heading2Bold,
+                      textAlign: TextAlign.right,
+                    ),
+                  ),
+                ],
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'كم نجمة تعطي لهذا الكتاب؟',
+                    style: AppTexts.contentRegular,
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: 24),
+                  // Stars with hover effect
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(5, (index) {
+                      final starNumber = index + 1;
+                      final isActive = (hoveredRating > 0
+                              ? hoveredRating
+                              : selectedRating) >=
+                          starNumber;
+
+                      return GestureDetector(
+                        onTap: _isSubmittingRating
+                            ? null
+                            : () {
+                                setDialogState(() {
+                                  selectedRating = starNumber;
+                                  hoveredRating =
+                                      0; // Reset hover when selected
+                                });
+                              },
+                        onTapDown: (_) {
+                          if (!_isSubmittingRating) {
+                            setDialogState(() {
+                              hoveredRating = starNumber;
+                            });
+                          }
+                        },
+                        onTapCancel: () {
+                          setDialogState(() {
+                            hoveredRating = 0;
+                          });
+                        },
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 4),
+                          child: AnimatedContainer(
+                            duration: Duration(milliseconds: 150),
+                            child: Icon(
+                              isActive ? Icons.star : Icons.star_border,
+                              size: 40,
+                              color: isActive
+                                  ? (hoveredRating == starNumber
+                                      ? Colors.amber.shade400
+                                      : Colors.amber)
+                                  : Colors.grey.shade400,
+                            ),
+                          ),
+                        ),
+                      );
+                    }),
+                  ),
+                  SizedBox(height: 16),
+                  // Show selected rating text
+                  if (selectedRating > 0) ...[
+                    Container(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary100,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        'التقييم المختار: $selectedRating ${_getRatingText(selectedRating)}',
+                        style: AppTexts.contentBold.copyWith(
+                          color: AppColors.primary700,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    SizedBox(height: 12),
+                    // Confirm button
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: _isSubmittingRating
+                            ? null
+                            : () async {
+                                await _submitRating(
+                                    selectedRating, setDialogState);
+                              },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary500,
+                          foregroundColor: Colors.white,
+                          padding: EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: Text(
+                          'تأكيد التقييم',
+                          style: AppTexts.contentBold,
+                        ),
+                      ),
+                    ),
+                  ] else ...[
+                    Text(
+                      'اضغط على النجوم لاختيار التقييم',
+                      style: AppTexts.captionRegular.copyWith(
+                        color: AppColors.neutral500,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                  if (_isSubmittingRating) ...[
+                    SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: AppColors.primary500,
+                          ),
+                        ),
+                        SizedBox(width: 12),
+                        Text(
+                          'جاري إرسال التقييم...',
+                          style: AppTexts.contentRegular.copyWith(
+                            color: AppColors.neutral500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: _isSubmittingRating
+                      ? null
+                      : () => Navigator.of(context).pop(),
+                  child: Text(
+                    'إلغاء',
+                    style: TextStyle(
+                      color: _isSubmittingRating
+                          ? AppColors.neutral400
+                          : AppColors.neutral600,
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  String _getRatingText(int rating) {
+    switch (rating) {
+      case 1:
+        return '⭐ (ضعيف)';
+      case 2:
+        return '⭐⭐ (مقبول)';
+      case 3:
+        return '⭐⭐⭐ (جيد)';
+      case 4:
+        return '⭐⭐⭐⭐ (ممتاز)';
+      case 5:
+        return '⭐⭐⭐⭐⭐ (رائع)';
+      default:
+        return '';
+    }
+  }
+
+  Future<void> _submitRating(int rating, StateSetter setDialogState) async {
+    if (bookId == null) {
+      Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Directionality(
+            textDirection: TextDirection.rtl,
+            child: Text('معرف الكتاب غير متوفر'),
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    setDialogState(() {
+      _isSubmittingRating = true;
+    });
+    try {
+      await _bookService.addBookReview(bookId!, rating);
+
+      Navigator.of(context).pop(); // Close dialog
+
+      // Show success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Directionality(
+            textDirection: TextDirection.rtl,
+            child: Text('تم إضافة تقييمك بنجاح! شكراً لك'),
+          ),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 3),
+        ),
+      );
+
+      // Optionally, refresh the book data to show updated rating
+      // You might want to reload the book data here if needed
+    } catch (e) {
+      setDialogState(() {
+        _isSubmittingRating = false;
+      });
+
+      String errorMessage = e.toString().replaceAll('Exception: ', '');
+
+      // Handle specific error messages
+      if (errorMessage.contains('already reviewed') ||
+          errorMessage.contains('لقد قمت بتقييم')) {
+        Navigator.of(context).pop(); // Close dialog
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Directionality(
+              textDirection: TextDirection.rtl,
+              child: Text('لقد قمت بتقييم هذا الكتاب مسبقاً'),
+            ),
+            backgroundColor: Colors.orange,
+            duration: Duration(seconds: 3),
+          ),
+        );
+      } else {
+        // Show error in dialog
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('خطأ في التقييم'),
+              content: Text(errorMessage),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: Text('موافق'),
+                ),
+              ],
+            );
+          },
+        );
+      }
+    }
+
+    setState(() {
+      _isSubmittingRating = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -819,132 +1102,134 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
                     ),
                   ),
                   Container(
-                color: Colors.white,
-                child: Column(
-                  children: [
-                    // AI Summary Button
-                    SizedBox(
-                      width: double.infinity,
-                      child: OutlinedButton.icon(
-                        style: OutlinedButton.styleFrom(
-                          side: BorderSide(color: AppColors.primary200),
-                          padding: EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        icon: Icon(Icons.smart_toy_outlined,
-                            color: AppColors.primary200, size: 24),
-                        label: Text('تلخيص بواسطة الذكاء الاصطناعي',
-                            style: AppTexts.highlightAccent
-                                .copyWith(color: AppColors.primary200)),
-                        onPressed: _openAISummary,
-                      ),
-                    ),
-                    SizedBox(height: 24),
-                    // Progress Slider
-                    SliderTheme(
-                      data: SliderThemeData(
-                        trackHeight: 4,
-                        thumbShape:
-                            RoundSliderThumbShape(enabledThumbRadius: 8),
-                        overlayShape:
-                            RoundSliderOverlayShape(overlayRadius: 16),
-                        activeTrackColor: AppColors.primary500,
-                        inactiveTrackColor: Colors.grey.shade300,
-                        thumbColor: AppColors.primary500,
-                      ),
-                      child: Slider(
-                        value: _audioBookService.progress,
-                        onChanged: (value) {
-                          // TODO: Implement seek functionality
-                        },
-                      ),
-                    ),
-                    // Progress indicators
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            (_audioBookService.isPlaying || _isPlaying) ? 'يتم التشغيل...' : 'متوقف',
-                            style: AppTexts.captionBold,
-                          ),
-                          Text(
-                            '${(_bookData?.duration ?? 0) ~/ 60} دقيقة',
-                            style: AppTexts.captionBold,
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 16),
-                    // Playback controls
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                    color: Colors.white,
+                    child: Column(
                       children: [
-                        _buildCircleButton(
-                          icon: Icons.replay_10,
-                          onTap: () {
-                            // TODO: Implement 10 second rewind
-                            print('Rewind 10 seconds');
-                          },
+                        // AI Summary Button
+                        SizedBox(
+                          width: double.infinity,
+                          child: OutlinedButton.icon(
+                            style: OutlinedButton.styleFrom(
+                              side: BorderSide(color: AppColors.primary200),
+                              padding: EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            icon: Icon(Icons.smart_toy_outlined,
+                                color: AppColors.primary200, size: 24),
+                            label: Text('تلخيص بواسطة الذكاء الاصطناعي',
+                                style: AppTexts.highlightAccent
+                                    .copyWith(color: AppColors.primary200)),
+                            onPressed: _openAISummary,
+                          ),
                         ),
-                        SizedBox(width: 32),
-                        _buildPlayButton(),
-                        SizedBox(width: 32),
-                        _buildCircleButton(
-                          icon: Icons.forward_10,
-                          onTap: () {
-                            // TODO: Implement 10 second forward
-                            print('Forward 10 seconds');
-                          },
+                        SizedBox(height: 24),
+                        // Progress Slider
+                        SliderTheme(
+                          data: SliderThemeData(
+                            trackHeight: 4,
+                            thumbShape:
+                                RoundSliderThumbShape(enabledThumbRadius: 8),
+                            overlayShape:
+                                RoundSliderOverlayShape(overlayRadius: 16),
+                            activeTrackColor: AppColors.primary500,
+                            inactiveTrackColor: Colors.grey.shade300,
+                            thumbColor: AppColors.primary500,
+                          ),
+                          child: Slider(
+                            value: _audioBookService.progress,
+                            onChanged: (value) {
+                              // TODO: Implement seek functionality
+                            },
+                          ),
                         ),
-                      ],
-                    ),
-                    SizedBox(height: 16),
-                    Center(
-                      child: _isLoadingAudio
-                          ? Column(
-                              children: [
-                                CircularProgressIndicator(
-                                  color: AppColors.primary500,
-                                ),
-                                SizedBox(height: 8),
-                                Text(
-                                  'جاري تحميل الكتاب الصوتي...',
-                                  style: AppTexts.contentRegular.copyWith(
-                                    color: AppColors.neutral500,
-                                  ),
-                                ),
-                              ],
-                            )
-                          : _audioError != null
+                        // Progress indicators
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                (_audioBookService.isPlaying || _isPlaying)
+                                    ? 'يتم التشغيل...'
+                                    : 'متوقف',
+                                style: AppTexts.captionBold,
+                              ),
+                              Text(
+                                '${(_bookData?.duration ?? 0) ~/ 60} دقيقة',
+                                style: AppTexts.captionBold,
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(height: 16),
+                        // Playback controls
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            _buildCircleButton(
+                              icon: Icons.replay_10,
+                              onTap: () {
+                                // TODO: Implement 10 second rewind
+                                print('Rewind 10 seconds');
+                              },
+                            ),
+                            SizedBox(width: 32),
+                            _buildPlayButton(),
+                            SizedBox(width: 32),
+                            _buildCircleButton(
+                              icon: Icons.forward_10,
+                              onTap: () {
+                                // TODO: Implement 10 second forward
+                                print('Forward 10 seconds');
+                              },
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 16),
+                        Center(
+                          child: _isLoadingAudio
                               ? Column(
                                   children: [
-                                    Icon(
-                                      Icons.error_outline,
-                                      size: 32,
-                                      color: Colors.red,
+                                    CircularProgressIndicator(
+                                      color: AppColors.primary500,
                                     ),
                                     SizedBox(height: 8),
                                     Text(
-                                      'خطأ في تحميل الصوت: $_audioError',
-                                      style: TextStyle(color: Colors.red),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                    SizedBox(height: 8),
-                                    ElevatedButton(
-                                      onPressed: _loadAudioBook,
-                                      child: Text('إعادة المحاولة'),
+                                      'جاري تحميل الكتاب الصوتي...',
+                                      style: AppTexts.contentRegular.copyWith(
+                                        color: AppColors.neutral500,
+                                      ),
                                     ),
                                   ],
                                 )
-                              : SizedBox.shrink(),
+                              : _audioError != null
+                                  ? Column(
+                                      children: [
+                                        Icon(
+                                          Icons.error_outline,
+                                          size: 32,
+                                          color: Colors.red,
+                                        ),
+                                        SizedBox(height: 8),
+                                        Text(
+                                          'خطأ في تحميل الصوت: $_audioError',
+                                          style: TextStyle(color: Colors.red),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                        SizedBox(height: 8),
+                                        ElevatedButton(
+                                          onPressed: _loadAudioBook,
+                                          child: Text('إعادة المحاولة'),
+                                        ),
+                                      ],
+                                    )
+                                  : SizedBox.shrink(),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              ),
+                  ),
                 ],
               ),
             ),
