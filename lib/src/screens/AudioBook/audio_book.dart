@@ -277,7 +277,7 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
           throw apiError;
         }
       }
-      
+
       setState(() {
         _bookSummary = summary;
         _isLoadingSummary = false;
@@ -393,7 +393,7 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
                   textAlign: TextAlign.center,
                 ),
                 SizedBox(height: 24),
-                
+
                 // Success Icon
                 Container(
                   width: 80,
@@ -413,7 +413,7 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
                   ),
                 ),
                 SizedBox(height: 24),
-                
+
                 // Success Message
                 Text(
                   'تم تفعيل الكتاب بنجاح، وضافناه لمكتبتك',
@@ -423,7 +423,7 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
                   textAlign: TextAlign.center,
                 ),
                 SizedBox(height: 16),
-                
+
                 // Description
                 Text(
                   "استعد لرحلة صوتية ممتعة – تقدر تبدأ الاستماع الآن أو ترجع له بأي وقت يناسبك",
@@ -434,7 +434,7 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
                   textAlign: TextAlign.center,
                 ),
                 SizedBox(height: 32),
-                
+
                 // Buttons
                 Row(
                   children: [
@@ -443,8 +443,15 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
                       child: OutlinedButton(
                         onPressed: () {
                           Navigator.pop(context); // Close dialog
-                          // Navigate to books screen
-                          Navigator.pop(context); // Go back to previous screen (probably books list)
+                          // Navigate to books screen (MainScreen with Books tab)
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  MainScreen(initialIndex: 1), // 1 = Books tab
+                            ),
+                            (route) => false,
+                          );
                         },
                         style: OutlinedButton.styleFrom(
                           side: BorderSide(color: AppColors.primary500),
@@ -462,14 +469,20 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
                       ),
                     ),
                     SizedBox(width: 16),
-                    
                     // الرئيسية Button
                     Expanded(
                       child: ElevatedButton(
                         onPressed: () {
                           Navigator.pop(context); // Close dialog
-                          // Navigate to home - go back to root and push home
-                          Navigator.of(context).popUntil((route) => route.isFirst);
+                          // Navigate to home - MainScreen with Home tab
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  MainScreen(initialIndex: 0), // 0 = Home tab
+                            ),
+                            (route) => false,
+                          );
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primary500,
@@ -503,7 +516,7 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
       });
 
       final response = await _apiService.orderBook(widget.bookId);
-      
+
       if (response.paymentUrl != null) {
         final Uri url = Uri.parse(response.paymentUrl!);
         try {
@@ -535,8 +548,9 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
             isBookOwned = true;
             _orderId = response.orderId; // Store the order ID
           });
-          print('Book order successful! OrderId: ${response.orderId}, isBookOwned: $isBookOwned');
-          
+          print(
+              'Book order successful! OrderId: ${response.orderId}, isBookOwned: $isBookOwned');
+
           // Show success popup
           _showOrderSuccessDialog();
         }
@@ -621,7 +635,8 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
       return const SizedBox.shrink();
     }
 
-    print('Building bottom bar - isBookOwned: $isBookOwned, orderId: $_orderId');
+    print(
+        'Building bottom bar - isBookOwned: $isBookOwned, orderId: $_orderId');
     String buttonText = '';
     Color buttonColor = AppColors.primary500;
     bool isEnabled = true;
@@ -643,7 +658,8 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
 
     if (isBookOwned) {
       buttonText = 'ابدأ الاستماع الآن';
-      print('Button should show: ابدأ الاستماع الآن (isBookOwned: $isBookOwned, orderId: $_orderId)');
+      print(
+          'Button should show: ابدأ الاستماع الآن (isBookOwned: $isBookOwned, orderId: $_orderId)');
     } else if (bookData?.isFree ?? false) {
       buttonText = 'احصل عليه مجانا';
     } else if (bookData?.price != null) {
@@ -810,8 +826,10 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
                                     child: Image.network(
                                       bookData?.cover ?? '',
                                       fit: BoxFit.cover,
-                                      loadingBuilder: (context, child, loadingProgress) {
-                                        if (loadingProgress == null) return child;
+                                      loadingBuilder:
+                                          (context, child, loadingProgress) {
+                                        if (loadingProgress == null)
+                                          return child;
                                         return Container(
                                           color: Colors.grey[200],
                                           child: Center(
@@ -822,8 +840,9 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
                                           ),
                                         );
                                       },
-                                      errorBuilder: (context, error, stackTrace) =>
-                                          Image.asset(
+                                      errorBuilder:
+                                          (context, error, stackTrace) =>
+                                              Image.asset(
                                         'assets/img/Book_1.png',
                                         fit: BoxFit.cover,
                                       ),
@@ -853,15 +872,19 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
                                                 children: [
                                                   TextSpan(
                                                     text: '${bookData!.price}',
-                                                    style: AppTexts.heading1Bold.copyWith(
+                                                    style: AppTexts.heading1Bold
+                                                        .copyWith(
                                                       color: Colors.green[800],
                                                       fontSize: 28,
                                                     ),
                                                   ),
                                                   TextSpan(
                                                     text: 'ج.م',
-                                                    style: AppTexts.captionRegular.copyWith(
-                                                      color: AppColors.neutral500,
+                                                    style: AppTexts
+                                                        .captionRegular
+                                                        .copyWith(
+                                                      color:
+                                                          AppColors.neutral500,
                                                       fontSize: 18,
                                                     ),
                                                   ),
@@ -879,8 +902,11 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
                                                     SizedBox(width: 4),
                                                     Text(
                                                       '${bookData!.pricePoints}',
-                                                      style: AppTexts.heading1Bold.copyWith(
-                                                        color: Colors.green[800],
+                                                      style: AppTexts
+                                                          .heading1Bold
+                                                          .copyWith(
+                                                        color:
+                                                            Colors.green[800],
                                                         fontSize: 28,
                                                       ),
                                                     ),
@@ -893,7 +919,8 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
                                       Text(
                                         bookData?.author.name ?? '',
                                         style: AppTexts.highlightEmphasis
-                                            .copyWith(color: AppColors.neutral500),
+                                            .copyWith(
+                                                color: AppColors.neutral500),
                                         textAlign: TextAlign.right,
                                       ),
                                     ],
@@ -927,7 +954,9 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
                                   ...List.generate(
                                       5,
                                       (index) => Icon(
-                                            index < (bookData?.rating ?? 0).floor()
+                                            index <
+                                                    (bookData?.rating ?? 0)
+                                                        .floor()
                                                 ? Icons.star
                                                 : Icons.star_border,
                                             color: Colors.amber,
