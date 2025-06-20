@@ -177,7 +177,7 @@ class _BookCardWidgetState extends State<BookCardWidget> {
                       widget.author,
                       style: AppTexts.captionRegular
                           .copyWith(color: AppColors.neutral500),
-                      maxLines: 2,
+                      maxLines: 1, // سطر واحد فقط
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 8),
@@ -188,7 +188,7 @@ class _BookCardWidgetState extends State<BookCardWidget> {
                             color: AppColors.neutral900,
                             fontWeight: FontWeight.w600,
                           ),
-                      maxLines: 2,
+                      maxLines: 3,
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 12),
