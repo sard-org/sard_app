@@ -1193,6 +1193,7 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
                         color: AppColors.neutral700,
                       ),
                       textAlign: TextAlign.center,
+                      textDirection: TextDirection.rtl,
                     ),
                   ],
                 ),

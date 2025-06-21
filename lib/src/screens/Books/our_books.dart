@@ -72,9 +72,24 @@ class _BookListScreenState extends State<BookListScreen> {
                   child: BlocBuilder<BooksCubit, BooksState>(
                     builder: (context, state) {
                       if (state is BooksLoading) {
-                        return Center(child: CircularProgressIndicator(
-                          color: AppColors.primary700,
-                        ));
+                        return Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              CircularProgressIndicator(
+                                color: AppColors.primary700,
+                              ),
+                              SizedBox(height: 16),
+                              Text(
+                                'جاري تحميل مكتبتك...',
+                                style: AppTexts.contentBold.copyWith(
+                                  color: AppColors.neutral700,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
+                        );
                       } else if (state is BooksLoaded) {
                         if (state.books.isEmpty) {
                           return RefreshIndicator(

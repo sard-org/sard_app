@@ -135,8 +135,21 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
         children: [
           if (_favoriteCubit == null)
             Center(
-              child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary500),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary500),
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    'جاري تحميل مفضلتك...',
+                    style: AppTexts.contentBold.copyWith(
+                      color: AppColors.neutral700,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
               ),
             )
           else
@@ -150,9 +163,22 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                       child: BlocBuilder<FavoriteCubit, FavoriteState>(
                         builder: (context, state) {
                           if (state is FavoriteLoadingState) {
-                            return const Center(
-                              child: CircularProgressIndicator(
-                                valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary500),
+                            return Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  CircularProgressIndicator(
+                                    valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary500),
+                                  ),
+                                  SizedBox(height: 16),
+                                  Text(
+                                    'جاري تحميل مفضلتك...',
+                                    style: AppTexts.contentBold.copyWith(
+                                      color: AppColors.neutral700,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
                               ),
                             );
                           } else if (state is FavoriteErrorState) {

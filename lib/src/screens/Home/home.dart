@@ -298,23 +298,48 @@ class HomeScreenState extends State<HomeScreen> {
       child: Directionality(
         textDirection: TextDirection.rtl,
         child: Scaffold(
-          body: Column(
-            children: [
-              Container(
-                  width: double.infinity,
-                padding: EdgeInsets.fromLTRB(16, 0, 16, 16),
-                decoration: BoxDecoration(
-                  color: AppColors.primary500,
-                  borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(12),
-                    bottomRight: Radius.circular(12),
+          body: BlocBuilder<HomeCubit, HomeState>(
+            builder: (context, state) {
+              // إذا كان يحمل، اعرض شاشة تحميل فقط
+              if (state is HomeLoading) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      CircularProgressIndicator(
+                        color: AppColors.primary500,
+                      ),
+                      SizedBox(height: 16),
+                      Text(
+                        'جارٍ تحميل الصفحة الرئيسية...',
+                        style: AppTexts.contentBold.copyWith(
+                          color: AppColors.neutral700,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
                   ),
-                ),
-                                  child: SafeArea(
-                    bottom: false,
-                    child: BlocBuilder<HomeCubit, HomeState>(
-                      builder: (context, state) {
-                        if (state is HomeLoaded) {
+                );
+              }
+
+              // إذا لم يكن يحمل، اعرض المحتوى العادي
+              return Column(
+                children: [
+                  Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.fromLTRB(16, 0, 16, 16),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary500,
+                      borderRadius: BorderRadius.only(
+                        bottomLeft: Radius.circular(12),
+                        bottomRight: Radius.circular(12),
+                      ),
+                    ),
+                    child: SafeArea(
+                      bottom: false,
+                      child: BlocBuilder<HomeCubit, HomeState>(
+                        builder: (context, state) {
+                          if (state is HomeLoaded) {
                           UserModelhome user = state.user;
                           
                           // Generate dynamic streak icons for AppBar
@@ -442,183 +467,76 @@ class HomeScreenState extends State<HomeScreen> {
                             ],
                           );
                         } else {
-                          return Text(
-                            'جاري تحميل البيانات',
-                            style: AppTexts.heading1Bold.copyWith(
-                              color: AppColors.neutral100,
-                              fontSize: 24,
-                            ),
-                          );
+                          return SizedBox.shrink();
                         }
                       },
                     ),
                   ),
               ),
-              Expanded(
-                child: BaseScreen(
-                  child: BlocBuilder<HomeCubit, HomeState>(
-              builder: (context, state) {
-                if (state is HomeLoading) {
-                  return Center(child: CircularProgressIndicator());
-                } else if (state is HomeLoaded) {
-                  return RefreshIndicator(
-                    onRefresh: _refreshData,
-                    color: AppColors.primary500,
-                    backgroundColor: AppColors.neutral100,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(12),
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      SearchResultsScreen(searchQuery: ''),
-                                ),
-                              );
-                            },
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: AppColors.neutral100,
+                  Expanded(
+                    child: BaseScreen(
+                      child: RefreshIndicator(
+                        onRefresh: _refreshData,
+                        color: AppColors.primary500,
+                        backgroundColor: AppColors.neutral100,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Material(
+                              color: Colors.transparent,
+                              child: InkWell(
                                 borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: AppColors.neutral300),
-                              ),
-                                                              child: Directionality(
-                                  textDirection: TextDirection.rtl,
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 16, vertical: 12),
-                                    child: Row(
-                                      children: [
-                                        Text(
-                                          'عن ماذا تبحث؟',
-                                          style: AppTexts.contentEmphasis
-                                              .copyWith(color: AppColors.neutral600),
-                                        ),
-                                        const Spacer(),
-                                        Icon(Icons.search, color: AppColors.neutral600),
-                                      ],
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          SearchResultsScreen(searchQuery: ''),
                                     ),
+                                  );
+                                },
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: AppColors.neutral100,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(color: AppColors.neutral300),
                                   ),
-                                ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        Expanded(
-                          child: SingleChildScrollView(
-                            physics: AlwaysScrollableScrollPhysics(), // Important for RefreshIndicator
-                            child: CategorySection(key: _categorySectionKey),
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-              } else if (state is HomeError) {
-                return RefreshIndicator(
-                  onRefresh: _refreshData,
-                  child: SingleChildScrollView(
-                    physics: AlwaysScrollableScrollPhysics(),
-                    child: Container(
-                      height: MediaQuery.of(context).size.height - 200,
-                      child: Center(
-                        child: Padding(
-                          padding: EdgeInsets.all(24),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.error_outline,
-                                size: 80,
-                                color: AppColors.primary600,
-                              ),
-                              SizedBox(height: 24),
-                              RichText(
-                                textAlign: TextAlign.center,
-                                text: TextSpan(
-                                  text: 'عذراً، حدث خطأ أثناء تحميل ',
-                                  style: AppTexts.heading2Bold.copyWith(
-                                    color: AppColors.neutral700,
-                                  ),
-                                  children: [
-                                    TextSpan(
-                                      text: 'الصفحة الرئيسية',
-                                      style: AppTexts.heading2Bold.copyWith(
-                                        color: AppColors.red200,
+                                  child: Directionality(
+                                    textDirection: TextDirection.rtl,
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 16, vertical: 12),
+                                      child: Row(
+                                        children: [
+                                          Text(
+                                            'عن ماذا تبحث؟',
+                                            style: AppTexts.contentEmphasis
+                                                .copyWith(color: AppColors.neutral600),
+                                          ),
+                                          const Spacer(),
+                                          Icon(Icons.search, color: AppColors.neutral600),
+                                        ],
                                       ),
                                     ),
-                                  ],
-                                ),
-                              ),
-                              SizedBox(height: 16),
-                              Container(
-                                padding: EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  color: AppColors.primary100,
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(
-                                    color: AppColors.primary200,
-                                    width: 1,
-                                  ),
-                                ),
-                                child: Text(
-                                  state.message,
-                                  style: AppTexts.contentRegular.copyWith(
-                                    color: AppColors.neutral700,
-                                    height: 1.5,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                              SizedBox(height: 24),
-                              ElevatedButton(
-                                onPressed: () {
-                                  homeCubit.getUserData(forceRefresh: true);
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.primary500,
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: 32,
-                                    vertical: 12,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                ),
-                                child: Text(
-                                  'إعادة المحاولة',
-                                  style: AppTexts.contentBold.copyWith(
-                                    color: AppColors.neutral100,
                                   ),
                                 ),
                               ),
-                            ],
-                          ),
+                            ),
+                            const SizedBox(height: 12),
+                            Expanded(
+                              child: SingleChildScrollView(
+                                physics: AlwaysScrollableScrollPhysics(),
+                                child: CategorySection(key: _categorySectionKey),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
                   ),
-                );
-              }
-              return RefreshIndicator(
-                onRefresh: _refreshData,
-                child: SingleChildScrollView(
-                  physics: AlwaysScrollableScrollPhysics(),
-                  child: Container(
-                    height: MediaQuery.of(context).size.height - 200,
-                    child: SizedBox(),
-                  ),
-                ),
+                ],
               );
             },
-          ),
-        ),
-              ),
-            ],
           ),
         ),
       ),
