@@ -21,6 +21,11 @@ class _ChangePasswordState extends State<ChangePassword> {
   bool _obscureNewPassword = true;
   bool _obscureConfirmPassword = true;
   String? _passwordError;
+  
+  // متغيرات مؤشر قوة كلمة المرور
+  double _passwordStrength = 0.0;
+  String _passwordStrengthText = '';
+  Color _passwordStrengthColor = Colors.grey;
 
   @override
   void dispose() {
@@ -28,6 +33,84 @@ class _ChangePasswordState extends State<ChangePassword> {
     _newPasswordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
+  }
+
+  // دالة حساب قوة كلمة المرور
+  void _calculatePasswordStrength(String password) {
+    double strength = 0.0;
+    String strengthText = '';
+    Color strengthColor = Colors.grey;
+
+    if (password.isEmpty) {
+      setState(() {
+        _passwordStrength = 0.0;
+        _passwordStrengthText = '';
+        _passwordStrengthColor = Colors.grey;
+      });
+      return;
+    }
+
+    // الطول (8-20 حرف)
+    if (password.length >= 8 && password.length <= 20) strength += 0.2;
+    
+    // الأحرف الكبيرة
+    if (RegExp(r'[A-Z]').hasMatch(password)) strength += 0.2;
+    
+    // الأحرف الصغيرة
+    if (RegExp(r'[a-z]').hasMatch(password)) strength += 0.2;
+    
+    // الأرقام
+    if (RegExp(r'[0-9]').hasMatch(password)) strength += 0.2;
+    
+    // الرموز الخاصة
+    if (RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(password)) strength += 0.2;
+
+    // تحديد النص واللون بناءً على القوة
+    if (strength < 0.4) {
+      strengthText = 'ضعيفة';
+      strengthColor = AppColors.red100;
+    } else if (strength < 0.8) {
+      strengthText = 'متوسطة';
+      strengthColor = AppColors.yellow200;
+    } else {
+      strengthText = 'قوية';
+      strengthColor = AppColors.green200;
+    }
+
+    setState(() {
+      _passwordStrength = strength;
+      _passwordStrengthText = strengthText;
+      _passwordStrengthColor = strengthColor;
+    });
+  }
+
+  // دالة التحقق من صحة كلمة المرور
+  String? _validatePassword(String password) {
+    if (password.isEmpty) {
+      return 'كلمة المرور مطلوبة';
+    }
+    if (password.length < 8) {
+      return 'كلمة المرور يجب أن تكون 8 أحرف على الأقل';
+    }
+    if (password.length > 20) {
+      return 'كلمة المرور يجب ألا تزيد عن 20 حرف';
+    }
+    if (password.contains(' ')) {
+      return 'كلمة المرور لا يجب أن تحتوي على مسافات';
+    }
+    if (!RegExp(r'[A-Z]').hasMatch(password)) {
+      return 'كلمة المرور يجب أن تحتوي على حرف كبير (A-Z)';
+    }
+    if (!RegExp(r'[a-z]').hasMatch(password)) {
+      return 'كلمة المرور يجب أن تحتوي على حرف صغير (a-z)';
+    }
+    if (!RegExp(r'[0-9]').hasMatch(password)) {
+      return 'كلمة المرور يجب أن تحتوي على رقم';
+    }
+    if (!RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(password)) {
+      return 'كلمة المرور يجب أن تحتوي على رمز خاص (!@#\$%^&*)';
+    }
+    return null;
   }
 
   void _clearError() {
@@ -106,7 +189,11 @@ class _ChangePasswordState extends State<ChangePassword> {
                               _obscureNewPassword = !_obscureNewPassword;
                             });
                           },
-                          onChanged: (_) => _clearError(),
+                          onChanged: (value) {
+                            _clearError();
+                            _calculatePasswordStrength(value);
+                          },
+                          showStrengthIndicator: true,
                         ),
                         const SizedBox(height: 16),
                         _buildPasswordField(
@@ -119,8 +206,12 @@ class _ChangePasswordState extends State<ChangePassword> {
                               _obscureConfirmPassword = !_obscureConfirmPassword;
                             });
                           },
-                          onChanged: (_) => _clearError(),
+                          onChanged: (value) {
+                            _clearError();
+                            setState(() {}); // لتحديث شروط كلمة المرور
+                          },
                         ),
+                        _buildPasswordRequirements(),
 
                         if (_passwordError != null)
                           Padding(
@@ -223,7 +314,7 @@ class _ChangePasswordState extends State<ChangePassword> {
       bool obscureText,
       String hint,
       VoidCallback toggleVisibility,
-      {Function(String)? onChanged}
+{Function(String)? onChanged, bool showStrengthIndicator = false}
       ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end, // جعل العنوان على اليمين
@@ -261,8 +352,112 @@ class _ChangePasswordState extends State<ChangePassword> {
             ),
           ),
         ),
+        if (showStrengthIndicator && controller.text.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 8, right: 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Text(
+                      _passwordStrengthText,
+                      style: AppTexts.contentRegular.copyWith(
+                        color: _passwordStrengthColor,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      ': قوة كلمة المرور',
+                      style: AppTexts.contentAccent.copyWith(
+                        color: AppColors.neutral600,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Directionality(
+                  textDirection: TextDirection.rtl,
+                  child: LinearProgressIndicator(
+                    value: _passwordStrength,
+                    backgroundColor: AppColors.neutral300,
+                    valueColor: AlwaysStoppedAnimation<Color>(_passwordStrengthColor),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
         SizedBox(height: 12),
       ],
+    );
+  }
+
+  Widget _buildPasswordRequirements() {
+    final newPassword = _newPasswordController.text;
+    final confirmPassword = _confirmPasswordController.text;
+    
+    return Padding(
+      padding: const EdgeInsets.only(top: 8, right: 8, bottom: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Text(
+            ': شروط كلمة المرور',
+            style: AppTexts.contentAccent.copyWith(
+              color: AppColors.neutral600,
+            ),
+            textAlign: TextAlign.right,
+          ),
+          const SizedBox(height: 4),
+          _buildPasswordRequirement(
+            '8 أحرف علي الأقل و 20 حرف بحد أقصى', 
+            newPassword.length >= 8 && newPassword.length <= 20
+          ),
+          _buildPasswordRequirement(
+            'عدم وجود مسافات', 
+            !newPassword.contains(' ')
+          ),
+          _buildPasswordRequirement(
+            'تحتوي علي رقم ورمز',
+            RegExp(r'[0-9]').hasMatch(newPassword) && RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(newPassword)
+          ),
+          _buildPasswordRequirement(
+            'تحتوي علي حرف كبير (A-Z) و حرف صغير (a-z)', 
+            RegExp(r'[A-Z]').hasMatch(newPassword) && RegExp(r'[a-z]').hasMatch(newPassword)
+          ),
+          _buildPasswordRequirement(
+            'تطابق كلمة المرور', 
+            newPassword.isNotEmpty && confirmPassword.isNotEmpty && newPassword == confirmPassword
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPasswordRequirement(String requirement, bool isMet) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 2),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          Text(
+            requirement,
+            style: AppTexts.captionAccent.copyWith(
+              color: isMet ? Colors.green : AppColors.neutral500,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Icon(
+            isMet ? Icons.check_circle : Icons.radio_button_unchecked,
+            size: 14,
+            color: isMet ? Colors.green : AppColors.neutral400,
+          ),
+        ],
+      ),
     );
   }
 }

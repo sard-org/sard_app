@@ -27,12 +27,66 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
   // إضافة متغيرات لرسائل الخطأ
   String? _passwordError;
   String? _confirmPasswordError;
+  
+  // متغيرات مؤشر قوة كلمة المرور
+  double _passwordStrength = 0.0;
+  String _passwordStrengthText = '';
+  Color _passwordStrengthColor = Colors.grey;
 
   @override
   void dispose() {
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
+  }
+
+  // دالة حساب قوة كلمة المرور
+  void _calculatePasswordStrength(String password) {
+    double strength = 0.0;
+    String strengthText = '';
+    Color strengthColor = Colors.grey;
+
+    if (password.isEmpty) {
+      setState(() {
+        _passwordStrength = 0.0;
+        _passwordStrengthText = '';
+        _passwordStrengthColor = Colors.grey;
+      });
+      return;
+    }
+
+    // الطول (8-20 حرف)
+    if (password.length >= 8 && password.length <= 20) strength += 0.2;
+    
+    // الأحرف الكبيرة
+    if (RegExp(r'[A-Z]').hasMatch(password)) strength += 0.2;
+    
+    // الأحرف الصغيرة
+    if (RegExp(r'[a-z]').hasMatch(password)) strength += 0.2;
+    
+    // الأرقام
+    if (RegExp(r'[0-9]').hasMatch(password)) strength += 0.2;
+    
+    // الرموز الخاصة
+    if (RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(password)) strength += 0.2;
+
+    // تحديد النص واللون بناءً على القوة
+    if (strength < 0.4) {
+      strengthText = 'ضعيفة';
+      strengthColor = AppColors.red100;
+    } else if (strength < 0.8) {
+      strengthText = 'متوسطة';
+      strengthColor = AppColors.yellow200;
+    } else {
+      strengthText = 'قوية';
+      strengthColor = AppColors.green200;
+    }
+
+    setState(() {
+      _passwordStrength = strength;
+      _passwordStrengthText = strengthText;
+      _passwordStrengthColor = strengthColor;
+    });
   }
 
   // دالة التحقق من صحة كلمة المرور
@@ -43,11 +97,17 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
     if (password.length < 8) {
       return 'كلمة المرور يجب أن تكون 8 أحرف على الأقل';
     }
+    if (password.length > 20) {
+      return 'كلمة المرور يجب ألا تزيد عن 20 حرف';
+    }
+    if (password.contains(' ')) {
+      return 'كلمة المرور لا يجب أن تحتوي على مسافات';
+    }
     if (!RegExp(r'[A-Z]').hasMatch(password)) {
-      return 'كلمة المرور يجب أن تحتوي على حرف كبير';
+      return 'كلمة المرور يجب أن تحتوي على حرف كبير (A-Z)';
     }
     if (!RegExp(r'[a-z]').hasMatch(password)) {
-      return 'كلمة المرور يجب أن تحتوي على حرف صغير';
+      return 'كلمة المرور يجب أن تحتوي على حرف صغير (a-z)';
     }
     if (!RegExp(r'[0-9]').hasMatch(password)) {
       return 'كلمة المرور يجب أن تحتوي على رقم';
@@ -64,27 +124,12 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
       return 'تأكيد كلمة المرور مطلوب';
     }
     
-    // التحقق من جميع شروط كلمة المرور
-    if (confirmPassword.length < 8) {
-      return 'تأكيد كلمة المرور يجب أن يكون 8 أحرف على الأقل';
-    }
-    if (!RegExp(r'[A-Z]').hasMatch(confirmPassword)) {
-      return 'تأكيد كلمة المرور يجب أن يحتوي على حرف كبير';
-    }
-    if (!RegExp(r'[a-z]').hasMatch(confirmPassword)) {
-      return 'تأكيد كلمة المرور يجب أن يحتوي على حرف صغير';
-    }
-    if (!RegExp(r'[0-9]').hasMatch(confirmPassword)) {
-      return 'تأكيد كلمة المرور يجب أن يحتوي على رقم';
-    }
-    if (!RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(confirmPassword)) {
-      return 'تأكيد كلمة المرور يجب أن يحتوي على رمز خاص (!@#\$%^&*)';
-    }
-    
     if (password != confirmPassword) {
       return 'كلمة المرور وتأكيد كلمة المرور غير متطابقين';
     }
-    return null;
+    
+    // التحقق من نفس شروط كلمة المرور الأساسية
+    return _validatePassword(confirmPassword);
   }
 
   // دالة التحقق من صحة جميع البيانات
@@ -308,6 +353,7 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
                               });
                             },
                             errorText: _passwordError,
+                            showStrengthIndicator: true,
                           ),
                           const SizedBox(height: 16),
                           _buildPasswordField(
@@ -422,35 +468,28 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Text(
-            'شروط كلمة المرور:',
-            style: AppTexts.contentRegular.copyWith(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              color: AppColors.neutral700,
+            ': شروط كلمة المرور',
+            style: AppTexts.contentAccent.copyWith(
+              color: AppColors.neutral600,
             ),
             textAlign: TextAlign.right,
           ),
           const SizedBox(height: 4),
           _buildPasswordRequirement(
-            '8 أحرف على الأقل', 
-            password.length >= 8 && confirmPassword.length >= 8
+            '8 أحرف علي الأقل و 20 حرف بحد أقصى', 
+            password.length >= 8 && password.length <= 20
           ),
           _buildPasswordRequirement(
-            'حرف كبير (A-Z)', 
-            RegExp(r'[A-Z]').hasMatch(password) && RegExp(r'[A-Z]').hasMatch(confirmPassword)
+            'عدم وجود مسافات', 
+            !password.contains(' ')
           ),
           _buildPasswordRequirement(
-            'حرف صغير (a-z)', 
-            RegExp(r'[a-z]').hasMatch(password) && RegExp(r'[a-z]').hasMatch(confirmPassword)
+            'تحتوي علي رقم ورمز',
+            RegExp(r'[0-9]').hasMatch(password) && RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(password)
           ),
           _buildPasswordRequirement(
-            'رقم (0-9)', 
-            RegExp(r'[0-9]').hasMatch(password) && RegExp(r'[0-9]').hasMatch(confirmPassword)
-          ),
-          _buildPasswordRequirement(
-            'رمز خاص (!@#\$%^&*)', 
-            RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(password) && 
-            RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(confirmPassword)
+            'تحتوي علي حرف كبير (A-Z) و حرف صغير (a-z)', 
+            RegExp(r'[A-Z]').hasMatch(password) && RegExp(r'[a-z]').hasMatch(password)
           ),
           _buildPasswordRequirement(
             'تطابق كلمة المرور', 
@@ -469,8 +508,7 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
         children: [
           Text(
             requirement,
-            style: AppTexts.contentRegular.copyWith(
-              fontSize: 11,
+            style: AppTexts.captionAccent.copyWith(
               color: isMet ? Colors.green : AppColors.neutral500,
             ),
           ),
@@ -486,7 +524,8 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
   }
 
   Widget _buildPasswordField(String label, TextEditingController controller,
-      bool obscureText, String hint, VoidCallback toggleVisibility, {String? errorText}) {
+      bool obscureText, String hint, VoidCallback toggleVisibility, 
+      {String? errorText, bool showStrengthIndicator = false}) {
     return Directionality(
       textDirection: TextDirection.ltr, // تحديد الاتجاه من اليمين لليسار
       child: Column(
@@ -501,7 +540,10 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
             onChanged: (value) {
               // إزالة رسالة الخطأ عند بدء الكتابة وتحديث الشروط
               setState(() {
-                if (label == "كلمة المرور") _passwordError = null;
+                if (label == "كلمة المرور") {
+                  _passwordError = null;
+                  _calculatePasswordStrength(value);
+                }
                 if (label == "تأكيد كلمة المرور") _confirmPasswordError = null;
               });
             },
@@ -539,6 +581,45 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
               ),
             ),
           ),
+          if (showStrengthIndicator && controller.text.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 8, right: 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Text(
+                        _passwordStrengthText,
+                        style: AppTexts.contentRegular.copyWith(
+                          color: _passwordStrengthColor,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        ': قوة كلمة المرور',
+                        style: AppTexts.contentAccent.copyWith(
+                          color: AppColors.neutral600,
+
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Directionality(
+                    textDirection: TextDirection.rtl,
+                    child: LinearProgressIndicator(
+                      value: _passwordStrength,
+                      backgroundColor: AppColors.neutral300,
+                      valueColor: AlwaysStoppedAnimation<Color>(_passwordStrengthColor),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           if (errorText != null)
             Padding(
               padding: const EdgeInsets.only(top: 4, right: 8),
