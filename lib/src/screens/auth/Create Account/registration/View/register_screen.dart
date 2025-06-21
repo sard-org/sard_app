@@ -402,40 +402,42 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final password = _passwordController.text;
     final confirmPassword = _confirmPasswordController.text;
     
-    return Padding(
-      padding: const EdgeInsets.only(top: 8, right: 8, bottom: 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Text(
-            ': شروط كلمة المرور',
-            style: AppTexts.contentAccent.copyWith(
-              color: AppColors.neutral600,
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Padding(
+        padding: const EdgeInsets.only(top: 8, bottom: 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'شروط كلمة المرور :',
+              style: AppTexts.contentAccent.copyWith(
+                color: AppColors.neutral600,
+              ),
             ),
-            textAlign: TextAlign.right,
-          ),
-          const SizedBox(height: 4),
-          _buildPasswordRequirement(
-            '8 أحرف علي الأقل و 20 حرف بحد أقصى', 
-            password.length >= 8 && password.length <= 20
-          ),
-          _buildPasswordRequirement(
-            'عدم وجود مسافات', 
-            !password.contains(' ')
-          ),
-          _buildPasswordRequirement(
-            'تحتوي علي رقم ورمز',
-            RegExp(r'[0-9]').hasMatch(password) && RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(password)
-          ),
-          _buildPasswordRequirement(
-            'تحتوي علي حرف كبير (A-Z) و حرف صغير (a-z)', 
-            RegExp(r'[A-Z]').hasMatch(password) && RegExp(r'[a-z]').hasMatch(password)
-          ),
-          _buildPasswordRequirement(
-            'تطابق كلمة المرور', 
-            password.isNotEmpty && confirmPassword.isNotEmpty && password == confirmPassword
-          ),
-        ],
+            const SizedBox(height: 4),
+            _buildPasswordRequirement(
+              '8 أحرف علي الأقل و 20 حرف بحد أقصى', 
+              password.length >= 8 && password.length <= 20
+            ),
+            _buildPasswordRequirement(
+              'عدم وجود مسافات', 
+              !password.contains(' ')
+            ),
+            _buildPasswordRequirement(
+              'تحتوي علي رقم ورمز',
+              RegExp(r'[0-9]').hasMatch(password) && RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(password)
+            ),
+            _buildPasswordRequirement(
+              'تحتوي علي حرف كبير (A-Z) و حرف صغير (a-z)', 
+              RegExp(r'[A-Z]').hasMatch(password) && RegExp(r'[a-z]').hasMatch(password)
+            ),
+            _buildPasswordRequirement(
+              'تطابق كلمة المرور', 
+              password.isNotEmpty && confirmPassword.isNotEmpty && password == confirmPassword
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -444,19 +446,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 2),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          Text(
-            requirement,
-            style: AppTexts.captionAccent.copyWith(
-              color: isMet ? Colors.green : AppColors.neutral500,
-            ),
-          ),
-          const SizedBox(width: 8),
           Icon(
             isMet ? Icons.check_circle : Icons.radio_button_unchecked,
             size: 14,
-            color: isMet ? Colors.green : AppColors.neutral400,
+            color: isMet ? AppColors.green200 : AppColors.neutral400,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              requirement,
+              style: AppTexts.captionAccent.copyWith(
+                color: isMet ? AppColors.green200 : AppColors.neutral500,
+              ),
+            ),
           ),
         ],
       ),
@@ -473,143 +476,139 @@ class _RegisterScreenState extends State<RegisterScreen> {
     String? errorText,
     bool showStrengthIndicator = false,
   }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Text(label, style: AppTexts.contentRegular),
-          const SizedBox(height: 8),
-          TextField(
-            controller: controller,
-            textAlign: TextAlign.right,
-            obscureText: obscureText,
-            inputFormatters:
-                isEmailField ? [LowercaseTextInputFormatter()] : null,
-            onChanged: (value) {
-              // إزالة رسالة الخطأ عند بدء الكتابة
-              setState(() {
-                if (label == "الاسم الكامل") _nameError = null;
-                if (label == "البريد الإلكتروني") _emailError = null;
-                if (label == "كلمة المرور") {
-                  _passwordError = null;
-                  _calculatePasswordStrength(value);
-                }
-                if (label == "تأكيد كلمة المرور") {
-                  _confirmPasswordError = null;
-                  // تحديث شروط كلمة المرور لإظهار حالة التطابق
-                }
-              });
-            },
-            onTap: () {
-              // التمرير لأسفل عند الضغط على الحقل لتجنب مشكلة الـ overflow
-              Future.delayed(const Duration(milliseconds: 300), () {
-                if (_scrollController.hasClients) {
-                  _scrollController.animateTo(
-                    _scrollController.position.maxScrollExtent,
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeOut,
-                  );
-                }
-              });
-            },
-            decoration: InputDecoration(
-              hintText: hint,
-              hintStyle: AppTexts.contentRegular,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(
-                  color: errorText != null ? AppColors.red100 : AppColors.neutral400,
-                ),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(
-                  color: errorText != null ? AppColors.red100 : AppColors.neutral400,
-                ),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(
-                  color: errorText != null ? AppColors.red100 : AppColors.primary500,
-                  width: 2,
-                ),
-              ),
-              errorBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: AppColors.red100),
-              ),
-              focusedErrorBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: AppColors.red100, width: 2),
-              ),
-              filled: true,
-              fillColor: Colors.white,
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              prefixIcon: toggleVisibility != null
-                  ? GestureDetector(
-                      onTap: toggleVisibility,
-                      child: Icon(
-                        obscureText ? Icons.visibility_off : Icons.visibility,
-                        color: AppColors.neutral400,
-                      ),
-                    )
-                  : null,
-            ),
-          ),
-          if (showStrengthIndicator && controller.text.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: 8, right: 8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Text(
-                        _passwordStrengthText,
-                        style: AppTexts.contentRegular.copyWith(
-                          color: _passwordStrengthColor,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        ': قوة كلمة المرور',
-                        style: AppTexts.contentAccent.copyWith(
-                          color: AppColors.neutral600,
-
-                        ),
-                      ),
-                    ],
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(label, style: AppTexts.contentRegular),
+            const SizedBox(height: 8),
+            TextField(
+              controller: controller,
+              textDirection: isEmailField ? TextDirection.ltr : TextDirection.rtl,
+              obscureText: obscureText,
+              inputFormatters:
+                  isEmailField ? [LowercaseTextInputFormatter()] : null,
+              onChanged: (value) {
+                // إزالة رسالة الخطأ عند بدء الكتابة
+                setState(() {
+                  if (label == "الاسم الكامل") _nameError = null;
+                  if (label == "البريد الإلكتروني") _emailError = null;
+                  if (label == "كلمة المرور") {
+                    _passwordError = null;
+                    _calculatePasswordStrength(value);
+                  }
+                  if (label == "تأكيد كلمة المرور") {
+                    _confirmPasswordError = null;
+                    // تحديث شروط كلمة المرور لإظهار حالة التطابق
+                  }
+                });
+              },
+              onTap: () {
+                // التمرير لأسفل عند الضغط على الحقل لتجنب مشكلة الـ overflow
+                Future.delayed(const Duration(milliseconds: 300), () {
+                  if (_scrollController.hasClients) {
+                    _scrollController.animateTo(
+                      _scrollController.position.maxScrollExtent,
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeOut,
+                    );
+                  }
+                });
+              },
+              decoration: InputDecoration(
+                hintText: hint,
+                hintStyle: AppTexts.contentRegular,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                    color: errorText != null ? AppColors.red100 : AppColors.neutral400,
                   ),
-                  const SizedBox(height: 4),
-                  Directionality(
-                    textDirection: TextDirection.rtl,
-                    child: LinearProgressIndicator(
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                    color: errorText != null ? AppColors.red100 : AppColors.neutral400,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                    color: errorText != null ? AppColors.red100 : AppColors.primary500,
+                    width: 2,
+                  ),
+                ),
+                errorBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: AppColors.red100),
+                ),
+                focusedErrorBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: AppColors.red100, width: 2),
+                ),
+                filled: true,
+                fillColor: Colors.white,
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                suffixIcon: toggleVisibility != null
+                    ? GestureDetector(
+                        onTap: toggleVisibility,
+                        child: Icon(
+                          obscureText ? Icons.visibility_off : Icons.visibility,
+                          color: AppColors.neutral400,
+                        ),
+                      )
+                    : null,
+              ),
+            ),
+            if (showStrengthIndicator && controller.text.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          'قوة كلمة المرور : ',
+                          style: AppTexts.contentAccent.copyWith(
+                            color: AppColors.neutral600,
+                          ),
+                        ),
+                        Text(
+                          _passwordStrengthText,
+                          style: AppTexts.contentRegular.copyWith(
+                            color: _passwordStrengthColor,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    LinearProgressIndicator(
                       value: _passwordStrength,
                       backgroundColor: AppColors.neutral300,
                       valueColor: AlwaysStoppedAnimation<Color>(_passwordStrengthColor),
                     ),
-                  ),
-                ],
-              ),
-            ),
-          if (errorText != null)
-            Padding(
-              padding: const EdgeInsets.only(top: 4, right: 8),
-              child: Text(
-                errorText,
-                style: AppTexts.contentRegular.copyWith(
-                  color: AppColors.red100,
-                  fontSize: 12,
+                  ],
                 ),
-                textAlign: TextAlign.right,
               ),
-            ),
-        ],
+            if (errorText != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(
+                  errorText,
+                  style: AppTexts.contentRegular.copyWith(
+                    color: AppColors.red100,
+                    fontSize: 12,
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }

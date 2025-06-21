@@ -468,41 +468,43 @@ class HomeScreenState extends State<HomeScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    SearchResultsScreen(searchQuery: ''),
-                              ),
-                            );
-                          },
-                          child: AbsorbPointer(
-                            child: TextField(
-                              decoration: InputDecoration(
-                                hintText: 'عن ماذا تبحث؟',
-                                hintStyle: AppTexts.contentEmphasis
-                                    .copyWith(color: AppColors.neutral600),
-                                contentPadding: EdgeInsets.symmetric(
-                                    horizontal: 16, vertical: 12),
-                                prefixIcon:
-                                    Icon(Icons.search, color: AppColors.neutral600),
-                                filled: true,
-                                fillColor: AppColors.neutral100,
-                                enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  borderSide:
-                                      BorderSide(color: AppColors.neutral300),
+                        Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(12),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      SearchResultsScreen(searchQuery: ''),
                                 ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  borderSide:
-                                      BorderSide(color: AppColors.primary600),
-                                ),
+                              );
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: AppColors.neutral100,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: AppColors.neutral300),
                               ),
-                              style: AppTexts.contentEmphasis
-                                  .copyWith(color: AppColors.neutral1000),
+                                                              child: Directionality(
+                                  textDirection: TextDirection.rtl,
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 16, vertical: 12),
+                                    child: Row(
+                                      children: [
+                                        Text(
+                                          'عن ماذا تبحث؟',
+                                          style: AppTexts.contentEmphasis
+                                              .copyWith(color: AppColors.neutral600),
+                                        ),
+                                        const Spacer(),
+                                        Icon(Icons.search, color: AppColors.neutral600),
+                                      ],
+                                    ),
+                                  ),
+                                ),
                             ),
                           ),
                         ),

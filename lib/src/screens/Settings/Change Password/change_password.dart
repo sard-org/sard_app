@@ -316,83 +316,81 @@ class _ChangePasswordState extends State<ChangePassword> {
       VoidCallback toggleVisibility,
 {Function(String)? onChanged, bool showStrengthIndicator = false}
       ) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.end, // جعل العنوان على اليمين
-      children: [
-        Text(label, style: AppTexts.contentRegular),
-        SizedBox(height: 8),
-        TextField(
-          controller: controller,
-          textAlign: TextAlign.right,
-          obscureText: obscureText,
-          onChanged: onChanged,
-          decoration: InputDecoration(
-            hintText: hint,
-            hintStyle: AppTexts.contentRegular,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: AppColors.neutral400),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: AppColors.neutral400),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: AppColors.primary500, width: 2),
-            ),
-            filled: true,
-            fillColor: Colors.white,
-            prefixIcon: GestureDetector( // العين على اليسار
-              onTap: toggleVisibility,
-              child: Icon(
-                obscureText ? Icons.visibility_off : Icons.visibility,
-                color: AppColors.neutral400,
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: AppTexts.contentRegular),
+          SizedBox(height: 8),
+          TextField(
+            controller: controller,
+            textDirection: TextDirection.rtl,
+            obscureText: obscureText,
+            onChanged: onChanged,
+            decoration: InputDecoration(
+              hintText: hint,
+              hintStyle: AppTexts.contentRegular,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: AppColors.neutral400),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: AppColors.neutral400),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: AppColors.primary500, width: 2),
+              ),
+              filled: true,
+              fillColor: Colors.white,
+              suffixIcon: GestureDetector(
+                onTap: toggleVisibility,
+                child: Icon(
+                  obscureText ? Icons.visibility_off : Icons.visibility,
+                  color: AppColors.neutral400,
+                ),
               ),
             ),
           ),
-        ),
-        if (showStrengthIndicator && controller.text.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.only(top: 8, right: 8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Text(
-                      _passwordStrengthText,
-                      style: AppTexts.contentRegular.copyWith(
-                        color: _passwordStrengthColor,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
+          if (showStrengthIndicator && controller.text.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        'قوة كلمة المرور : ',
+                        style: AppTexts.contentAccent.copyWith(
+                          color: AppColors.neutral600,
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      ': قوة كلمة المرور',
-                      style: AppTexts.contentAccent.copyWith(
-                        color: AppColors.neutral600,
+                      Text(
+                        _passwordStrengthText,
+                        style: AppTexts.contentRegular.copyWith(
+                          color: _passwordStrengthColor,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Directionality(
-                  textDirection: TextDirection.rtl,
-                  child: LinearProgressIndicator(
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  LinearProgressIndicator(
                     value: _passwordStrength,
                     backgroundColor: AppColors.neutral300,
                     valueColor: AlwaysStoppedAnimation<Color>(_passwordStrengthColor),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
 
-        SizedBox(height: 12),
-      ],
+          SizedBox(height: 12),
+        ],
+      ),
     );
   }
 
@@ -400,40 +398,42 @@ class _ChangePasswordState extends State<ChangePassword> {
     final newPassword = _newPasswordController.text;
     final confirmPassword = _confirmPasswordController.text;
     
-    return Padding(
-      padding: const EdgeInsets.only(top: 8, right: 8, bottom: 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Text(
-            ': شروط كلمة المرور',
-            style: AppTexts.contentAccent.copyWith(
-              color: AppColors.neutral600,
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Padding(
+        padding: const EdgeInsets.only(top: 8, bottom: 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'شروط كلمة المرور :',
+              style: AppTexts.contentAccent.copyWith(
+                color: AppColors.neutral600,
+              ),
             ),
-            textAlign: TextAlign.right,
-          ),
-          const SizedBox(height: 4),
-          _buildPasswordRequirement(
-            '8 أحرف علي الأقل و 20 حرف بحد أقصى', 
-            newPassword.length >= 8 && newPassword.length <= 20
-          ),
-          _buildPasswordRequirement(
-            'عدم وجود مسافات', 
-            !newPassword.contains(' ')
-          ),
-          _buildPasswordRequirement(
-            'تحتوي علي رقم ورمز',
-            RegExp(r'[0-9]').hasMatch(newPassword) && RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(newPassword)
-          ),
-          _buildPasswordRequirement(
-            'تحتوي علي حرف كبير (A-Z) و حرف صغير (a-z)', 
-            RegExp(r'[A-Z]').hasMatch(newPassword) && RegExp(r'[a-z]').hasMatch(newPassword)
-          ),
-          _buildPasswordRequirement(
-            'تطابق كلمة المرور', 
-            newPassword.isNotEmpty && confirmPassword.isNotEmpty && newPassword == confirmPassword
-          ),
-        ],
+            const SizedBox(height: 4),
+            _buildPasswordRequirement(
+              '8 أحرف علي الأقل و 20 حرف بحد أقصى', 
+              newPassword.length >= 8 && newPassword.length <= 20
+            ),
+            _buildPasswordRequirement(
+              'عدم وجود مسافات', 
+              !newPassword.contains(' ')
+            ),
+            _buildPasswordRequirement(
+              'تحتوي علي رقم ورمز',
+              RegExp(r'[0-9]').hasMatch(newPassword) && RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(newPassword)
+            ),
+            _buildPasswordRequirement(
+              'تحتوي علي حرف كبير (A-Z) و حرف صغير (a-z)', 
+              RegExp(r'[A-Z]').hasMatch(newPassword) && RegExp(r'[a-z]').hasMatch(newPassword)
+            ),
+            _buildPasswordRequirement(
+              'تطابق كلمة المرور', 
+              newPassword.isNotEmpty && confirmPassword.isNotEmpty && newPassword == confirmPassword
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -442,19 +442,20 @@ class _ChangePasswordState extends State<ChangePassword> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 2),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          Text(
-            requirement,
-            style: AppTexts.captionAccent.copyWith(
-              color: isMet ? Colors.green : AppColors.neutral500,
-            ),
-          ),
-          const SizedBox(width: 8),
           Icon(
             isMet ? Icons.check_circle : Icons.radio_button_unchecked,
             size: 14,
-            color: isMet ? Colors.green : AppColors.neutral400,
+            color: isMet ? AppColors.green200 : AppColors.neutral400,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              requirement,
+              style: AppTexts.captionAccent.copyWith(
+                color: isMet ? AppColors.green200 : AppColors.neutral500,
+              ),
+            ),
           ),
         ],
       ),

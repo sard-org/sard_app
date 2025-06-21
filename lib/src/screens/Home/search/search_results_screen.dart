@@ -22,6 +22,7 @@ class SearchResultsScreen extends StatefulWidget {
 class _SearchResultsScreenState extends State<SearchResultsScreen> {
   final SearchBooksApiService _apiService = SearchBooksApiService();
   final TextEditingController _searchController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
   Timer? _debounceTimer;
 
   List<SearchBook> searchResults = [];
@@ -35,11 +36,21 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
     currentQuery = widget.searchQuery;
     _searchController.text = widget.searchQuery;
     _performSearch(widget.searchQuery);
+    
+    // تركيز تلقائي على مربع البحث مع تأخير بسيط للسماح للانتقال بالاكتمال
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(const Duration(milliseconds: 300), () {
+        if (mounted && _searchController.text.isEmpty) {
+          _searchFocusNode.requestFocus();
+        }
+      });
+    });
   }
 
   @override
   void dispose() {
     _searchController.dispose();
+    _searchFocusNode.dispose();
     _debounceTimer?.cancel();
     super.dispose();
   }
@@ -47,6 +58,9 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
   void _onSearchChanged(String query) {
     // Cancel the previous timer if it exists
     _debounceTimer?.cancel();
+
+    // Update UI immediately to show/hide clear button
+    setState(() {});
 
     // Set a new timer for 500ms delay
     _debounceTimer = Timer(const Duration(milliseconds: 500), () {
@@ -211,15 +225,36 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
                 padding: const EdgeInsets.all(16),
                 child: TextField(
                   controller: _searchController,
+                  focusNode: _searchFocusNode,
                   textDirection: TextDirection.rtl,
+                  autofocus: true,
                   decoration: InputDecoration(
                     hintText: 'عن ماذا تبحث؟',
                     hintStyle: AppTexts.contentEmphasis
                         .copyWith(color: AppColors.neutral600),
                     contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16, vertical: 12),
-                    suffixIcon:
+                    suffixIcon: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (_searchController.text.isNotEmpty)
+                          GestureDetector(
+                            onTap: () {
+                              _searchController.clear();
+                              _onSearchChanged('');
+                              _searchFocusNode.requestFocus();
+                            },
+                            child: const Icon(
+                              Icons.clear,
+                              color: AppColors.neutral500,
+                              size: 20,
+                            ),
+                          ),
+                        const SizedBox(width: 8),
                         const Icon(Icons.search, color: AppColors.neutral600),
+                        const SizedBox(width: 8),
+                      ],
+                    ),
                     filled: true,
                     fillColor: Colors.white,
                     enabledBorder: OutlineInputBorder(
@@ -228,7 +263,11 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: AppColors.primary600),
+                      borderSide: const BorderSide(color: AppColors.primary500, width: 2),
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: AppColors.neutral300),
                     ),
                   ),
                   style: AppTexts.contentEmphasis
