@@ -259,13 +259,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             const SizedBox(height: 16),
                             _buildPhoneField(),
                             const SizedBox(height: 16),
-                            _buildDropdownField(
-                                "النوع", ["ذكر", "أنثى"], selectedGender,
-                                (value) {
-                              setState(() {
-                                selectedGender = value!;
-                              });
-                            }),
+                            _buildGenderSelection(),
                             const SizedBox(height: 24),
                           ],
                         ),
@@ -427,47 +421,138 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
-  Widget _buildDropdownField(String label, List<String> options,
-      String? selectedValue, Function(String?) onChanged) {
+  Widget _buildGenderSelection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        Text(label, style: AppTexts.contentRegular),
-        SizedBox(height: 8),
-        Container(
-          width: double.infinity,
-          padding: EdgeInsets.symmetric(horizontal: 16),
-          decoration: BoxDecoration(
-            border: Border.all(color: AppColors.neutral400),
-            borderRadius: BorderRadius.circular(8),
-            color: Colors.white,
-          ),
-          child: Directionality(
-            textDirection: TextDirection.rtl,
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                isExpanded: true,
-                value: selectedValue,
-                hint: Text(
-                  "قم بالاختيار",
-                  textAlign: TextAlign.right,
-                  style: AppTexts.contentRegular.copyWith(
-                    color: AppColors.neutral500,
+        Text("النوع", style: AppTexts.contentRegular),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            // خيار أنثى
+            Expanded(
+              child: GestureDetector(
+                onTap: () => setState(() => selectedGender = 'أنثى'),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+                  decoration: BoxDecoration(
+                    color: selectedGender == 'أنثى' 
+                        ? AppColors.primary500.withOpacity(0.1)
+                        : Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: selectedGender == 'أنثى'
+                          ? AppColors.primary500
+                          : AppColors.neutral300,
+                      width: selectedGender == 'أنثى' ? 2 : 1,
+                    ),
+                    boxShadow: selectedGender == 'أنثى'
+                        ? [
+                            BoxShadow(
+                              color: AppColors.primary500.withOpacity(0.1),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ]
+                        : null,
+                  ),
+                  child: Column(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: selectedGender == 'أنثى'
+                              ? AppColors.primary500.withOpacity(0.15)
+                              : AppColors.neutral100,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.female,
+                          size: 28,
+                          color: selectedGender == 'أنثى'
+                              ? AppColors.primary600
+                              : AppColors.neutral500,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'أنثى',
+                        style: AppTexts.contentBold.copyWith(
+                          color: selectedGender == 'أنثى'
+                              ? AppColors.primary600
+                              : AppColors.neutral600,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                icon: Icon(Icons.arrow_drop_down, color: AppColors.neutral500),
-                items: options.map((option) {
-                  return DropdownMenuItem<String>(
-                    value: option,
-                    child: Text(option, textAlign: TextAlign.right),
-                  );
-                }).toList(),
-                onChanged: onChanged,
               ),
             ),
-          ),
+            const SizedBox(width: 16),
+            // خيار ذكر
+            Expanded(
+              child: GestureDetector(
+                onTap: () => setState(() => selectedGender = 'ذكر'),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+                  decoration: BoxDecoration(
+                    color: selectedGender == 'ذكر' 
+                        ? AppColors.primary500.withOpacity(0.1)
+                        : Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: selectedGender == 'ذكر'
+                          ? AppColors.primary500
+                          : AppColors.neutral300,
+                      width: selectedGender == 'ذكر' ? 2 : 1,
+                    ),
+                    boxShadow: selectedGender == 'ذكر'
+                        ? [
+                            BoxShadow(
+                              color: AppColors.primary500.withOpacity(0.1),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ]
+                        : null,
+                  ),
+                  child: Column(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: selectedGender == 'ذكر'
+                              ? AppColors.primary500.withOpacity(0.15)
+                              : AppColors.neutral100,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.male,
+                          size: 28,
+                          color: selectedGender == 'ذكر'
+                              ? AppColors.primary600
+                              : AppColors.neutral500,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'ذكر',
+                        style: AppTexts.contentBold.copyWith(
+                          color: selectedGender == 'ذكر'
+                              ? AppColors.primary600
+                              : AppColors.neutral600,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
-        SizedBox(height: 12),
+        const SizedBox(height: 12),
       ],
     );
   }

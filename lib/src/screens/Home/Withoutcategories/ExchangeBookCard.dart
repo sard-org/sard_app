@@ -56,8 +56,8 @@ class ExchangeBookCard extends StatelessWidget {
                   ),
                 ),
                 Positioned(
-                  top: 8,
-                  left: 8,
+                  top: 4,
+                  left: 4,
                   child: BlocBuilder<GlobalFavoriteCubit, GlobalFavoriteState>(
                     builder: (context, state) {
                       final globalFavoriteCubit =
@@ -65,28 +65,29 @@ class ExchangeBookCard extends StatelessWidget {
                       final isCurrentlyFavorite =
                           globalFavoriteCubit.isFavorite(id);
 
-                      return GestureDetector(
-                        onTap: onFavoriteTap,
-                        child: Container(
-                          width: 24,
-                          height: 24,
-                          decoration: BoxDecoration(
-                            color: AppColors.neutral100,
-                            borderRadius: BorderRadius.circular(2),
-                            border: Border.all(
-                              color: AppColors.neutral300, // لون البورد، غيّره حسب نظام ألوانك
-                              width: 1, // سمك البورد
-                            ),
-                          ),
-                          child: Icon(
-                            isCurrentlyFavorite ? Icons.favorite : Icons.favorite_border,
-                            size: 16,
-                            color: isCurrentlyFavorite ? AppColors.red100 : AppColors.neutral600,
+                      return IconButton(
+                        padding: EdgeInsets.all(4),
+                        constraints: BoxConstraints(
+                          minWidth: 32,
+                          minHeight: 32,
+                        ),
+                        style: IconButton.styleFrom(
+                          backgroundColor: AppColors.neutral100.withOpacity(0.9),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(6),
                           ),
                         ),
+                        icon: Icon(
+                          isCurrentlyFavorite
+                              ? Icons.favorite
+                              : Icons.favorite_border,
+                          color: isCurrentlyFavorite
+                              ? AppColors.red100
+                              : AppColors.neutral600,
+                          size: 20,
+                        ),
+                        onPressed: onFavoriteTap,
                       );
-
-
                     },
                   ),
                 ),

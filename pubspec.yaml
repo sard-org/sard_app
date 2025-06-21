@@ -48,6 +48,7 @@ dependencies:
   google_fonts:
   dio:
   pinput:
+  sms_autofill: ^2.4.1
 
 
 dev_dependencies:

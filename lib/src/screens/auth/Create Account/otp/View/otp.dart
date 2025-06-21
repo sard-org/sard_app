@@ -101,6 +101,75 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
     registerCubit.resendOtp();
   }
 
+  // دالة لصق الكود من الحافظة
+  Future<void> _handlePaste() async {
+    try {
+      final data = await Clipboard.getData(Clipboard.kTextPlain);
+      if (data?.text != null) {
+        String pastedText = data!.text!.replaceAll(RegExp(r'\D'), ''); // إزالة كل ما ليس رقم
+        
+        if (pastedText.length >= 4) {
+          // ملء الحقول الأربعة
+          for (int i = 0; i < 4; i++) {
+            _controllers[i].text = pastedText[i];
+          }
+          
+          setState(() {
+            _isErrorShown = false;
+          });
+          
+          // التحقق التلقائي بعد لصق الكود
+          Future.delayed(const Duration(milliseconds: 200), () {
+            final otp = _getFullOtpCode();
+            if (otp.length == 4) {
+              final registerCubit = BlocProvider.of<RegisterCubit>(context);
+              registerCubit.verifyOtp(otp: otp);
+            }
+          });
+          
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              backgroundColor: Colors.green,
+              content: Directionality(
+                textDirection: TextDirection.rtl,
+                child: Text(
+                  'تم لصق الكود بنجاح',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              backgroundColor: Colors.orange,
+              content: Directionality(
+                textDirection: TextDirection.rtl,
+                child: Text(
+                  'الكود المنسوخ غير صحيح أو غير مكتمل',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          backgroundColor: Colors.red,
+          content: Directionality(
+            textDirection: TextDirection.rtl,
+            child: Text(
+              'فشل في لصق الكود',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+        ),
+      );
+    }
+  }
+
   // إضافة popup النجاح في أسفل الصفحة
   void _showSuccessPopup() {
     showModalBottomSheet(
@@ -439,6 +508,60 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
                                 ),
                               );
                             }),
+                          ),
+                          const SizedBox(height: 16),
+                          // زر لصق الكود - حجم أصغر
+                          Center(
+                            child: Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(10),
+                                onTap: _handlePaste,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        AppColors.primary500.withOpacity(0.1),
+                                        AppColors.primary600.withOpacity(0.05),
+                                      ],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                    ),
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(
+                                      color: AppColors.primary500.withOpacity(0.3),
+                                      width: 1,
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: AppColors.primary500.withOpacity(0.08),
+                                        blurRadius: 6,
+                                        offset: const Offset(0, 1),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.content_paste_rounded,
+                                        size: 16,
+                                        color: AppColors.primary600,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        'لصق الكود',
+                                        style: AppTexts.contentBold.copyWith(
+                                          color: AppColors.primary600,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
                           ),
                           const SizedBox(height: 20),
                           Row(
