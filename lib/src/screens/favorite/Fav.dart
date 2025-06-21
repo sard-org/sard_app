@@ -52,7 +52,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                 textDirection: TextDirection.rtl,
                 child: Text('يرجى تسجيل الدخول أولاً'),
               ),
-              backgroundColor: Colors.red,
+              backgroundColor: AppColors.red100,
             ),
           );
         }
@@ -78,7 +78,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
               textDirection: TextDirection.rtl,
               child: Text('حدث خطأ في تحميل المفضلات'),
             ),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.red100,
           ),
         );
       }

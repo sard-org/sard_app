@@ -81,7 +81,7 @@ class ExchangeBookCard extends StatelessWidget {
                           child: Icon(
                             isCurrentlyFavorite ? Icons.favorite : Icons.favorite_border,
                             size: 16,
-                            color: isCurrentlyFavorite ? Colors.red : AppColors.neutral600,
+                            color: isCurrentlyFavorite ? AppColors.red100 : AppColors.neutral600,
                           ),
                         ),
                       );

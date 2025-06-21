@@ -98,7 +98,7 @@ class _WithoutCategoryDetailsPageState
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text('خطأ في تحديث المفضلات: ${state.message}'),
-                  backgroundColor: Colors.red,
+                  backgroundColor: AppColors.red100,
                 ),
               );
             } else if (state is GlobalFavoriteUpdated) {

@@ -139,7 +139,7 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
             textDirection: TextDirection.rtl,
             child: Text('خطأ في تشغيل الصوت: $e'),
           ),
-          backgroundColor: Colors.red,
+          backgroundColor: AppColors.red100,
         ),
       );
     }
@@ -623,7 +623,7 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('لا يوجد ملخص متاح للتحويل إلى صوت'),
-          backgroundColor: Colors.red,
+          backgroundColor: AppColors.red100,
         ),
       );
       return;
@@ -778,7 +778,7 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
             textDirection: TextDirection.rtl,
             child: Text('خطأ في تشغيل الصوت: $e'),
           ),
-          backgroundColor: Colors.red,
+          backgroundColor: AppColors.red100,
         ),
       );
     }
@@ -1093,7 +1093,7 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
             textDirection: TextDirection.rtl,
             child: Text('معرف الكتاب غير متوفر'),
           ),
-          backgroundColor: Colors.red,
+          backgroundColor: AppColors.red100,
         ),
       );
       return;
@@ -1305,12 +1305,12 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
                                         Icon(
                                           Icons.error_outline,
                                           size: 32,
-                                          color: Colors.red,
+                                          color: AppColors.red100,
                                         ),
                                         SizedBox(height: 8),
                                         Text(
                                           'خطأ في تحميل الصوت: $_audioError',
-                                          style: TextStyle(color: Colors.red),
+                                          style: TextStyle(color: AppColors.red100),
                                           textAlign: TextAlign.center,
                                         ),
                                         SizedBox(height: 8),

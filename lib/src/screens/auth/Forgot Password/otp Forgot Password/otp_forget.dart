@@ -122,7 +122,7 @@ class _OtpVerificationCodeScreenState extends State<OtpVerificationCodeScreen> {
                     style: TextStyle(fontFamily: 'Cairo'),
                   ),
                 ),
-                backgroundColor: Colors.red,
+                backgroundColor: AppColors.red100,
               ),
             );
           }

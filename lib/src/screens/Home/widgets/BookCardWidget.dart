@@ -238,7 +238,7 @@ class _BookCardWidgetState extends State<BookCardWidget> {
                               ? Icons.favorite
                               : Icons.favorite_border,
                           color: isCurrentlyFavorite
-                              ? Colors.red
+                              ? AppColors.red100
                               : AppColors.neutral500,
                           size: 28,
                         ),

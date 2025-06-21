@@ -474,29 +474,29 @@ class _RegisterScreenState extends State<RegisterScreen> {
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide(
-                  color: errorText != null ? Colors.red : AppColors.neutral400,
+                  color: errorText != null ? AppColors.red100 : AppColors.neutral400,
                 ),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide(
-                  color: errorText != null ? Colors.red : AppColors.neutral400,
+                  color: errorText != null ? AppColors.red100 : AppColors.neutral400,
                 ),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide(
-                  color: errorText != null ? Colors.red : AppColors.primary500,
+                  color: errorText != null ? AppColors.red100 : AppColors.primary500,
                   width: 2,
                 ),
               ),
               errorBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: Colors.red),
+                borderSide: const BorderSide(color: AppColors.red100),
               ),
               focusedErrorBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: Colors.red, width: 2),
+                borderSide: const BorderSide(color: AppColors.red100, width: 2),
               ),
               filled: true,
               fillColor: Colors.white,
@@ -519,7 +519,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               child: Text(
                 errorText,
                 style: AppTexts.contentRegular.copyWith(
-                  color: Colors.red,
+                  color: AppColors.red100,
                   fontSize: 12,
                 ),
                 textAlign: TextAlign.right,

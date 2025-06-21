@@ -309,7 +309,7 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('لا يوجد ملخص متاح للتحويل إلى صوت'),
-          backgroundColor: Colors.red,
+          backgroundColor: AppColors.red100,
         ),
       );
       return;
@@ -360,7 +360,7 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(errorMessage),
-          backgroundColor: Colors.red,
+          backgroundColor: AppColors.red100,
           duration: Duration(seconds: 5), // Show error longer
           action: SnackBarAction(
             label: 'إعادة المحاولة',
@@ -576,7 +576,7 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
                   textDirection: TextDirection.rtl,
                   child: Text('حدث خطأ في فتح صفحة الدفع'),
                 ),
-                backgroundColor: Colors.red,
+                backgroundColor: AppColors.red100,
               ),
             );
           }

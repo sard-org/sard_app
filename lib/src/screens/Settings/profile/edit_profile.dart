@@ -116,7 +116,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     style: TextStyle(fontFamily: 'Cairo'),
                   ),
                 ),
-                backgroundColor: Colors.red,
+                backgroundColor: AppColors.red100,
               ),
             );
           }
@@ -131,7 +131,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     style: TextStyle(fontFamily: 'Cairo'),
                   ),
                 ),
-                backgroundColor: Colors.red,
+                backgroundColor: AppColors.red100,
               ),
             );
           }
@@ -485,7 +485,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               style: TextStyle(fontFamily: 'Cairo'),
             ),
           ),
-          backgroundColor: Colors.red,
+          backgroundColor: AppColors.red100,
         ),
       );
       return;

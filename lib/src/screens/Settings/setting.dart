@@ -361,7 +361,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             color: isLogout ? Colors.red.shade100 : AppColors.neutral100,
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: isLogout ? Colors.red : AppColors.neutral300,
+              color: isLogout ? AppColors.red100 : AppColors.neutral300,
               width: 1.2,
             ),
           ),
@@ -381,7 +381,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 child: Text(
                   title,
                   style: AppTexts.highlightEmphasis.copyWith(
-                    color: isLogout ? Colors.red : AppColors.neutral1000,
+                    color: isLogout ? AppColors.red100 : AppColors.neutral1000,
                     fontWeight: FontWeight.w600,
                   ),
                 ),

@@ -129,7 +129,7 @@ class _ChangePasswordState extends State<ChangePassword> {
                               alignment: Alignment.centerRight,
                               child: Text(
                                 _passwordError!,
-                                style: TextStyle(color: Colors.red, fontSize: 14),
+                                style: TextStyle(color: AppColors.red100, fontSize: 14),
                                 textAlign: TextAlign.right,
                               ),
                             ),

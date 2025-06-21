@@ -251,7 +251,7 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
-                backgroundColor: Colors.red,
+                backgroundColor: AppColors.red100,
               ),
             );
           }
@@ -511,19 +511,19 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide(
-                  color: errorText != null ? Colors.red : AppColors.neutral400,
+                  color: errorText != null ? AppColors.red100 : AppColors.neutral400,
                 ),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide(
-                  color: errorText != null ? Colors.red : AppColors.neutral400,
+                  color: errorText != null ? AppColors.red100 : AppColors.neutral400,
                 ),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide(
-                  color: errorText != null ? Colors.red : AppColors.primary500,
+                  color: errorText != null ? AppColors.red100 : AppColors.primary500,
                   width: 2,
                 ),
               ),
@@ -545,7 +545,7 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
               child: Text(
                 errorText,
                 style: AppTexts.contentRegular.copyWith(
-                  color: Colors.red,
+                  color: AppColors.red100,
                   fontSize: 12,
                 ),
                 textAlign: TextAlign.right,

@@ -38,7 +38,7 @@ class ForgotPasswordScreen extends StatelessWidget {
                     style: TextStyle(fontFamily: 'Cairo'),
                   ),
                 ),
-                backgroundColor: Colors.red,
+                backgroundColor: AppColors.red100,
               ),
             );
           }
