@@ -767,17 +767,19 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
             width: double.infinity,
             child: OutlinedButton.icon(
               style: OutlinedButton.styleFrom(
-                side: BorderSide(color: AppColors.primary200),
+                side: BorderSide(color: Color(0xFFC79AFF)),
                 padding: EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              icon: Icon(Icons.smart_toy_outlined,
-                  color: AppColors.primary200, size: 24),
               label: Text('تلخيص بواسطة الذكاء الاصطناعي',
                   style: AppTexts.highlightAccent
-                      .copyWith(color: AppColors.primary200)),
+                      .copyWith(color: Color(0xFFC79AFF)
+                  )
+              ),
+              icon: Icon(Icons.smart_toy_outlined,
+                  color: Color(0xFFC79AFF), size: 24),
               onPressed: () {
                 _openAISummary();
               },
@@ -791,7 +793,7 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.neutral100,
       body: isLoading
           ? Center(
               child: CircularProgressIndicator(
@@ -864,7 +866,7 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
                           child: Text(
                             'إعادة المحاولة',
                             style: AppTexts.contentBold
-                                .copyWith(color: Colors.white),
+                                .copyWith(color: AppColors.neutral100),
                           ),
                         ),
                       ],
@@ -935,9 +937,8 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
                                   (bookData?.isFree ?? false)
                                       ? Text(
                                           'مجانا',
-                                          style: AppTexts.heading1Bold.copyWith(
+                                          style: AppTexts.heading2Bold.copyWith(
                                             color: AppColors.primary500,
-                                            fontSize: 28,
                                           ),
                                         )
                                       : bookData?.price != null
@@ -947,10 +948,9 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
                                                 children: [
                                                   TextSpan(
                                                     text: '${bookData!.price}',
-                                                    style: AppTexts.heading1Bold
+                                                    style: AppTexts.heading2Bold
                                                         .copyWith(
                                                       color: AppColors.primary500,
-                                                      fontSize: 28,
                                                     ),
                                                   ),
                                                   TextSpan(
@@ -967,26 +967,33 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
                                               ),
                                             )
                                           : bookData?.pricePoints != null
-                                              ? Row(
-                                                  children: [
-                                                    Image.asset(
-                                                      'assets/img/coin.png',
-                                                      width: 24,
-                                                      height: 24,
-                                                    ),
-                                                    SizedBox(width: 4),
-                                                    Text(
-                                                      '${bookData!.pricePoints}',
-                                                      style: AppTexts
-                                                          .heading1Bold
-                                                          .copyWith(
-                                                        color: AppColors.primary500,
-                                                        fontSize: 28,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                )
-                                              : SizedBox.shrink(),
+                                              ? Container(
+                                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.primary100,
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      textDirection: TextDirection.ltr, // نقدر نلغيه هنا أو نسيبه حسب اللغة
+                                      children: [
+                                        Text(
+                                          '${bookData!.pricePoints}',
+                                          style: AppTexts.heading2Bold.copyWith(
+                                            color: AppColors.primary500,
+                                          ),
+                                        ),
+                                        SizedBox(width: 4),
+                                        Image.asset(
+                                          'assets/img/coin.png',
+                                          width: 24,
+                                          height: 24,
+                                        ),
+                                      ],
+                                    ),
+                                  )
+
+                                      : SizedBox.shrink(),
                                   // Author info - RIGHT SIDE
                                   Row(
                                     children: [
@@ -1001,17 +1008,18 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
                                   ),
                                 ],
                               ),
-                              SizedBox(height: 16),
+                              SizedBox(height: 8),
                               // Book Title
                               Text(
                                 bookData?.title ?? '',
-                                style: AppTexts.heading1Bold,
+                                style: AppTexts.heading2Bold,
                                 textAlign: TextAlign.right,
                               ),
-                              SizedBox(height: 12),
+                              SizedBox(height: 8),
                               // Book Description
-                              _buildExpandableDescription(bookData?.description ?? ''),
-                              SizedBox(height: 12),
+                              _buildExpandableDescription(bookData?.description ?? '' ),
+
+                              SizedBox(height: 8),
                               // Rating
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.end,
@@ -1032,14 +1040,13 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
                                                   ? Icons.star
                                                   : Icons.star_border,
                                               color: Colors.amber,
-                                              size: 22,
+                                              size: 24,
                                             );
                                       }),
                                 ],
                               ),
                               SizedBox(height: 24),
                               // Removed suggested books section
-                              SizedBox(height: 32),
                             ],
                           ),
                         ),

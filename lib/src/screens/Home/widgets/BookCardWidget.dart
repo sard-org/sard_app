@@ -73,13 +73,14 @@ class _BookCardWidgetState extends State<BookCardWidget> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
+            Image.asset('assets/img/coin.png', width: 24, height: 24),
+            const SizedBox(width: 4),
             Text(
               '${widget.pricePoints}',
-              style: AppTexts.highlightAccent
-                  .copyWith(color: AppColors.primary800),
+              style: AppTexts.highlightAccent.copyWith(
+                color: AppColors.primary800,
+              ),
             ),
-            const SizedBox(width: 4),
-            Image.asset('assets/img/coin.png', width: 20, height: 20),
           ],
         ),
       );
@@ -135,15 +136,15 @@ class _BookCardWidgetState extends State<BookCardWidget> {
           margin: const EdgeInsets.only(bottom: 16),
           padding: const EdgeInsets.all(16),
           decoration: ShapeDecoration(
-            color: Colors.white,
+            color: AppColors.neutral100,
             shape: RoundedRectangleBorder(
-              side: BorderSide(width: 0.5, color: AppColors.neutral300),
-              borderRadius: BorderRadius.circular(12),
+              side: BorderSide( color: AppColors.neutral300),
+              borderRadius: BorderRadius.circular(8),
             ),
             shadows: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.05),
-                blurRadius: 8,
+                blurRadius: 4,
                 offset: Offset(0, 2),
               ),
             ],

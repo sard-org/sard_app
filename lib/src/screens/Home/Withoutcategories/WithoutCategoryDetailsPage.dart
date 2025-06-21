@@ -56,27 +56,35 @@ class _WithoutCategoryDetailsPageState
   }
 
   Widget _buildSectionHeader(String title, int count, VoidCallback onViewMore) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          title,
-          style: AppTexts.heading1Bold.copyWith(
-            fontSize: 24,
-            color: AppColors.neutral900,
-          ),
-        ),
-        TextButton(
-          onPressed: onViewMore,
-          child: Text(
-            'شاهد المزيد',
-            style: AppTexts.contentRegular.copyWith(
-              color: AppColors.primary600,
-              decoration: TextDecoration.underline,
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            title,
+            style: AppTexts.heading1Bold.copyWith(
+              fontSize: 24,
+              color: AppColors.neutral900,
             ),
           ),
-        ),
-      ],
+          TextButton(
+            onPressed: onViewMore,
+            style: TextButton.styleFrom(
+              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: Text(
+              'شاهد المزيد',
+              style: AppTexts.contentRegular.copyWith(
+                color: AppColors.primary600,
+                decoration: TextDecoration.underline,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -161,220 +169,217 @@ class _WithoutCategoryDetailsPageState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 24),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildSectionHeader('كتب مرشحة لك', recommendedBooks.length,
-                    () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const AllRecommendedBooksScreen(),
-                    ),
-                  );
-                }),
-                const SizedBox(height: 12),
-                BlocBuilder<HomeBooksLCubit, HomeBooksState>(
-                  buildWhen: (previous, current) =>
-                      current is RecommendedBooksLoading ||
-                      current is RecommendedBooksLoaded ||
-                      current is RecommendedBooksError,
-                  builder: (context, state) {
-                    print('🏗️ Recommended books builder - state: ${state.runtimeType}, books count: ${recommendedBooks.length}');
-                    if (state is RecommendedBooksLoading) {
-                      return const Center(
-                        child: Padding(
-                          padding: EdgeInsets.all(32.0),
-                          child: CircularProgressIndicator(),
-                        ),
-                      );
-                    } else if (state is RecommendedBooksError) {
-                      return Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Column(
-                            children: [
-                              Text(
-                                'حدث خطأ في تحميل الكتب المقترحة',
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildSectionHeader('كتب مرشحة لك', recommendedBooks.length,
+                  () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AllRecommendedBooksScreen(),
+                  ),
+                );
+              }),
+              const SizedBox(height: 12),
+              BlocBuilder<HomeBooksLCubit, HomeBooksState>(
+                buildWhen: (previous, current) =>
+                    current is RecommendedBooksLoading ||
+                    current is RecommendedBooksLoaded ||
+                    current is RecommendedBooksError,
+                builder: (context, state) {
+                  print('🏗️ Recommended books builder - state: ${state.runtimeType}, books count: ${recommendedBooks.length}');
+                  if (state is RecommendedBooksLoading) {
+                    return const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(32.0),
+                        child: CircularProgressIndicator(),
+                      ),
+                    );
+                  } else if (state is RecommendedBooksError) {
+                    return Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          children: [
+                            Text(
+                              'حدث خطأ في تحميل الكتب المقترحة',
+                              style: AppTexts.contentRegular.copyWith(
+                                color: AppColors.neutral900,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            TextButton(
+                              onPressed: () => context
+                                  .read<HomeBooksLCubit>()
+                                  .loadRecommendedBooks(
+                                      forceRefresh: true, limit: 4),
+                              child: Text(
+                                'إعادة المحاولة',
                                 style: AppTexts.contentRegular.copyWith(
-                                  color: AppColors.neutral900,
+                                  color: AppColors.primary600,
                                 ),
                               ),
-                              const SizedBox(height: 8),
-                              TextButton(
-                                onPressed: () => context
-                                    .read<HomeBooksLCubit>()
-                                    .loadRecommendedBooks(
-                                        forceRefresh: true, limit: 4),
-                                child: Text(
-                                  'إعادة المحاولة',
-                                  style: AppTexts.contentRegular.copyWith(
-                                    color: AppColors.primary600,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-                      );
-                    } else if (recommendedBooks.isEmpty) {
-                      return Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(32.0),
-                        ),
-                      );
-                    } else {
-                      return SizedBox(
-                        height: 200,
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
-                          itemCount: recommendedBooks.length,
-                          itemBuilder: (context, index) {
-                            var book = recommendedBooks[index];
-                            return Container(
-                              width: MediaQuery.of(context).size.width * 0.75,
-                              margin: EdgeInsets.only(
-                                right: index == 0 ? 0 : 16,
-                                left: index == recommendedBooks.length - 1 ? 16 : 0,
-                              ),
-                              child: BookCardWidget(
-                                id: book['id'].toString(),
-                                author: book['author'] as String,
-                                title: book['title'] as String,
-                                description: book['description'] as String,
-                                imageUrl: book['imageUrl'] as String,
-                                is_favorite: book['isFavorite'] as bool,
-                                price: book['price'] as int?,
-                                pricePoints: book['pricePoints'] as int?,
-                                isFree: book['isFree'] as bool,
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => AudioBookScreen(
-                                          bookId: book['id'] as String),
-                                    ),
-                                  );
-                                },
-                                onFavoriteTap: () {
-                                  final globalFavoriteCubit =
-                                      context.read<GlobalFavoriteCubit>();
-                                  globalFavoriteCubit
-                                      .toggleFavorite(book['id'].toString());
-                                },
-                              ),
-                            );
-                          },
-                        ),
-                      );
-                    }
-                  },
-                ),
-                const SizedBox(height: 24),
-                _buildSectionHeader('استبدل نقاطك', exchangeBooks.length, () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const AllExchangeBooksScreen(),
-                    ),
-                  );
-                }),
-                const SizedBox(height: 12),
-                BlocBuilder<HomeBooksLCubit, HomeBooksState>(
-                  buildWhen: (previous, current) =>
-                      current is ExchangeBooksLoading ||
-                      current is ExchangeBooksLoaded ||
-                      current is ExchangeBooksError,
-                  builder: (context, state) {
-                    print('🏗️ Exchange books builder - state: ${state.runtimeType}, books count: ${exchangeBooks.length}');
-                    if (state is ExchangeBooksLoading) {
-                      return const Center(
-                        child: Padding(
-                          padding: EdgeInsets.all(32.0),
-                          child: CircularProgressIndicator(),
-                        ),
-                      );
-                    } else if (state is ExchangeBooksError) {
-                      return Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Column(
-                            children: [
-                              Text(
-                                'حدث خطأ في تحميل كتب التبديل',
-                                style: AppTexts.contentRegular.copyWith(
-                                  color: AppColors.neutral900,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              TextButton(
-                                onPressed: () => context
-                                    .read<HomeBooksLCubit>()
-                                    .loadExchangeBooks(
-                                        forceRefresh: true, limit: 3),
-                                child: Text(
-                                  'إعادة المحاولة',
-                                  style: AppTexts.contentRegular.copyWith(
-                                    color: AppColors.primary600,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    } else if (exchangeBooks.isEmpty) {
-                      return Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(32.0),
-                        ),
-                      );
-                    } else {
-                      return SingleChildScrollView(
+                      ),
+                    );
+                  } else if (recommendedBooks.isEmpty) {
+                    return Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(32.0),
+                      ),
+                    );
+                  } else {
+                    return SizedBox(
+                      height: 200,
+                      child: ListView.builder(
                         scrollDirection: Axis.horizontal,
-                        child: Row(
-                          children: exchangeBooks.asMap().entries.map((entry) {
-                            int index = entry.key;
-                            var book = entry.value;
-                            return Container(
-                              margin: EdgeInsets.only(
-                                right: index == 0 ? 0 : 12,
-                                left: index == exchangeBooks.length - 1 ? 16 : 0,
+                        itemCount: recommendedBooks.length,
+                        itemBuilder: (context, index) {
+                          var book = recommendedBooks[index];
+                          return Container(
+                            width: MediaQuery.of(context).size.width * 0.75,
+                            margin: EdgeInsets.only(
+                              right: index == 0 ? 0 : 16,
+                              left: index == recommendedBooks.length - 1 ? 16 : 0,
+                            ),
+                            child: BookCardWidget(
+                              id: book['id'].toString(),
+                              author: book['author'] as String,
+                              title: book['title'] as String,
+                              description: book['description'] as String,
+                              imageUrl: book['imageUrl'] as String,
+                              is_favorite: book['isFavorite'] as bool,
+                              price: book['price'] as int?,
+                              pricePoints: book['pricePoints'] as int?,
+                              isFree: book['isFree'] as bool,
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => AudioBookScreen(
+                                        bookId: book['id'] as String),
+                                  ),
+                                );
+                              },
+                              onFavoriteTap: () {
+                                final globalFavoriteCubit =
+                                    context.read<GlobalFavoriteCubit>();
+                                globalFavoriteCubit
+                                    .toggleFavorite(book['id'].toString());
+                              },
+                            ),
+                          );
+                        },
+                      ),
+                    );
+                  }
+                },
+              ),
+              const SizedBox(height: 12),
+              _buildSectionHeader('استبدل نقاطك', exchangeBooks.length, () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AllExchangeBooksScreen(),
+                  ),
+                );
+              }),
+              const SizedBox(height: 12),
+              BlocBuilder<HomeBooksLCubit, HomeBooksState>(
+                buildWhen: (previous, current) =>
+                    current is ExchangeBooksLoading ||
+                    current is ExchangeBooksLoaded ||
+                    current is ExchangeBooksError,
+                builder: (context, state) {
+                  print('🏗️ Exchange books builder - state: ${state.runtimeType}, books count: ${exchangeBooks.length}');
+                  if (state is ExchangeBooksLoading) {
+                    return const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(32.0),
+                        child: CircularProgressIndicator(),
+                      ),
+                    );
+                  } else if (state is ExchangeBooksError) {
+                    return Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          children: [
+                            Text(
+                              'حدث خطأ في تحميل كتب التبديل',
+                              style: AppTexts.contentRegular.copyWith(
+                                color: AppColors.neutral900,
                               ),
-                              child: ExchangeBookCard(
-                                id: book['id'] as String,
-                                title: book['title'] as String,
-                                author: book['author'] as String,
-                                coverUrl: book['coverUrl'] as String,
-                                pricePoints: book['pricePoints'] as int,
-                                isFavorite: book['isFavorite'] as bool,
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => AudioBookScreen(
-                                          bookId: book['id'] as String),
-                                    ),
-                                  );
-                                },
-                                onFavoriteTap: () {
-                                  final globalFavoriteCubit =
-                                      context.read<GlobalFavoriteCubit>();
-                                  globalFavoriteCubit
-                                      .toggleFavorite(book['id'].toString());
-                                },
+                            ),
+                            const SizedBox(height: 8),
+                            TextButton(
+                              onPressed: () => context
+                                  .read<HomeBooksLCubit>()
+                                  .loadExchangeBooks(
+                                      forceRefresh: true, limit: 3),
+                              child: Text(
+                                'إعادة المحاولة',
+                                style: AppTexts.contentRegular.copyWith(
+                                  color: AppColors.primary600,
+                                ),
                               ),
-                            );
-                          }).toList(),
+                            ),
+                          ],
                         ),
-                      );
-                    }
-                  },
-                ),
-              ],
-            ),
+                      ),
+                    );
+                  } else if (exchangeBooks.isEmpty) {
+                    return Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(32.0),
+                      ),
+                    );
+                  } else {
+                    return SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: exchangeBooks.asMap().entries.map((entry) {
+                          int index = entry.key;
+                          var book = entry.value;
+                          return Container(
+                            margin: EdgeInsets.only(
+                              right: index == 0 ? 0 : 12,
+                              left: index == exchangeBooks.length - 1 ? 16 : 0,
+                            ),
+                            child: ExchangeBookCard(
+                              id: book['id'] as String,
+                              title: book['title'] as String,
+                              author: book['author'] as String,
+                              coverUrl: book['coverUrl'] as String,
+                              pricePoints: book['pricePoints'] as int,
+                              isFavorite: book['isFavorite'] as bool,
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => AudioBookScreen(
+                                        bookId: book['id'] as String),
+                                  ),
+                                );
+                              },
+                              onFavoriteTap: () {
+                                final globalFavoriteCubit =
+                                    context.read<GlobalFavoriteCubit>();
+                                globalFavoriteCubit
+                                    .toggleFavorite(book['id'].toString());
+                              },
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    );
+                  }
+                },
+              ),
+            ],
           ),
         ],
       ),

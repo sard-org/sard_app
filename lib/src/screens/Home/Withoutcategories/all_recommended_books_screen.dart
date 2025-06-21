@@ -231,38 +231,34 @@ class _AllRecommendedBooksScreenState extends State<AllRecommendedBooksScreen> {
                                       physics: const BouncingScrollPhysics(),
                                       itemBuilder: (context, index) {
                                         final book = recommendedBooks[index];
-                                        return Padding(
-                                          padding:
-                                              const EdgeInsets.only(bottom: 12),
-                                          child: BookCardWidget(
-                                            id: book.id,
-                                            author: book.author.name,
-                                            title: book.title,
-                                            description: book.description,
-                                            imageUrl: book.cover,
-                                            is_favorite: book.isFavorite,
-                                            price: book.price,
-                                            pricePoints: null,
-                                            isFree: book.price == 0,
-                                            showDescription: true, // إظهار الوصف في هذه الصفحة
-                                            onTap: () {
-                                              Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      AudioBookScreen(
-                                                          bookId: book.id),
-                                                ),
-                                              );
-                                            },
-                                            onFavoriteTap: () {
-                                              final globalFavoriteCubit =
-                                                  context.read<
-                                                      GlobalFavoriteCubit>();
-                                              globalFavoriteCubit
-                                                  .toggleFavorite(book.id);
-                                            },
-                                          ),
+                                        return BookCardWidget(
+                                          id: book.id,
+                                          author: book.author.name,
+                                          title: book.title,
+                                          description: book.description,
+                                          imageUrl: book.cover,
+                                          is_favorite: book.isFavorite,
+                                          price: book.price,
+                                          pricePoints: null,
+                                          isFree: book.price == 0,
+                                          showDescription: true, // إظهار الوصف في هذه الصفحة
+                                          onTap: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    AudioBookScreen(
+                                                        bookId: book.id),
+                                              ),
+                                            );
+                                          },
+                                          onFavoriteTap: () {
+                                            final globalFavoriteCubit =
+                                                context.read<
+                                                    GlobalFavoriteCubit>();
+                                            globalFavoriteCubit
+                                                .toggleFavorite(book.id);
+                                          },
                                         );
                                       },
                                     ),

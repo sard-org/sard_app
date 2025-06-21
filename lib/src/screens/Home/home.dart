@@ -35,7 +35,7 @@ class CategoryItem extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.neutral100,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
               color: isSelected ? AppColors.primary600 : AppColors.neutral300),
@@ -224,7 +224,7 @@ class _CategorySectionState extends State<CategorySection> {
                     child: Text(
                       'إعادة المحاولة',
                       style: AppTexts.contentBold.copyWith(
-                        color: Colors.white,
+                        color: AppColors.neutral100,
                       ),
                     ),
                   ),
@@ -415,26 +415,27 @@ class HomeScreenState extends State<HomeScreen> {
                                     decoration: BoxDecoration(
                                       color: Colors.white.withOpacity(0.2),
                                       borderRadius: BorderRadius.circular(4),
-                                      border: Border.all(color: Colors.white.withOpacity(0.3)),
+                                      border: Border.all(color: Colors.white.withOpacity(0.5)),
                                     ),
                                     child: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        Text(
-                                          '${user.points}',
-                                          style: AppTexts.heading2Bold.copyWith(
-                                            color: Colors.white,
-                                            fontSize: 18,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 4),
                                         Image.asset(
                                           'assets/img/coin.png',
                                           width: 24,
                                           height: 24,
                                         ),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          '${user.points}',
+                                          style: AppTexts.heading2Bold.copyWith(
+                                            color: AppColors.neutral100,
+                                            fontSize: 18,
+                                          ),
+                                        ),
                                       ],
                                     ),
+
                                   ),
                                 ],
                               ),
@@ -444,7 +445,7 @@ class HomeScreenState extends State<HomeScreen> {
                           return Text(
                             'جاري تحميل البيانات',
                             style: AppTexts.heading1Bold.copyWith(
-                              color: Colors.white,
+                              color: AppColors.neutral100,
                               fontSize: 24,
                             ),
                           );
@@ -463,7 +464,7 @@ class HomeScreenState extends State<HomeScreen> {
                   return RefreshIndicator(
                     onRefresh: _refreshData,
                     color: AppColors.primary500,
-                    backgroundColor: Colors.white,
+                    backgroundColor: AppColors.neutral100,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -488,7 +489,7 @@ class HomeScreenState extends State<HomeScreen> {
                                 prefixIcon:
                                     Icon(Icons.search, color: AppColors.neutral600),
                                 filled: true,
-                                fillColor: Colors.white,
+                                fillColor: AppColors.neutral100,
                                 enabledBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
                                   borderSide:
@@ -589,7 +590,7 @@ class HomeScreenState extends State<HomeScreen> {
                                 child: Text(
                                   'إعادة المحاولة',
                                   style: AppTexts.contentBold.copyWith(
-                                    color: Colors.white,
+                                    color: AppColors.neutral100,
                                   ),
                                 ),
                               ),

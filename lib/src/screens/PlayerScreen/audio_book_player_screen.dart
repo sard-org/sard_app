@@ -487,7 +487,7 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
             ),
           ],
         ),
-        SizedBox(height: 12),
+        SizedBox(height: 8),
         // Book title
         Text(
           _bookData?.title ?? '',
@@ -554,7 +554,7 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
                           ? Icons.star
                           : Icons.star_border,
                       color: Colors.amber,
-                      size: 18,
+                      size: 24,
                     );
                   },
                 ),
@@ -1203,17 +1203,17 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
                           width: double.infinity,
                           child: OutlinedButton.icon(
                             style: OutlinedButton.styleFrom(
-                              side: BorderSide(color: AppColors.primary200),
+                              side: BorderSide(color: Color(0xFFC79AFF)),
                               padding: EdgeInsets.symmetric(vertical: 16),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),
                               ),
                             ),
-                            icon: Icon(Icons.smart_toy_outlined,
-                                color: AppColors.primary200, size: 24),
                             label: Text('تلخيص بواسطة الذكاء الاصطناعي',
                                 style: AppTexts.highlightAccent
-                                    .copyWith(color: AppColors.primary200)),
+                                    .copyWith(color: Color(0xFFC79AFF))),
+                            icon: Icon(Icons.smart_toy_outlined,
+                                color: Color(0xFFC79AFF), size: 24),
                             onPressed: _openAISummary,
                           ),
                         ),

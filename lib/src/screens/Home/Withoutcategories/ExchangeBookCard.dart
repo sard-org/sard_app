@@ -32,11 +32,11 @@ class ExchangeBookCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         width: 150,
-        height: 280, // إضافة ارتفاع ثابت
+        height: 250, // إضافة ارتفاع ثابت
         decoration: BoxDecoration(
           border: Border.all(color: AppColors.neutral300),
-          borderRadius: BorderRadius.circular(12),
-          color: Colors.white,
+          borderRadius: BorderRadius.circular(8),
+          color: AppColors.neutral100,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -45,8 +45,8 @@ class ExchangeBookCard extends StatelessWidget {
               children: [
                 ClipRRect(
                   borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(12),
-                    topRight: Radius.circular(12),
+                    topLeft: Radius.circular(8),
+                    topRight: Radius.circular(8),
                   ),
                   child: Image.network(
                     coverUrl,
@@ -67,20 +67,26 @@ class ExchangeBookCard extends StatelessWidget {
 
                       return GestureDetector(
                         onTap: onFavoriteTap,
-                        child: CircleAvatar(
-                          backgroundColor: Colors.white,
-                          radius: 14,
+                        child: Container(
+                          width: 24,
+                          height: 24,
+                          decoration: BoxDecoration(
+                            color: AppColors.neutral100,
+                            borderRadius: BorderRadius.circular(2),
+                            border: Border.all(
+                              color: AppColors.neutral300, // لون البورد، غيّره حسب نظام ألوانك
+                              width: 1, // سمك البورد
+                            ),
+                          ),
                           child: Icon(
-                            isCurrentlyFavorite
-                                ? Icons.favorite
-                                : Icons.favorite_border,
+                            isCurrentlyFavorite ? Icons.favorite : Icons.favorite_border,
                             size: 16,
-                            color: isCurrentlyFavorite
-                                ? Colors.red
-                                : AppColors.neutral600,
+                            color: isCurrentlyFavorite ? Colors.red : AppColors.neutral600,
                           ),
                         ),
                       );
+
+
                     },
                   ),
                 ),
@@ -91,27 +97,28 @@ class ExchangeBookCard extends StatelessWidget {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
-                      color: AppColors.primary700,
-                      borderRadius: BorderRadius.circular(12),
+                      color: AppColors.primary100,
+                      borderRadius: BorderRadius.circular(2),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(
-                          '$pricePoints',
-                          style: AppTexts.contentBold.copyWith(
-                            color: Colors.white,
-                            fontSize: 12,
-                          ),
-                        ),
-                        const SizedBox(width: 2),
                         Image.asset(
                           'assets/img/coin.png',
                           width: 12,
                           height: 12,
                         ),
+                        const SizedBox(width: 2),
+                        Text(
+                          '$pricePoints',
+                          style: AppTexts.contentBold.copyWith(
+                            color: AppColors.neutral1000,
+                            fontSize: 12,
+                          ),
+                        ),
                       ],
                     ),
+
                   ),
                 ),
               ],
