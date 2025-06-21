@@ -103,7 +103,7 @@ class CategoryDetailsPage extends StatelessWidget {
           height: 200,
           child: const Center(
             child: CircularProgressIndicator(
-              color: AppColors.primary700,
+              color: AppColors.primary500,
             ),
           ),
         );

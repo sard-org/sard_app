@@ -137,7 +137,7 @@ class _ChangePasswordState extends State<ChangePassword> {
                 content: Text(
                   state.message.toString(),
                   style: TextStyle(
-                    color: Colors.white,
+                    color: AppColors.neutral100,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -154,7 +154,7 @@ class _ChangePasswordState extends State<ChangePassword> {
         },
         builder: (context, state) {
                   return Scaffold(
-          backgroundColor: Colors.white,
+          backgroundColor: AppColors.neutral100,
           resizeToAvoidBottomInset: true,
           body: Column(
             children: [
@@ -235,10 +235,10 @@ class _ChangePasswordState extends State<ChangePassword> {
                 Container(
                   padding: const EdgeInsets.all(16.0),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppColors.neutral100,
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
+                        color: AppColors.neutral1000.withOpacity(0.05),
                         blurRadius: 10,
                         offset: const Offset(0, -2),
                       ),
@@ -297,7 +297,7 @@ class _ChangePasswordState extends State<ChangePassword> {
               height: 50,
               padding: EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.neutral100,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(Icons.arrow_forward, color: AppColors.primary500), // السهم على اليمين
@@ -344,7 +344,7 @@ class _ChangePasswordState extends State<ChangePassword> {
                 borderSide: BorderSide(color: AppColors.primary500, width: 2),
               ),
               filled: true,
-              fillColor: Colors.white,
+              fillColor: AppColors.neutral100,
               suffixIcon: GestureDetector(
                 onTap: toggleVisibility,
                 child: Icon(
@@ -485,7 +485,7 @@ class UpdateButton extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary500,
           disabledBackgroundColor: AppColors.primary300,
-          foregroundColor: Colors.white,
+          foregroundColor: AppColors.neutral100,
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -496,14 +496,14 @@ class UpdateButton extends StatelessWidget {
                 height: 20,
                 width: 20,
                 child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.neutral100),
                   strokeWidth: 2.0,
                 ),
               )
             : Text(
                 title,
                 style: AppTexts.highlightAccent.copyWith(
-                  color: Colors.white,
+                  color: AppColors.neutral100,
                   fontWeight: FontWeight.w600,
                 ),
               ),

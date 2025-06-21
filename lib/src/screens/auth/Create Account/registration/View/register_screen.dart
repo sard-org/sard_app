@@ -224,7 +224,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         },
         builder: (context, state) {
           return Scaffold(
-            backgroundColor: Colors.white,
+            backgroundColor: AppColors.neutral100,
             body: BaseScreen(
               child: SafeArea(
                 child: LayoutBuilder(
@@ -352,7 +352,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             padding: const EdgeInsets.symmetric(vertical: 12),
           ),
           child: state is RegisterLoadingState
-              ? const CircularProgressIndicator(color: Colors.white)
+              ? const CircularProgressIndicator(color: AppColors.neutral100)
               : Text(
                   "إنشاء حساب",
                   style: AppTexts.contentEmphasis
@@ -549,7 +549,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   borderSide: const BorderSide(color: AppColors.red100, width: 2),
                 ),
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: AppColors.neutral100,
                 contentPadding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 suffixIcon: toggleVisibility != null

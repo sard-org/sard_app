@@ -197,7 +197,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                                           Icon(
                                             Icons.error_outline,
                                             size: 80,
-                                            color: AppColors.primary600,
+                                            color: AppColors.primary500,
                                           ),
                                           SizedBox(height: 24),
                                           RichText(
@@ -253,7 +253,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                                             child: Text(
                                               'إعادة المحاولة',
                                               style: AppTexts.contentBold.copyWith(
-                                                color: Colors.white,
+                                                color: AppColors.neutral100,
                                               ),
                                             ),
                                           ),
@@ -282,7 +282,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                             return RefreshIndicator(
                               onRefresh: _refreshFavorites,
                               color: AppColors.primary500,
-                              backgroundColor: Colors.white,
+                              backgroundColor: AppColors.neutral100,
                               child: ListView.builder(
                                 physics: AlwaysScrollableScrollPhysics(),
                                 itemCount: books.length,
@@ -401,14 +401,14 @@ class _BookItemState extends State<BookItem> {
         margin: const EdgeInsets.only(bottom: 16),
         padding: const EdgeInsets.all(16),
         decoration: ShapeDecoration(
-          color: Colors.white,
+          color: AppColors.neutral100,
           shape: RoundedRectangleBorder(
             side: BorderSide(width: 0.5, color: AppColors.neutral300),
             borderRadius: BorderRadius.circular(12),
           ),
           shadows: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: AppColors.neutral1000.withOpacity(0.05),
               blurRadius: 8,
               offset: Offset(0, 2),
             ),
@@ -482,13 +482,13 @@ class _BookItemState extends State<BookItem> {
                         Text(
                           widget.price,
                           style: AppTexts.highlightAccent
-                              .copyWith(color: AppColors.primary1000),
+                              .copyWith(color: AppColors.primary500),
                         ),
                         const SizedBox(width: 2),
                         Text(
                           widget.currency,
                           style: AppTexts.footnoteRegular11
-                              .copyWith(color: AppColors.primary1000),
+                              .copyWith(color: AppColors.primary500),
                         ),
                       ],
                     ),

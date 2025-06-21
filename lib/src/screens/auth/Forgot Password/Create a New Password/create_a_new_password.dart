@@ -156,7 +156,7 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
       builder: (BuildContext context) {
         return Container(
           decoration: const BoxDecoration(
-            color: Colors.white,
+            color: AppColors.neutral100,
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(20),
               topRight: Radius.circular(20),
@@ -201,7 +201,7 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
                     ),
                     child: const Icon(
                       Icons.check,
-                      color: Colors.white,
+                      color: AppColors.neutral100,
                       size: 32,
                     ),
                   ),
@@ -255,7 +255,7 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary500,
-                      foregroundColor: Colors.white,
+                      foregroundColor: AppColors.neutral100,
                       elevation: 0,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -264,7 +264,7 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
                     child: Text(
                       'تسجيل الدخول',
                       style: AppTexts.contentEmphasis.copyWith(
-                        color: Colors.white,
+                        color: AppColors.neutral100,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -303,7 +303,7 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
         },
         builder: (context, state) {
           return Scaffold(
-            backgroundColor: Colors.white,
+            backgroundColor: AppColors.neutral100,
             body: Column(
               children: [
                 _buildAppBar(),
@@ -404,11 +404,11 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
                             ),
                           ),
                           child: state is CreatePasswordLoading
-                              ? CircularProgressIndicator(color: Colors.white)
+                              ? CircularProgressIndicator(color: AppColors.neutral100)
                               : Text(
                                   'إنشاء كلمة المرور',
                                   style: AppTexts.contentEmphasis
-                                      .copyWith(color: Colors.white),
+                                      .copyWith(color: AppColors.neutral100),
                                 ),
                         ),
                       ),
@@ -573,7 +573,7 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
                 ),
               ),
               filled: true,
-              fillColor: Colors.white,
+              fillColor: AppColors.neutral100,
               suffixIcon: GestureDetector(
                 onTap: toggleVisibility,
                 child: Icon(

@@ -167,7 +167,7 @@ class _MainScreenState extends State<MainScreen> {
           },
           selectedItemColor: AppColors.primary500,
           unselectedItemColor: AppColors.neutral400,
-          backgroundColor: Colors.white,
+          backgroundColor: AppColors.neutral100,
           elevation: 8.0,
           items: List.generate(4, (index) {
             return BottomNavigationBarItem(

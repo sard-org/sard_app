@@ -181,7 +181,7 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
       builder: (BuildContext context) {
         return Container(
           decoration: const BoxDecoration(
-            color: Colors.white,
+            color: AppColors.neutral100,
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(20),
               topRight: Radius.circular(20),
@@ -226,7 +226,7 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
                     ),
                     child: const Icon(
                       Icons.check,
-                      color: Colors.white,
+                      color: AppColors.neutral100,
                       size: 32,
                     ),
                   ),
@@ -289,7 +289,7 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
                     child: Text(
                       'تسجيل الدخول',
                       style: AppTexts.contentEmphasis.copyWith(
-                        color: Colors.white,
+                        color: AppColors.neutral100,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -388,7 +388,7 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
       },
       builder: (context, state) {
         return Scaffold(
-          backgroundColor: Colors.white,
+          backgroundColor: AppColors.neutral100,
           resizeToAvoidBottomInset: true,
           body: Directionality(
             textDirection: TextDirection.rtl,
@@ -451,7 +451,7 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
                                     color: _isErrorShown
                                         ? AppColors.red100
                                         : (_controllers[rtlIndex].text.isNotEmpty
-                                            ? AppColors.primary800
+                                            ? AppColors.primary500
                                             : AppColors.neutral1000),
                                   ),
                                   decoration: InputDecoration(
@@ -523,7 +523,7 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
                                     gradient: LinearGradient(
                                       colors: [
                                         AppColors.primary500.withOpacity(0.1),
-                                        AppColors.primary600.withOpacity(0.05),
+                                        AppColors.primary500.withOpacity(0.05),
                                       ],
                                       begin: Alignment.topLeft,
                                       end: Alignment.bottomRight,
@@ -547,13 +547,13 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
                                       Icon(
                                         Icons.content_paste_rounded,
                                         size: 16,
-                                        color: AppColors.primary600,
+                                        color: AppColors.primary500,
                                       ),
                                       const SizedBox(width: 8),
                                       Text(
                                         'لصق الكود',
                                         style: AppTexts.contentBold.copyWith(
-                                          color: AppColors.primary600,
+                                          color: AppColors.primary500,
                                           fontSize: 14,
                                         ),
                                       ),
@@ -637,11 +637,11 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
                           ),
                           child: state is OtpVerificationLoadingState
                               ? const CircularProgressIndicator(
-                                  color: Colors.white)
+                                  color: AppColors.neutral100)
                               : Text(
                                   'تحقق',
                                   style: AppTexts.contentEmphasis
-                                      .copyWith(color: Colors.white),
+                                      .copyWith(color: AppColors.neutral100),
                                 ),
                         ),
                       ),
@@ -683,7 +683,7 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
                   height: 4,
                   margin: const EdgeInsets.only(bottom: 16),
                   decoration: BoxDecoration(
-                    color: Colors.black,
+                    color: AppColors.neutral1000,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -715,7 +715,7 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
               height: 50,
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.neutral100,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(Icons.arrow_back, color: AppColors.primary500),

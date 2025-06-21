@@ -256,7 +256,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
         margin: const EdgeInsets.only(bottom: 8),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.neutral100,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(color: AppColors.neutral200),
         ),
@@ -329,7 +329,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
           Icon(
             Icons.error_outline,
             size: 64,
-            color: AppColors.primary600,
+            color: AppColors.primary500,
           ),
           const SizedBox(height: 16),
           Text(
@@ -352,7 +352,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
             ),
             child: Text(
               'إعادة المحاولة',
-              style: AppTexts.contentBold.copyWith(color: Colors.white),
+              style: AppTexts.contentBold.copyWith(color: AppColors.neutral100),
             ),
           ),
         ],
@@ -380,7 +380,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
               height: 50,
               padding: EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.neutral100,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(Icons.arrow_back, color: AppColors.primary500),
@@ -403,7 +403,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.neutral100,
         body: SafeArea(
           child: Column(
             children: [
@@ -443,7 +443,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
                       ],
                     ),
                     filled: true,
-                    fillColor: Colors.white,
+                    fillColor: AppColors.neutral100,
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: const BorderSide(color: AppColors.neutral300),
@@ -477,7 +477,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
                       Text(
                         '"$currentQuery"',
                         style: AppTexts.contentBold
-                            .copyWith(color: AppColors.primary600),
+                            .copyWith(color: AppColors.primary500),
                       ),
                       const Spacer(),
                       Text(
@@ -492,7 +492,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
                 child: isLoading
                     ? const Center(
                         child: CircularProgressIndicator(
-                          color: AppColors.primary700,
+                          color: AppColors.primary500,
                         ),
                       )
                     : errorMessage != null

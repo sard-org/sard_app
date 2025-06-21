@@ -63,7 +63,7 @@ class _LoginScreenState extends State<LoginScreen> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.neutral100,
         body: SafeArea(
           child: BaseScreen(
             child: SingleChildScrollView(
@@ -252,7 +252,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   width: 24,
                                   child: CircularProgressIndicator(
                                     valueColor: AlwaysStoppedAnimation<Color>(
-                                        Colors.white),
+                                        AppColors.neutral100),
                                     strokeWidth: 2.0,
                                   ),
                                 )
@@ -334,7 +334,7 @@ class _LoginScreenState extends State<LoginScreen> {
               borderSide: BorderSide(color: AppColors.primary500, width: 2),
             ),
             filled: true,
-            fillColor: Colors.white,
+            fillColor: AppColors.neutral100,
             contentPadding:
                 const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             suffixIcon: toggleVisibility != null

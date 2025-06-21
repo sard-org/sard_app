@@ -38,7 +38,7 @@ class CategoryItem extends StatelessWidget {
           color: AppColors.neutral100,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-              color: isSelected ? AppColors.primary600 : AppColors.neutral300),
+              color: isSelected ? AppColors.primary500 : AppColors.neutral300),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -46,13 +46,13 @@ class CategoryItem extends StatelessWidget {
             Icon(
               category['icon'] as IconData,
               size: 16,
-              color: isSelected ? AppColors.primary600 : AppColors.neutral700,
+              color: isSelected ? AppColors.primary500 : AppColors.neutral700,
             ),
             SizedBox(width: 4),
             Text(
               category['label'] as String,
               style: AppTexts.contentRegular.copyWith(
-                color: isSelected ? AppColors.primary600 : AppColors.neutral700,
+                color: isSelected ? AppColors.primary500 : AppColors.neutral700,
               ),
             ),
           ],
@@ -127,11 +127,11 @@ class _CategorySectionState extends State<CategorySection> {
                           decoration: BoxDecoration(
                             color: isSelected
                                 ? AppColors.primary100
-                                : Colors.white,
+                                : AppColors.neutral100,
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
                               color: isSelected
-                                  ? AppColors.primary600
+                                  ? AppColors.primary500
                                   : AppColors.neutral300,
                             ),
                           ),
@@ -150,7 +150,7 @@ class _CategorySectionState extends State<CategorySection> {
                                       Icons.category,
                                       size: 24,
                                       color: isSelected
-                                          ? AppColors.primary600
+                                          ? AppColors.primary500
                                           : AppColors.neutral700,
                                     );
                                   },
@@ -161,7 +161,7 @@ class _CategorySectionState extends State<CategorySection> {
                                 category.name,
                                 style: AppTexts.contentRegular.copyWith(
                                   color: isSelected
-                                      ? AppColors.primary600
+                                      ? AppColors.primary500
                                       : AppColors.neutral700,
                                 ),
                               ),
@@ -191,7 +191,7 @@ class _CategorySectionState extends State<CategorySection> {
                   Icon(
                     Icons.error_outline,
                     size: 64,
-                    color: AppColors.primary600,
+                    color: AppColors.primary500,
                   ),
                   SizedBox(height: 16),
                   Text(
@@ -438,9 +438,9 @@ class HomeScreenState extends State<HomeScreen> {
                                   Container(
                                     padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                                     decoration: BoxDecoration(
-                                      color: Colors.white.withOpacity(0.2),
+                                      color: AppColors.neutral100.withOpacity(0.2),
                                       borderRadius: BorderRadius.circular(4),
-                                      border: Border.all(color: Colors.white.withOpacity(0.5)),
+                                      border: Border.all(color: AppColors.neutral100.withOpacity(0.5)),
                                     ),
                                     child: Row(
                                       mainAxisSize: MainAxisSize.min,

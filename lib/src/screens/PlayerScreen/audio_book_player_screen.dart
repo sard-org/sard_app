@@ -159,7 +159,7 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
           expand: false,
           builder: (context, scrollController) => Container(
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.neutral100,
               borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(28),
                 topRight: Radius.circular(28),
@@ -192,7 +192,7 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
                           width: 44,
                           height: 44,
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: AppColors.neutral100,
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Icon(Icons.arrow_forward,
@@ -229,7 +229,7 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
                                       width: 30,
                                       height: 30,
                                       child: CircularProgressIndicator(
-                                        color: Colors.white,
+                                        color: AppColors.neutral100,
                                         strokeWidth: 2,
                                       ),
                                     )
@@ -238,7 +238,7 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
                                           ? Icons.stop
                                           : Icons.volume_up_outlined,
                                       size: 30,
-                                      color: Colors.white,
+                                      color: AppColors.neutral100,
                                     ),
                             ),
                           ),
@@ -309,7 +309,7 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary500,
-                foregroundColor: Colors.white,
+                foregroundColor: AppColors.neutral100,
               ),
               child: Text('إعادة المحاولة'),
             ),
@@ -425,7 +425,7 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.neutral100,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(Icons.arrow_forward, color: AppColors.primary500),
@@ -445,7 +445,7 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.black26,
+              color: AppColors.neutral1000,
               blurRadius: 8,
               offset: Offset(0, 4),
             ),
@@ -515,7 +515,7 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
                   child: Text(
                     bookCat.category.name,
                     style: AppTexts.captionBold.copyWith(
-                      color: AppColors.primary700,
+                      color: AppColors.primary500,
                     ),
                   ),
                 );
@@ -532,7 +532,7 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
               child: Text(
                 'إضافة تقييم',
                 style: AppTexts.contentBold.copyWith(
-                    color: AppColors.primary700,
+                    color: AppColors.primary500,
                     decoration: TextDecoration.underline),
                 textAlign: TextAlign.right,
               ),
@@ -806,7 +806,7 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
               ? Icons.pause
               : Icons.play_arrow,
           size: 35,
-          color: Colors.white,
+          color: AppColors.neutral100,
         ),
       ),
     );
@@ -825,7 +825,7 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
         height: 50,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: Colors.white,
+          color: AppColors.neutral100,
           border: Border.all(color: AppColors.neutral400, width: 1),
         ),
         child: Stack(
@@ -968,7 +968,7 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
                       child: Text(
                         'التقييم المختار: $selectedRating ${_getRatingText(selectedRating)}',
                         style: AppTexts.contentBold.copyWith(
-                          color: AppColors.primary700,
+                          color: AppColors.primary500,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -989,7 +989,7 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
                                   },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.primary500,
-                              foregroundColor: Colors.white,
+                              foregroundColor: AppColors.neutral100,
                               padding: EdgeInsets.symmetric(vertical: 12),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),
@@ -1173,7 +1173,7 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
     // إذا كان يحمل، اعرض شاشة تحميل فقط
     if (_isLoadingAudio) {
       return Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.neutral100,
         body: Column(
           children: [
             _buildAppBar(context),
@@ -1206,7 +1206,7 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
 
     // إذا لم يكن يحمل، اعرض المحتوى العادي
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.neutral100,
       body: Column(
         children: [
           _buildAppBar(context),
@@ -1231,7 +1231,7 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
                   ),
                   if (_audioError == null)
                     Container(
-                      color: Colors.white,
+                      color: AppColors.neutral100,
                       child: Column(
                         children: [
                           // AI Summary Button
@@ -1324,7 +1324,7 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
                     ),
                   if (_audioError != null)
                     Container(
-                      color: Colors.white,
+                      color: AppColors.neutral100,
                       padding: EdgeInsets.all(16),
                       child: Center(
                         child: Column(

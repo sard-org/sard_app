@@ -45,7 +45,7 @@ class _BookCardWidgetState extends State<BookCardWidget> {
     if (widget.isFree) {
       return Text(
         'مجانا',
-        style: AppTexts.highlightAccent.copyWith(color: AppColors.primary1000),
+        style: AppTexts.highlightAccent.copyWith(color: AppColors.primary500),
       );
     } else if (widget.price != null) {
       return Row(
@@ -53,13 +53,13 @@ class _BookCardWidgetState extends State<BookCardWidget> {
           Text(
             '${widget.price}',
             style:
-                AppTexts.highlightAccent.copyWith(color: AppColors.primary1000),
+                AppTexts.highlightAccent.copyWith(color: AppColors.primary500),
           ),
           const SizedBox(width: 2),
           Text(
             'ج.م',
             style: AppTexts.footnoteRegular11
-                .copyWith(color: AppColors.primary1000),
+                .copyWith(color: AppColors.primary500),
           ),
         ],
       );
@@ -78,7 +78,7 @@ class _BookCardWidgetState extends State<BookCardWidget> {
             Text(
               '${widget.pricePoints}',
               style: AppTexts.highlightAccent.copyWith(
-                color: AppColors.primary800,
+                color: AppColors.primary500,
               ),
             ),
           ],
@@ -143,7 +143,7 @@ class _BookCardWidgetState extends State<BookCardWidget> {
             ),
             shadows: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: AppColors.neutral1000.withOpacity(0.05),
                 blurRadius: 4,
                 offset: Offset(0, 2),
               ),

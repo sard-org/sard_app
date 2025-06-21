@@ -105,7 +105,7 @@ class _AllExchangeBooksScreenState extends State<AllExchangeBooksScreen> {
           Icon(
             Icons.error_outline,
             size: 64,
-            color: AppColors.primary600,
+            color: AppColors.primary500,
           ),
           const SizedBox(height: 16),
           Text(
@@ -128,7 +128,7 @@ class _AllExchangeBooksScreenState extends State<AllExchangeBooksScreen> {
             ),
             child: Text(
               'إعادة المحاولة',
-              style: AppTexts.contentBold.copyWith(color: Colors.white),
+              style: AppTexts.contentBold.copyWith(color: AppColors.neutral100),
             ),
           ),
         ],
@@ -156,7 +156,7 @@ class _AllExchangeBooksScreenState extends State<AllExchangeBooksScreen> {
               height: 50,
               padding: EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.neutral100,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(Icons.arrow_back, color: AppColors.primary500),
@@ -212,7 +212,7 @@ class _AllExchangeBooksScreenState extends State<AllExchangeBooksScreen> {
                       child: isLoading
                           ? const Center(
                               child: CircularProgressIndicator(
-                                color: AppColors.primary700,
+                                color: AppColors.primary500,
                               ),
                             )
                           : errorMessage != null

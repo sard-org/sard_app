@@ -78,7 +78,7 @@ class _WithoutCategoryDetailsPageState
             child: Text(
               'شاهد المزيد',
               style: AppTexts.contentRegular.copyWith(
-                color: AppColors.primary600,
+                color: AppColors.primary500,
                 decoration: TextDecoration.underline,
               ),
             ),
@@ -217,7 +217,7 @@ class _WithoutCategoryDetailsPageState
                               child: Text(
                                 'إعادة المحاولة',
                                 style: AppTexts.contentRegular.copyWith(
-                                  color: AppColors.primary600,
+                                  color: AppColors.primary500,
                                 ),
                               ),
                             ),
@@ -323,7 +323,7 @@ class _WithoutCategoryDetailsPageState
                               child: Text(
                                 'إعادة المحاولة',
                                 style: AppTexts.contentRegular.copyWith(
-                                  color: AppColors.primary600,
+                                  color: AppColors.primary500,
                                 ),
                               ),
                             ),

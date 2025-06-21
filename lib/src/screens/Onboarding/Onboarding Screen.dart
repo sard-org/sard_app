@@ -62,7 +62,7 @@ class _OnboardingState extends State<Onboarding> {
                   child: Text(
                     "تخطي",
                     style: AppTexts.highlightAccent.copyWith(
-                      color: AppColors.primary700,
+                      color: AppColors.primary500,
                       decoration: TextDecoration.underline,
                       decorationColor: AppColors.neutral600,
                     ),
@@ -110,7 +110,7 @@ class _OnboardingState extends State<Onboarding> {
                 // Progress Indicator
                 LinearProgressIndicator(
                   value: (index + 1) / _pages.length,
-                  color: AppColors.primary700,
+                  color: AppColors.primary500,
                 ),
                 
                 // Content
@@ -134,7 +134,7 @@ class _OnboardingState extends State<Onboarding> {
                             TextSpan(
                               text: page.subtitle,
                               style: AppTexts.heading2Bold.copyWith(
-                                color: AppColors.primary700,
+                                color: AppColors.primary500,
 
                               ),
                             ),
@@ -167,7 +167,7 @@ class _OnboardingState extends State<Onboarding> {
                             height: 10,
                             decoration: BoxDecoration(
                               color: i == currentIndex 
-                                  ? AppColors.primary700 
+                                  ? AppColors.primary500
                                   : AppColors.primary200,
                               borderRadius: BorderRadius.circular(5.0),
                             ),
@@ -211,7 +211,7 @@ class _OnboardingState extends State<Onboarding> {
               },
               style: OutlinedButton.styleFrom(
                 side: BorderSide(
-                  color: AppColors.primary700,
+                  color: AppColors.primary500,
                   width: 2.0,
                 ),
                 shape: RoundedRectangleBorder(
@@ -221,7 +221,7 @@ class _OnboardingState extends State<Onboarding> {
               child: Text(
                 "السابق",
                 style: AppTexts.highlightAccent.copyWith(
-                  color: AppColors.primary700,
+                  color: AppColors.primary500,
                   height: 0,
                 ),
               ),
@@ -243,7 +243,7 @@ class _OnboardingState extends State<Onboarding> {
                 );
               },
               style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.all(AppColors.primary700),
+                backgroundColor: MaterialStateProperty.all(AppColors.primary500),
                 shape: MaterialStateProperty.all(
                   RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
@@ -287,7 +287,7 @@ class _OnboardingState extends State<Onboarding> {
           }
         },
         style: ButtonStyle(
-          backgroundColor: MaterialStateProperty.all(AppColors.primary700),
+          backgroundColor: MaterialStateProperty.all(AppColors.primary500),
           shape: MaterialStateProperty.all(
             RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),

@@ -195,7 +195,7 @@ class _OtpVerificationCodeScreenState extends State<OtpVerificationCodeScreen> {
         },
         builder: (context, state) {
           return Scaffold(
-            backgroundColor: Colors.white,
+            backgroundColor: AppColors.neutral100,
             resizeToAvoidBottomInset: true,
             body: Directionality(
               textDirection: TextDirection.rtl,
@@ -254,8 +254,8 @@ class _OtpVerificationCodeScreenState extends State<OtpVerificationCodeScreen> {
                                       fontSize: 24,
                                       fontWeight: FontWeight.bold,
                                       color: _controllers[rtlIndex].text.isNotEmpty
-                                          ? AppColors.primary800
-                                          : Colors.black,
+                                          ? AppColors.primary500
+                                          : AppColors.neutral1000,
                                     ),
                                     decoration: InputDecoration(
                                       counterText: '',
@@ -295,7 +295,7 @@ class _OtpVerificationCodeScreenState extends State<OtpVerificationCodeScreen> {
                                       gradient: LinearGradient(
                                         colors: [
                                           AppColors.primary500.withOpacity(0.1),
-                                          AppColors.primary600.withOpacity(0.05),
+                                          AppColors.primary500.withOpacity(0.05),
                                         ],
                                         begin: Alignment.topLeft,
                                         end: Alignment.bottomRight,
@@ -319,13 +319,13 @@ class _OtpVerificationCodeScreenState extends State<OtpVerificationCodeScreen> {
                                         Icon(
                                           Icons.content_paste_rounded,
                                           size: 16,
-                                          color: AppColors.primary600,
+                                          color: AppColors.primary500,
                                         ),
                                         const SizedBox(width: 8),
                                         Text(
                                           'لصق الكود',
                                           style: AppTexts.contentBold.copyWith(
-                                            color: AppColors.primary600,
+                                            color: AppColors.primary500,
                                             fontSize: 14,
                                           ),
                                         ),
@@ -463,7 +463,7 @@ class _OtpVerificationCodeScreenState extends State<OtpVerificationCodeScreen> {
               height: 50,
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.neutral100,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(Icons.arrow_back, color: AppColors.primary500),

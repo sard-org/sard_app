@@ -49,7 +49,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.neutral100,
       body: BlocListener<ProfileCubit, ProfileState>(
         listener: (context, state) {
           if (state is ProfileLoaded || state is ProfileUpdateSuccess) {
@@ -85,7 +85,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   child: Text(
                     'تم تحديث البيانات بنجاح',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: AppColors.neutral100,
                       fontWeight: FontWeight.w600,
                     ),
                     textAlign: TextAlign.right,
@@ -169,11 +169,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                           color: AppColors.green200,
                                           shape: BoxShape.circle,
                                           border: Border.all(
-                                              color: Colors.white, width: 2),
+                                              color: AppColors.neutral100, width: 2),
                                         ),
                                         padding: EdgeInsets.all(4),
                                         child: Icon(Icons.camera_alt,
-                                            color: Colors.white, size: 20),
+                                            color: AppColors.neutral100, size: 20),
                                       ),
                                     ),
                                   ),
@@ -248,7 +248,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                           color: AppColors.neutral400),
                                     ),
                                     filled: true,
-                                    fillColor: Colors.white,
+                                    fillColor: AppColors.neutral100,
                                   ),
                                 ),
                                 SizedBox(height: 12),
@@ -271,10 +271,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 Container(
                   padding: const EdgeInsets.all(16.0),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppColors.neutral100,
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
+                        color: AppColors.neutral1000.withOpacity(0.05),
                         blurRadius: 10,
                         offset: const Offset(0, -2),
                       ),
@@ -325,7 +325,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               height: 50,
               padding: EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.neutral100,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(Icons.arrow_forward, color: AppColors.primary500),
@@ -413,7 +413,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               borderSide: BorderSide(color: AppColors.neutral400),
             ),
             filled: true,
-            fillColor: Colors.white,
+            fillColor: AppColors.neutral100,
           ),
         ),
         SizedBox(height: 12),
@@ -438,7 +438,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   decoration: BoxDecoration(
                     color: selectedGender == 'أنثى' 
                         ? AppColors.primary500.withOpacity(0.1)
-                        : Colors.white,
+                        : AppColors.neutral100,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: selectedGender == 'أنثى'
@@ -470,7 +470,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           Icons.female,
                           size: 28,
                           color: selectedGender == 'أنثى'
-                              ? AppColors.primary600
+                              ? AppColors.primary500
                               : AppColors.neutral500,
                         ),
                       ),
@@ -479,7 +479,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         'أنثى',
                         style: AppTexts.contentBold.copyWith(
                           color: selectedGender == 'أنثى'
-                              ? AppColors.primary600
+                              ? AppColors.primary500
                               : AppColors.neutral600,
                           fontSize: 16,
                         ),
@@ -499,7 +499,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   decoration: BoxDecoration(
                     color: selectedGender == 'ذكر' 
                         ? AppColors.primary500.withOpacity(0.1)
-                        : Colors.white,
+                        : AppColors.neutral100,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: selectedGender == 'ذكر'
@@ -531,7 +531,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           Icons.male,
                           size: 28,
                           color: selectedGender == 'ذكر'
-                              ? AppColors.primary600
+                              ? AppColors.primary500
                               : AppColors.neutral500,
                         ),
                       ),
@@ -540,7 +540,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         'ذكر',
                         style: AppTexts.contentBold.copyWith(
                           color: selectedGender == 'ذكر'
-                              ? AppColors.primary600
+                              ? AppColors.primary500
                               : AppColors.neutral600,
                           fontSize: 16,
                         ),
@@ -706,7 +706,7 @@ class UpdateButton extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary500,
           disabledBackgroundColor: AppColors.primary300,
-          foregroundColor: Colors.white,
+          foregroundColor: AppColors.neutral100,
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -717,14 +717,14 @@ class UpdateButton extends StatelessWidget {
                 height: 20,
                 width: 20,
                 child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.neutral100),
                   strokeWidth: 2.0,
                 ),
               )
             : Text(
                 title,
                 style: AppTexts.highlightAccent.copyWith(
-                  color: Colors.white,
+                  color: AppColors.neutral100,
                   fontWeight: FontWeight.w600,
                 ),
               ),

@@ -45,7 +45,7 @@ class ForgotPasswordScreen extends StatelessWidget {
         },
         builder: (context, state) {
           return Scaffold(
-            backgroundColor: Colors.white,
+            backgroundColor: AppColors.neutral100,
             body: Directionality(
               textDirection: TextDirection.rtl,
               child: Column(
@@ -109,7 +109,7 @@ class ForgotPasswordScreen extends StatelessWidget {
                                   borderSide: BorderSide(color: AppColors.primary500, width: 2),
                                 ),
                                 filled: true,
-                                fillColor: Colors.white,
+                                fillColor: AppColors.neutral100,
                                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                               ),
                             ),
@@ -153,7 +153,7 @@ class ForgotPasswordScreen extends StatelessWidget {
                         ),
                       ),
                       child: state is ForgetPasswordLoading
-                          ? const CircularProgressIndicator(color: Colors.white)
+                          ? const CircularProgressIndicator(color: AppColors.neutral100)
                           : Text(
                               "إرسال",
                               style: AppTexts.contentEmphasis
@@ -193,7 +193,7 @@ class ForgotPasswordScreen extends StatelessWidget {
                 height: 50,
                 padding: EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppColors.neutral100,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(Icons.arrow_back,

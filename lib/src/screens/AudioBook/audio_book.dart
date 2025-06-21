@@ -85,7 +85,7 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
           expand: false,
           builder: (context, scrollController) => Container(
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.neutral100,
               borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(28),
                 topRight: Radius.circular(28),
@@ -118,7 +118,7 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
                           width: 44,
                           height: 44,
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: AppColors.neutral100,
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Icon(Icons.arrow_forward,
@@ -152,7 +152,7 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
                                   width: 30,
                                   height: 30,
                                   child: CircularProgressIndicator(
-                                    color: Colors.white,
+                                    color: AppColors.neutral100,
                                     strokeWidth: 2,
                                   ),
                                 )
@@ -161,7 +161,7 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
                                       ? Icons.stop
                                       : Icons.volume_up_outlined,
                                   size: 30,
-                                  color: Colors.white,
+                                  color: AppColors.neutral100,
                                 ),
                         ),
                       ),
@@ -230,7 +230,7 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary500,
-                foregroundColor: Colors.white,
+                foregroundColor: AppColors.neutral100,
               ),
               child: Text('إعادة المحاولة'),
             ),
@@ -364,7 +364,7 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
           duration: Duration(seconds: 5), // Show error longer
           action: SnackBarAction(
             label: 'إعادة المحاولة',
-            textColor: Colors.white,
+            textColor: AppColors.neutral100,
             onPressed: () => _handleTextToSpeech(),
           ),
         ),
@@ -384,7 +384,7 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
       builder: (BuildContext context) {
         return Container(
           decoration: const BoxDecoration(
-            color: Colors.white,
+            color: AppColors.neutral100,
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(20),
               topRight: Radius.circular(20),
@@ -432,7 +432,7 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
                     child: Icon(
                       Icons.check,
                       size: 30,
-                      color: Colors.white,
+                      color: AppColors.neutral100,
                     ),
                   ),
                 ),
@@ -532,7 +532,7 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
                         child: Text(
                           'كتبي',
                           style: AppTexts.highlightAccent.copyWith(
-                            color: Colors.white,
+                            color: AppColors.neutral100,
                           ),
                         ),
                       ),
@@ -658,7 +658,7 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.neutral100,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(Icons.arrow_forward, color: AppColors.primary500),
@@ -722,7 +722,7 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.neutral100,
         boxShadow: [
           BoxShadow(
             color: Colors.black12,
@@ -750,14 +750,14 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
                       width: 24,
                       height: 24,
                       child: CircularProgressIndicator(
-                        color: Colors.white,
+                        color: AppColors.neutral100,
                         strokeWidth: 2,
                       ),
                     )
                   : Text(
                       buttonText,
                       style: AppTexts.highlightAccent.copyWith(
-                        color: isEnabled ? Colors.white : Colors.white70,
+                        color: isEnabled ? AppColors.neutral100 : Colors.white70,
                       ),
                     ),
             ),
@@ -810,7 +810,7 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
                         Icon(
                           Icons.error_outline,
                           size: 80,
-                          color: AppColors.primary600,
+                          color: AppColors.primary500,
                         ),
                         SizedBox(height: 24),
                         RichText(
@@ -892,7 +892,7 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
                                     borderRadius: BorderRadius.circular(12),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: Colors.black26,
+                                        color: Colors.black12,
                                         blurRadius: 8,
                                         offset: Offset(0, 4),
                                       ),

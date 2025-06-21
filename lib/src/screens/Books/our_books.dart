@@ -77,7 +77,7 @@ class _BookListScreenState extends State<BookListScreen> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               CircularProgressIndicator(
-                                color: AppColors.primary700,
+                                color: AppColors.primary500,
                               ),
                               SizedBox(height: 16),
                               Text(
@@ -107,7 +107,7 @@ class _BookListScreenState extends State<BookListScreen> {
                         return RefreshIndicator(
                           onRefresh: _refreshBooks,
                           color: AppColors.primary500,
-                          backgroundColor: Colors.white,
+                          backgroundColor: AppColors.neutral100,
                           child: ListView.builder(
                             physics: AlwaysScrollableScrollPhysics(),
                             itemCount: state.books.length,
@@ -152,7 +152,7 @@ class _BookListScreenState extends State<BookListScreen> {
                                       Icon(
                                         Icons.error_outline,
                                         size: 80,
-                                        color: AppColors.primary600,
+                                        color: AppColors.primary500,
                                       ),
                                       SizedBox(height: 24),
                                       RichText(
@@ -210,7 +210,7 @@ class _BookListScreenState extends State<BookListScreen> {
                                         child: Text(
                                           "إعادة المحاولة",
                                           style: AppTexts.contentBold.copyWith(
-                                            color: Colors.white,
+                                            color: AppColors.neutral100,
                                           ),
                                         ),
                                       ),
@@ -298,14 +298,14 @@ class BookItem extends StatelessWidget {
           margin: EdgeInsets.only(bottom: 16),
           padding: const EdgeInsets.all(16),
           decoration: ShapeDecoration(
-            color: Colors.white,
+            color: AppColors.neutral100,
             shape: RoundedRectangleBorder(
               side: BorderSide(width: 0.5, color: AppColors.neutral600), // تغيير إلى neutral600
               borderRadius: BorderRadius.circular(12),
             ),
             shadows: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.02), // تخفيف الشادو من 0.05 إلى 0.02
+                color: AppColors.neutral1000.withOpacity(0.02), // تخفيف الشادو من 0.05 إلى 0.02
                 blurRadius: 4, // تقليل الـ blur من 8 إلى 4
                 offset: Offset(0, 1), // تقليل الـ offset من 2 إلى 1
               ),

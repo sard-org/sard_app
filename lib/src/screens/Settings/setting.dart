@@ -36,7 +36,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       builder: (BuildContext context) {
         return Container(
           decoration: const BoxDecoration(
-            color: Colors.white,
+            color: AppColors.neutral100,
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(20),
               topRight: Radius.circular(20),
@@ -81,7 +81,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                     child: const Icon(
                       Icons.help_outline,
-                      color: Colors.white,
+                      color: AppColors.neutral100,
                       size: 32,
                     ),
                   ),
@@ -170,7 +170,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.primary500,
-                            foregroundColor: Colors.white,
+                            foregroundColor: AppColors.neutral100,
                             elevation: 0,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
@@ -179,7 +179,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           child: Text(
                             'إلغاء',
                             style: AppTexts.contentEmphasis.copyWith(
-                              color: Colors.white,
+                              color: AppColors.neutral100,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -204,14 +204,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
           return Scaffold(
-            backgroundColor: Colors.white,
+            backgroundColor: AppColors.neutral100,
             body: Center(child: CircularProgressIndicator()),
           );
         }
 
         if (snapshot.hasError) {
           return Scaffold(
-            backgroundColor: Colors.white,
+            backgroundColor: AppColors.neutral100,
             body: Center(child: Text('Error: ${snapshot.error}')),
           );
         }
@@ -224,7 +224,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           child: BlocBuilder<ProfileCubit, ProfileState>(
             builder: (context, state) {
               return Scaffold(
-                backgroundColor: Colors.white,
+                backgroundColor: AppColors.neutral100,
                 body: Column(
                   children: [
                     _buildAppBar(state),
