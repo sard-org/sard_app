@@ -1170,6 +1170,40 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
 
   @override
   Widget build(BuildContext context) {
+    // إذا كان يحمل، اعرض شاشة تحميل فقط
+    if (_isLoadingAudio) {
+      return Scaffold(
+        backgroundColor: Colors.white,
+        body: Column(
+          children: [
+            _buildAppBar(context),
+            Expanded(
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator(
+                      color: AppColors.primary500,
+                      strokeWidth: 3,
+                    ),
+                    SizedBox(height: 24),
+                    Text(
+                      'جاري تحميل الكتاب الصوتي...',
+                      style: AppTexts.contentBold.copyWith(
+                        color: AppColors.neutral700,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // إذا لم يكن يحمل، اعرض المحتوى العادي
     return Scaffold(
       backgroundColor: Colors.white,
       body: Column(
@@ -1194,137 +1228,126 @@ class _AudioBookPlayerState extends State<AudioBookPlayer> {
                       ),
                     ),
                   ),
-                  Container(
-                    color: Colors.white,
-                    child: Column(
-                      children: [
-                        // AI Summary Button
-                        SizedBox(
-                          width: double.infinity,
-                          child: OutlinedButton.icon(
-                            style: OutlinedButton.styleFrom(
-                              side: BorderSide(color: Color(0xFFC79AFF)),
-                              padding: EdgeInsets.symmetric(vertical: 16),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
+                  if (_audioError == null)
+                    Container(
+                      color: Colors.white,
+                      child: Column(
+                        children: [
+                          // AI Summary Button
+                          SizedBox(
+                            width: double.infinity,
+                            child: OutlinedButton.icon(
+                              style: OutlinedButton.styleFrom(
+                                side: BorderSide(color: Color(0xFFC79AFF)),
+                                padding: EdgeInsets.symmetric(vertical: 16),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
                               ),
+                              label: Text('تلخيص بواسطة الذكاء الاصطناعي',
+                                  style: AppTexts.highlightAccent
+                                      .copyWith(color: Color(0xFFC79AFF))),
+                              icon: Icon(Icons.smart_toy_outlined,
+                                  color: Color(0xFFC79AFF), size: 24),
+                              onPressed: _openAISummary,
                             ),
-                            label: Text('تلخيص بواسطة الذكاء الاصطناعي',
-                                style: AppTexts.highlightAccent
-                                    .copyWith(color: Color(0xFFC79AFF))),
-                            icon: Icon(Icons.smart_toy_outlined,
-                                color: Color(0xFFC79AFF), size: 24),
-                            onPressed: _openAISummary,
                           ),
-                        ),
-                        SizedBox(height: 24),
-                        // Progress Slider
-                        SliderTheme(
-                          data: SliderThemeData(
-                            trackHeight: 4,
-                            thumbShape:
-                                RoundSliderThumbShape(enabledThumbRadius: 8),
-                            overlayShape:
-                                RoundSliderOverlayShape(overlayRadius: 16),
-                            activeTrackColor: AppColors.primary500,
-                            inactiveTrackColor: Colors.grey.shade300,
-                            thumbColor: AppColors.primary500,
+                          SizedBox(height: 24),
+                          // Progress Slider
+                          SliderTheme(
+                            data: SliderThemeData(
+                              trackHeight: 4,
+                              thumbShape:
+                                  RoundSliderThumbShape(enabledThumbRadius: 8),
+                              overlayShape:
+                                  RoundSliderOverlayShape(overlayRadius: 16),
+                              activeTrackColor: AppColors.primary500,
+                              inactiveTrackColor: Colors.grey.shade300,
+                              thumbColor: AppColors.primary500,
+                            ),
+                            child: Slider(
+                              value: _audioBookService.progress.clamp(0.0, 1.0),
+                              onChanged: (value) {
+                                _audioBookService.seekToPosition(value);
+                              },
+                            ),
                           ),
-                          child: Slider(
-                            value: _audioBookService.progress.clamp(0.0, 1.0),
-                            onChanged: (value) {
-                              _audioBookService.seekToPosition(value);
-                            },
+                          // Progress indicators
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  _audioBookService.currentPositionText.isNotEmpty
+                                      ? _audioBookService.currentPositionText
+                                      : '0:00',
+                                  style: AppTexts.captionBold,
+                                ),
+                                Text(
+                                  _audioBookService.totalDurationText.isNotEmpty
+                                      ? _audioBookService.totalDurationText
+                                      : '${(_bookData?.duration ?? 0)} ثانية',
+                                  style: AppTexts.captionBold,
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                        // Progress indicators
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          SizedBox(height: 16),
+                          // Playback controls
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text(
-                                _audioBookService.currentPositionText.isNotEmpty
-                                    ? _audioBookService.currentPositionText
-                                    : '0:00',
-                                style: AppTexts.captionBold,
+                              _buildCircleButton(
+                                icon: Icons.replay_10,
+                                onTap: () async {
+                                  await _audioBookService.seekBackward10Seconds();
+                                  setState(() {}); // تحديث الواجهة
+                                },
                               ),
-                              Text(
-                                _audioBookService.totalDurationText.isNotEmpty
-                                    ? _audioBookService.totalDurationText
-                                    : '${(_bookData?.duration ?? 0)} ثانية',
-                                style: AppTexts.captionBold,
+                              SizedBox(width: 32),
+                              _buildPlayButton(),
+                              SizedBox(width: 32),
+                              _buildCircleButton(
+                                icon: Icons.forward_10,
+                                onTap: () async {
+                                  await _audioBookService.seekForward10Seconds();
+                                  setState(() {}); // تحديث الواجهة
+                                },
                               ),
                             ],
                           ),
-                        ),
-                        SizedBox(height: 16),
-                        // Playback controls
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                          SizedBox(height: 16),
+                        ],
+                      ),
+                    ),
+                  if (_audioError != null)
+                    Container(
+                      color: Colors.white,
+                      padding: EdgeInsets.all(16),
+                      child: Center(
+                        child: Column(
                           children: [
-                            _buildCircleButton(
-                              icon: Icons.replay_10,
-                              onTap: () async {
-                                await _audioBookService.seekBackward10Seconds();
-                                setState(() {}); // تحديث الواجهة
-                              },
+                            Icon(
+                              Icons.error_outline,
+                              size: 32,
+                              color: AppColors.red100,
                             ),
-                            SizedBox(width: 32),
-                            _buildPlayButton(),
-                            SizedBox(width: 32),
-                            _buildCircleButton(
-                              icon: Icons.forward_10,
-                              onTap: () async {
-                                await _audioBookService.seekForward10Seconds();
-                                setState(() {}); // تحديث الواجهة
-                              },
+                            SizedBox(height: 8),
+                            Text(
+                              'خطأ في تحميل الصوت: $_audioError',
+                              style: TextStyle(color: AppColors.red100),
+                              textAlign: TextAlign.center,
+                            ),
+                            SizedBox(height: 8),
+                            ElevatedButton(
+                              onPressed: _loadAudioBook,
+                              child: Text('إعادة المحاولة'),
                             ),
                           ],
                         ),
-                        SizedBox(height: 16),
-                        Center(
-                          child: _isLoadingAudio
-                              ? Column(
-                                  children: [
-                                    CircularProgressIndicator(
-                                      color: AppColors.primary500,
-                                    ),
-                                    SizedBox(height: 8),
-                                    Text(
-                                      'جاري تحميل الكتاب الصوتي...',
-                                      style: AppTexts.contentRegular.copyWith(
-                                        color: AppColors.neutral500,
-                                      ),
-                                    ),
-                                  ],
-                                )
-                              : _audioError != null
-                                  ? Column(
-                                      children: [
-                                        Icon(
-                                          Icons.error_outline,
-                                          size: 32,
-                                          color: AppColors.red100,
-                                        ),
-                                        SizedBox(height: 8),
-                                        Text(
-                                          'خطأ في تحميل الصوت: $_audioError',
-                                          style: TextStyle(color: AppColors.red100),
-                                          textAlign: TextAlign.center,
-                                        ),
-                                        SizedBox(height: 8),
-                                        ElevatedButton(
-                                          onPressed: _loadAudioBook,
-                                          child: Text('إعادة المحاولة'),
-                                        ),
-                                      ],
-                                    )
-                                  : SizedBox.shrink(),
-                        ),
-                      ],
+                      ),
                     ),
-                  ),
                 ],
               ),
             ),
