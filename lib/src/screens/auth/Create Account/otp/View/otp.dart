@@ -280,7 +280,7 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary500,
-                      foregroundColor: Colors.white,
+                      foregroundColor: AppColors.neutral100,
                       elevation: 0,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),

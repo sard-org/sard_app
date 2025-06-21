@@ -9,6 +9,7 @@ import '../widgets/BookCardWidget.dart';
 import 'search_books_api_service.dart';
 import 'search_books_model.dart';
 import 'search_cache_service.dart';
+import 'books_suggestions_service.dart';
 
 class SearchResultsScreen extends StatefulWidget {
   final String searchQuery;
@@ -22,6 +23,7 @@ class SearchResultsScreen extends StatefulWidget {
 
 class _SearchResultsScreenState extends State<SearchResultsScreen> {
   final SearchBooksApiService _apiService = SearchBooksApiService();
+  final BooksSuggestionsService _suggestionsService = BooksSuggestionsService();
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
   Timer? _debounceTimer;
@@ -31,20 +33,8 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
   String? errorMessage;
   String currentQuery = '';
   List<String> searchHistory = [];
-  
-  // Default search suggestions
-  final List<String> defaultSuggestions = [
-    'تطوير الذات',
-    'الأدب والشعر',
-    'التاريخ الإسلامي',
-    'علم النفس',
-    'الفلسفة',
-    'الروايات العربية',
-    'كتب الأطفال',
-    'الثقافة العامة',
-    'السيرة النبوية',
-    'القصص القصيرة',
-  ];
+  List<String> bookSuggestions = [];
+  bool isLoadingSuggestions = false;
 
   @override
   void initState() {
@@ -52,6 +42,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
     currentQuery = widget.searchQuery;
     _searchController.text = widget.searchQuery;
     _loadSearchHistory();
+    _loadBookSuggestions();
     
     if (widget.searchQuery.isNotEmpty) {
       _performSearch(widget.searchQuery);
@@ -84,6 +75,36 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
     setState(() {
       searchHistory = history;
     });
+  }
+
+  Future<void> _loadBookSuggestions() async {
+    setState(() {
+      isLoadingSuggestions = true;
+    });
+    
+    try {
+      final suggestions = await _suggestionsService.getRandomBookTitles(count: 8);
+      setState(() {
+        bookSuggestions = suggestions;
+        isLoadingSuggestions = false;
+      });
+    } catch (e) {
+      print('Error loading book suggestions: $e');
+      setState(() {
+        isLoadingSuggestions = false;
+        // Use fallback suggestions
+        bookSuggestions = [
+          'الإسلام',
+          'لسان آدم',
+          'فكر تصبح غنيًا',
+          'علم النفس',
+          'الفلسفة',
+          'الروايات العربية',
+          'كتب الأطفال',
+          'الثقافة العامة',
+        ];
+      });
+    }
   }
 
   void _onSearchChanged(String query) {
@@ -182,17 +203,44 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
             )),
             const SizedBox(height: 24),
           ],
-          Text(
-            'اقتراحات البحث',
-            style: AppTexts.heading3Bold.copyWith(
-              color: AppColors.neutral800,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'اقتراحات البحث',
+                style: AppTexts.heading3Bold.copyWith(
+                  color: AppColors.neutral800,
+                ),
+              ),
+              GestureDetector(
+                onTap: isLoadingSuggestions ? null : _loadBookSuggestions,
+                child: Text(
+                  'تحديث',
+                  style: AppTexts.contentBold.copyWith(
+                    color: isLoadingSuggestions 
+                        ? AppColors.neutral400 
+                        : AppColors.primary500,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 12),
-          ...defaultSuggestions.map((suggestion) => _buildSuggestionItem(
-            suggestion,
-            Icons.trending_up,
-          )),
+          if (isLoadingSuggestions)
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: CircularProgressIndicator(
+                  color: AppColors.primary500,
+                ),
+              ),
+            )
+          else
+            ...bookSuggestions.map((suggestion) => _buildSuggestionItem(
+              suggestion,
+              Icons.menu_book,
+            )),
         ],
       ),
     );

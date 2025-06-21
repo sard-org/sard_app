@@ -3,7 +3,7 @@ import 'dart:convert';
 
 class SearchCacheService {
   static const String _searchHistoryKey = 'search_history';
-  static const int _maxHistoryItems = 10;
+  static const int _maxHistoryItems = 5;
 
   // Get search history from cache
   static Future<List<String>> getSearchHistory() async {
