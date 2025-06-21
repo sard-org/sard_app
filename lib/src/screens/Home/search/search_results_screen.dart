@@ -8,6 +8,7 @@ import '../../AudioBook/audio_book.dart';
 import '../widgets/BookCardWidget.dart';
 import 'search_books_api_service.dart';
 import 'search_books_model.dart';
+import 'search_cache_service.dart';
 
 class SearchResultsScreen extends StatefulWidget {
   final String searchQuery;
@@ -29,13 +30,36 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
   bool isLoading = true;
   String? errorMessage;
   String currentQuery = '';
+  List<String> searchHistory = [];
+  
+  // Default search suggestions
+  final List<String> defaultSuggestions = [
+    'تطوير الذات',
+    'الأدب والشعر',
+    'التاريخ الإسلامي',
+    'علم النفس',
+    'الفلسفة',
+    'الروايات العربية',
+    'كتب الأطفال',
+    'الثقافة العامة',
+    'السيرة النبوية',
+    'القصص القصيرة',
+  ];
 
   @override
   void initState() {
     super.initState();
     currentQuery = widget.searchQuery;
     _searchController.text = widget.searchQuery;
-    _performSearch(widget.searchQuery);
+    _loadSearchHistory();
+    
+    if (widget.searchQuery.isNotEmpty) {
+      _performSearch(widget.searchQuery);
+    } else {
+      setState(() {
+        isLoading = false;
+      });
+    }
     
     // تركيز تلقائي على مربع البحث مع تأخير بسيط للسماح للانتقال بالاكتمال
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -53,6 +77,13 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
     _searchFocusNode.dispose();
     _debounceTimer?.cancel();
     super.dispose();
+  }
+
+  Future<void> _loadSearchHistory() async {
+    final history = await SearchCacheService.getSearchHistory();
+    setState(() {
+      searchHistory = history;
+    });
   }
 
   void _onSearchChanged(String query) {
@@ -74,6 +105,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
         searchResults = [];
         isLoading = false;
         errorMessage = null;
+        currentQuery = '';
       });
       return;
     }
@@ -86,6 +118,10 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
       });
 
       final results = await _apiService.searchBooks(query);
+
+      // Save search to history whether results found or not
+      await SearchCacheService.addSearchToHistory(query);
+      await _loadSearchHistory();
 
       // Update global favorite state with search results
       if (mounted) {
@@ -105,6 +141,109 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
         isLoading = false;
       });
     }
+  }
+
+  Widget _buildSearchSuggestions() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (searchHistory.isNotEmpty) ...[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'آخر نتائج البحث',
+                  style: AppTexts.heading3Bold.copyWith(
+                    color: AppColors.neutral800,
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () async {
+                    await SearchCacheService.clearSearchHistory();
+                    await _loadSearchHistory();
+                  },
+                  child: Text(
+                    'مسح الكل',
+                    style: AppTexts.contentBold.copyWith(
+                      color: AppColors.primary500,
+                        decoration: TextDecoration.underline
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            ...searchHistory.map((query) => _buildSuggestionItem(
+              query,
+              Icons.history,
+              isHistory: true,
+            )),
+            const SizedBox(height: 24),
+          ],
+          Text(
+            'اقتراحات البحث',
+            style: AppTexts.heading3Bold.copyWith(
+              color: AppColors.neutral800,
+            ),
+          ),
+          const SizedBox(height: 12),
+          ...defaultSuggestions.map((suggestion) => _buildSuggestionItem(
+            suggestion,
+            Icons.trending_up,
+          )),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSuggestionItem(String text, IconData icon, {bool isHistory = false}) {
+    return GestureDetector(
+      onTap: () {
+        _searchController.text = text;
+        _performSearch(text);
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: AppColors.neutral200),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              size: 20,
+              color: isHistory ? AppColors.neutral500 : AppColors.primary500,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                text,
+                style: AppTexts.contentRegular.copyWith(
+                  color: AppColors.neutral800,
+                ),
+              ),
+            ),
+            if (isHistory)
+              GestureDetector(
+                onTap: () async {
+                  await SearchCacheService.removeSearchFromHistory(text);
+                  await _loadSearchHistory();
+                },
+                child: Icon(
+                  Icons.close,
+                  size: 18,
+                  color: AppColors.neutral400,
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildEmptyState() {
@@ -310,47 +449,49 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
                       )
                     : errorMessage != null
                         ? _buildErrorState()
-                        : searchResults.isEmpty
-                            ? _buildEmptyState()
-                            : ListView.builder(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 16, vertical: 8),
-                                itemCount: searchResults.length,
-                                physics: const BouncingScrollPhysics(),
-                                itemBuilder: (context, index) {
-                                  final book = searchResults[index];
-                                  return Padding(
-                                    padding: const EdgeInsets.only(bottom: 16),
-                                    child: BookCardWidget(
-                                      id: book.id,
-                                      author: book.author.name,
-                                      title: book.title,
-                                      description: book.description,
-                                      imageUrl: book.cover,
-                                      is_favorite: book.isFavorite,
-                                      price: book.isFree ? null : book.price,
-                                      pricePoints: book.pricePoints,
-                                      isFree: book.isFree,
-                                      onTap: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                AudioBookScreen(
-                                                    bookId: book.id),
-                                          ),
-                                        );
-                                      },
-                                      onFavoriteTap: () {
-                                        final globalFavoriteCubit =
-                                            context.read<GlobalFavoriteCubit>();
-                                        globalFavoriteCubit
-                                            .toggleFavorite(book.id);
-                                      },
-                                    ),
-                                  );
-                                },
-                              ),
+                        : currentQuery.isEmpty
+                            ? _buildSearchSuggestions()
+                            : searchResults.isEmpty
+                                ? _buildEmptyState()
+                                : ListView.builder(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 16, vertical: 8),
+                                    itemCount: searchResults.length,
+                                    physics: const BouncingScrollPhysics(),
+                                    itemBuilder: (context, index) {
+                                      final book = searchResults[index];
+                                      return Padding(
+                                        padding: const EdgeInsets.only(bottom: 16),
+                                        child: BookCardWidget(
+                                          id: book.id,
+                                          author: book.author.name,
+                                          title: book.title,
+                                          description: book.description,
+                                          imageUrl: book.cover,
+                                          is_favorite: book.isFavorite,
+                                          price: book.isFree ? null : book.price,
+                                          pricePoints: book.pricePoints,
+                                          isFree: book.isFree,
+                                          onTap: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    AudioBookScreen(
+                                                        bookId: book.id),
+                                              ),
+                                            );
+                                          },
+                                          onFavoriteTap: () {
+                                            final globalFavoriteCubit =
+                                                context.read<GlobalFavoriteCubit>();
+                                            globalFavoriteCubit
+                                                .toggleFavorite(book.id);
+                                          },
+                                        ),
+                                      );
+                                    },
+                                  ),
               ),
             ],
           ),
