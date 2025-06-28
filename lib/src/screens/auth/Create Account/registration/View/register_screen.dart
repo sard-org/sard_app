@@ -488,6 +488,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             TextField(
               controller: controller,
               textDirection: isEmailField ? TextDirection.ltr : TextDirection.rtl,
+              textAlign: isEmailField ? TextAlign.right : TextAlign.right,
               obscureText: obscureText,
               inputFormatters:
                   isEmailField ? [LowercaseTextInputFormatter()] : null,
