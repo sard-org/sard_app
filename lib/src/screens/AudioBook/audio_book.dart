@@ -381,8 +381,12 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
       isDismissible: false,
       enableDrag: false,
       backgroundColor: Colors.transparent,
+      isScrollControlled: true,
       builder: (BuildContext context) {
         return Container(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.8,
+          ),
           decoration: const BoxDecoration(
             color: AppColors.neutral100,
             borderRadius: BorderRadius.only(
@@ -390,158 +394,160 @@ class _AudioBookScreenState extends State<AudioBookScreen> {
               topRight: Radius.circular(20),
             ),
           ),
-          child: Padding(
-            padding: const EdgeInsets.all(30),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // العنوان
-                Text(
-                  'تم شراء الكتاب بنجاح',
-                  style: AppTexts.heading2Bold.copyWith(
-                    color: AppColors.neutral1000,
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // العنوان
+                  Text(
+                    'تم شراء الكتاب بنجاح',
+                    style: AppTexts.heading2Bold.copyWith(
+                      color: AppColors.neutral1000,
+                    ),
+                    textAlign: TextAlign.center,
                   ),
-                  textAlign: TextAlign.center,
-                ),
-                
-                SizedBox(height: 20),
-                
-                // خط فاصل
-                Container(
-                  height: 1,
-                  width: double.infinity,
-                  color: AppColors.neutral300,
-                ),
-                
-                SizedBox(height: 30),
+                  
+                  SizedBox(height: 16),
+                  
+                  // خط فاصل
+                  Container(
+                    height: 1,
+                    width: double.infinity,
+                    color: AppColors.neutral300,
+                  ),
+                  
+                  SizedBox(height: 20),
 
-                // Success Icon
-                Container(
-                  width: 120,
-                  height: 120,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: AppColors.green200.withOpacity(0.2),
-                  ),
-                  child: Container(
-                    margin: EdgeInsets.all(20),
+                  // Success Icon
+                  Container(
+                    width: 100,
+                    height: 100,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: AppColors.green200,
+                      color: AppColors.green200.withOpacity(0.2),
                     ),
-                    child: Icon(
-                      Icons.check,
-                      size: 30,
-                      color: AppColors.neutral100,
+                    child: Container(
+                      margin: EdgeInsets.all(18),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: AppColors.green200,
+                      ),
+                      child: Icon(
+                        Icons.check,
+                        size: 28,
+                        color: AppColors.neutral100,
+                      ),
                     ),
                   ),
-                ),
-                
-                SizedBox(height: 24),
+                  
+                  SizedBox(height: 20),
 
-                // Success Message
-                Text.rich(
-                  TextSpan(
+                  // Success Message
+                  Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                          text: 'تم تفعيل الكتاب بنجاح، ',
+                          style: AppTexts.heading3Bold.copyWith(color: AppColors.neutral1000),
+                        ),
+                        TextSpan(
+                          text: 'وضافناه لمكتبتك',
+                          style: AppTexts.heading3Bold.copyWith(
+                            color: AppColors.green200,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+
+                  SizedBox(height: 12),
+
+                  // Description
+                  Text(
+                    "استعد لرحلة صوتية ممتعة – تقدر تبدأ الاستماع الآن أو ترجع له بأي وقت يناسبك",
+                    style: AppTexts.contentRegular.copyWith(
+                      color: AppColors.neutral600,
+                      height: 1.5,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  
+                  SizedBox(height: 24),
+
+                  // Buttons
+                  Row(
                     children: [
-                      TextSpan(
-                        text: 'تم تفعيل الكتاب بنجاح، ',
-                        style: AppTexts.heading3Bold.copyWith(color: AppColors.neutral1000),
+                      // الرئيسية Button
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () {
+                            Navigator.pop(context); // Close dialog
+                            // Navigate to books screen (MainScreen with Books tab)
+                            Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    MainScreen(initialIndex: 0), // 0 = Home tab
+                              ),
+                              (route) => false,
+                            );
+                          },
+                          style: OutlinedButton.styleFrom(
+                            side: BorderSide(color: AppColors.primary500),
+                            padding: EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: Text(
+                            'الرئيسية',
+                            style: AppTexts.highlightAccent.copyWith(
+                              color: AppColors.primary500,
+                            ),
+                          ),
+                        ),
                       ),
-                      TextSpan(
-                        text: 'وضافناه لمكتبتك',
-                        style: AppTexts.heading3Bold.copyWith(
-                          color: AppColors.green200,
-                          fontWeight: FontWeight.w600,
+                      SizedBox(width: 16),
+                      // كتبي Button
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.pop(context); // Close dialog
+                            // Navigate to home - MainScreen with Home tab
+                            Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    MainScreen(initialIndex: 1), // 1 = Books tab
+                              ),
+                              (route) => false,
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary500,
+                            padding: EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: Text(
+                            'كتبي',
+                            style: AppTexts.highlightAccent.copyWith(
+                              color: AppColors.neutral100,
+                            ),
+                          ),
                         ),
                       ),
                     ],
                   ),
-                  textAlign: TextAlign.center,
-                ),
-
-                SizedBox(height: 16),
-
-                // Description
-                Text(
-                  "استعد لرحلة صوتية ممتعة – تقدر تبدأ الاستماع الآن أو ترجع له بأي وقت يناسبك",
-                  style: AppTexts.contentRegular.copyWith(
-                    color: AppColors.neutral600,
-                    height: 1.5,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                
-                SizedBox(height: 32),
-
-                // Buttons
-                Row(
-                  children: [
-                    // الرئيسية Button
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () {
-                          Navigator.pop(context); // Close dialog
-                          // Navigate to books screen (MainScreen with Books tab)
-                          Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  MainScreen(initialIndex: 0), // 0 = Home tab
-                            ),
-                            (route) => false,
-                          );
-                        },
-                        style: OutlinedButton.styleFrom(
-                          side: BorderSide(color: AppColors.primary500),
-                          padding: EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        child: Text(
-                          'الرئيسية',
-                          style: AppTexts.highlightAccent.copyWith(
-                            color: AppColors.primary500,
-                          ),
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 16),
-                    // كتبي Button
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.pop(context); // Close dialog
-                          // Navigate to home - MainScreen with Home tab
-                          Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  MainScreen(initialIndex: 1), // 1 = Books tab
-                            ),
-                            (route) => false,
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary500,
-                          padding: EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        child: Text(
-                          'كتبي',
-                          style: AppTexts.highlightAccent.copyWith(
-                            color: AppColors.neutral100,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                
-                SizedBox(height: 20),
-              ],
+                  
+                  SizedBox(height: 16),
+                ],
+              ),
             ),
           ),
         );
